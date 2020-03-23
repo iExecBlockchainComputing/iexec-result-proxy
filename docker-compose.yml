@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  iexec-result-proxy:
+    image: iexec-result-proxy
+    build: .
+    ports:
+      - 18443

@@ -6,6 +6,7 @@ plugins {
 	id 'org.springframework.boot' version '2.2.5.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'com.palantir.docker' version '0.25.0'
+	// id "org.sonarqube" version "2.7"
 	// id 'com.palantir.graal' version '0.6.0-112-gca0b727'
 }
 
@@ -33,19 +34,22 @@ ext {
 }
 
 dependencies {
+	// iexec
+	// implementation "com.iexec.common:iexec-common:${iexecCommonVersion}"
+	implementation files("../iexec-common/build/libs/iexec-common-${iexecCommonVersion}.jar")
+
 	// spring
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
 	// ipfs
     implementation "com.github.ipfs:java-ipfs-http-client:1.2.3"
-	// iexec
-	// implementation "com.iexec.common:iexec-common:${iexecCommonVersion}"
-	implementation files("../iexec-common/build/libs/iexec-common-${iexecCommonVersion}.jar")
 
 	// jason web token
     implementation "io.jsonwebtoken:jjwt:0.7.0"
@@ -72,4 +76,16 @@ dependencyManagement {
 
 test {
 	useJUnitPlatform()
+}
+
+// the test coverage report is
+// created just before the build
+build.dependsOn jacocoTestReport
+
+docker {
+    name "nexus.iex.ec/iexec-result-proxy:${project.version}"
+    // tag 'another dev tag', 'dev'
+    dockerfile file('Dockerfile')
+    files "build/libs/iexec-result-proxy-${project.version}.jar"
+    buildArgs([BUILD_VERSION: project.version])
 }

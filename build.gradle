@@ -6,7 +6,7 @@ plugins {
 	id 'org.springframework.boot' version '2.2.5.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'com.palantir.docker' version '0.25.0'
-	// id "org.sonarqube" version "2.7"
+	// id 'org.sonarqube' version '2.7'
 	// id 'com.palantir.graal' version '0.6.0-112-gca0b727'
 }
 
@@ -22,15 +22,19 @@ configurations {
 repositories {
 	mavenCentral()
 	maven {
-		url "https://nexus.iex.ec/repository/maven-public/"
+		url 'https://nexus.iex.ec/repository/maven-public/'
 	}
 	maven {
-		url "https://jitpack.io"
+		url 'https://jitpack.io'
 	}
 }
 
+configurations {
+    deployerJars
+}
+
 ext {
-	set('springCloudVersion', "Hoxton.SR3")
+	set('springCloudVersion', 'Hoxton.SR3')
 }
 
 dependencies {
@@ -44,28 +48,32 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-	// lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	// ipfs
-    implementation "com.github.ipfs:java-ipfs-http-client:1.2.3"
-
-	// jason web token
-    implementation "io.jsonwebtoken:jjwt:0.7.0"
-	// expiring map
-    implementation "net.jodah:expiringmap:0.5.8"
-
 	// test
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.mockito:mockito-inline:2.13.0' // activate mocking final classes/methods
+	testImplementation 'org.mockito:mockito-inline:2.13.0' // activates mocking final classes/methods
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
 	// swagger
-    implementation "io.springfox:springfox-swagger2:2.9.2"
-    implementation "io.springfox:springfox-swagger-ui:2.9.2"
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+
+	// package cloud
+    deployerJars 'io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6'
+
+	// ipfs
+    implementation 'com.github.ipfs:java-ipfs-http-client:1.2.3'
+
+	// jason web token
+    implementation 'io.jsonwebtoken:jjwt:0.7.0'
+
+	// expiring map
+    implementation 'net.jodah:expiringmap:0.5.8'
 }
 
 dependencyManagement {
@@ -82,10 +90,140 @@ test {
 // created just before the build
 build.dependsOn jacocoTestReport
 
+// ######################
+// #     build meta     #
+// ######################
+
+def gitBranch = 'git name-rev --name-only HEAD'.execute().text.trim()
+def isMasterBranch = gitBranch == 'master'
+def isDevelopBranch = gitBranch == 'develop'
+def isSnapshotVersion = project.version.contains('SNAPSHOT')
+def hasNexusProperties = project.hasProperty('nexusUser') \
+					  && project.hasProperty('nexusPassword')
+def canUploadArchives = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
+def canPushDockerImage = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
+def canBuildDockerImage = isMasterBranch || isDevelopBranch || project.hasProperty('forceDockerBuild')
+
+// ######################
+// #   upload archive   #
+// ######################
+
+project.ext.getNexusMaven = {
+    def nexusMavenBase = 'https://nexus.iex.ec/repository'
+    if (isSnapshotVersion) {
+        return nexusMavenBase + '/maven-snapshots/'
+    } else {
+        return nexusMavenBase + '/maven-releases/'
+    }
+}
+
+uploadArchives {
+	enabled = canUploadArchives
+    repositories.mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: getNexusMaven()) {
+            authentication(userName: project.nexusUser, password: project.nexusPassword)
+        }
+    }
+}
+
+// ######################
+// #	  docker		#
+// ######################
+
+def dockerImageBaseName = 'nexus.iex.ec/iexec-result-proxy'
+def gitShortCommit = 'git rev-parse --short HEAD'.execute().text.trim()
+def dockerImageTag = isSnapshotVersion ? "${version}-${gitShortCommit}" : version
+
 docker {
-    name "nexus.iex.ec/iexec-result-proxy:${project.version}"
-    // tag 'another dev tag', 'dev'
+    name "${dockerImageBaseName}:${dockerImageTag}"
+	tag 'FullTag', 			dockerImageTag
+    tag 'ShortCommitTag',	gitShortCommit
+    tag 'DevTag',			'dev'
     dockerfile file('Dockerfile')
     files "build/libs/iexec-result-proxy-${project.version}.jar"
     buildArgs([BUILD_VERSION: project.version])
 }
+
+// docker build
+tasks.docker {
+	enabled = canBuildDockerImage
+}
+
+// docker login
+task dockerLogin(type: Exec) {
+	enabled = canPushDockerImage
+	dependsOn docker
+	commandLine('sh', '-c', "docker login -u ${project.nexusUser} -p ${project.nexusPassword} nexus.iex.ec")
+}
+
+// docker logout
+task dockerLogout(type: Exec) {
+	enabled = canPushDockerImage
+	dependsOn dockerPush
+	commandLine('sh', '-c', 'docker logout nexus.iex.ec')
+}
+
+// docker push
+dockerPush {
+	enabled = canPushDockerImage
+	dependsOn dockerLogin
+
+	doFirst {
+		dockerLogin()
+	}
+
+	doLast {
+		dockerLogout()
+	}
+}
+
+
+
+
+
+
+
+
+// task pushImage(type: Exec) {
+//     if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
+//         commandLine("sh", "-c", "docker login -u " + project.nexusUser + " -p " + project.nexusPassword + " nexus.iex.ec && " +
+//                 "docker push " + getFullDockerImageName() + " && " +
+//                 "docker tag " + getFullDockerImageName() + " " + getDockerImageNameShortCommit() + " && " +
+//                 "docker push " + getDockerImageNameShortCommit() + " && " +
+//                 "docker logout")
+//     } else {
+//         println "Credentials for DockerHub are missing, the images cannot be pushed"
+//     }
+// }
+
+// pushImage.dependsOn buildImage
+// pushImage.enabled = isMasterBranch && project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// project.ext.getFullDockerImageName = {
+// 	return isSnapshotVersion ? "${dockerImageBaseName}:${version}-${gitShortCommit}"
+// 							 : "${dockerImageBaseName}:${version}"
+// }
+
+// project.ext.getDockerImageTag = {
+// 	return isSnapshotVersion ? "${dockerImageBaseName}:${version}-${gitShortCommit}"
+// 							 : "${dockerImageBaseName}:${version}"
+// }
+
+// project.ext.getDockerImageNameShortCommit = {
+//     return "${dockerImageBaseName}:${gitShortCommit}"
+// }

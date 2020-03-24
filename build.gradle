@@ -10,6 +10,8 @@ plugins {
 	// id 'com.palantir.graal' version '0.6.0-112-gca0b727'
 }
 
+version = '0.0.1-SNAPSHOT'
+group = 'com.iexec.result-proxy'
 sourceCompatibility = 11
 targetCompatibility = 11
 
@@ -35,6 +37,7 @@ configurations {
 
 ext {
 	set('springCloudVersion', 'Hoxton.SR3')
+	set('iexecCommonVersion', '4.1.0-SNAPSHOT')
 }
 
 dependencies {
@@ -98,10 +101,14 @@ def gitBranch = 'git name-rev --name-only HEAD'.execute().text.trim()
 def isMasterBranch = gitBranch == 'master'
 def isDevelopBranch = gitBranch == 'develop'
 def isSnapshotVersion = project.version.contains('SNAPSHOT')
-def hasNexusProperties = project.hasProperty('nexusUser') \
-					  && project.hasProperty('nexusPassword')
+
+def nexusUser = project.hasProperty('nexusUser') ? project.getProperty('nexusUser') : ''
+def nexusPassword = project.hasProperty('nexusPassword') ? project.getProperty('nexusPassword') : ''
+def hasNexusProperties = !nexusUser.isEmpty() && !nexusPassword.isEmpty()
+
 def canUploadArchives = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
 def canPushDockerImage = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
+// def canPushDockerImage = true
 def canBuildDockerImage = isMasterBranch || isDevelopBranch || project.hasProperty('forceDockerBuild')
 
 // ######################
@@ -122,7 +129,7 @@ uploadArchives {
     repositories.mavenDeployer {
         configuration = configurations.deployerJars
         repository(url: getNexusMaven()) {
-            authentication(userName: project.nexusUser, password: project.nexusPassword)
+            authentication(userName: nexusUser, password: nexusPassword)
         }
     }
 }
@@ -136,10 +143,10 @@ def gitShortCommit = 'git rev-parse --short HEAD'.execute().text.trim()
 def dockerImageTag = isSnapshotVersion ? "${version}-${gitShortCommit}" : version
 
 docker {
-    name "${dockerImageBaseName}:${dockerImageTag}"
-	tag 'FullTag', 			dockerImageTag
-    tag 'ShortCommitTag',	gitShortCommit
-    tag 'DevTag',			'dev'
+    name 					"${dockerImageBaseName}:${dockerImageTag}"
+	tag 'FullTag', 			"${dockerImageBaseName}:${dockerImageTag}"
+    tag 'ShortCommitTag',	"${dockerImageBaseName}:${gitShortCommit}"
+    // tag 'DevTag',			"${dockerImageBaseName}:dev"
     dockerfile file('Dockerfile')
     files "build/libs/iexec-result-proxy-${project.version}.jar"
     buildArgs([BUILD_VERSION: project.version])
@@ -152,31 +159,50 @@ tasks.docker {
 
 // docker login
 task dockerLogin(type: Exec) {
+	// println "dockerLogin"
 	enabled = canPushDockerImage
-	dependsOn docker
-	commandLine('sh', '-c', "docker login -u ${project.nexusUser} -p ${project.nexusPassword} nexus.iex.ec")
+	commandLine('sh', '-c', "docker login -u ${nexusUser} -p ${nexusPassword} nexus.iex.ec")
 }
 
 // docker logout
 task dockerLogout(type: Exec) {
+	// println "dockerLogout"
 	enabled = canPushDockerImage
-	dependsOn dockerPush
 	commandLine('sh', '-c', 'docker logout nexus.iex.ec')
 }
 
-// docker push
-dockerPush {
-	enabled = canPushDockerImage
-	dependsOn dockerLogin
+// // docker push
+// dockerPush {
+// 	enabled = canPushDockerImage
+// 	finalizedBy dockerLogout
 
-	doFirst {
-		dockerLogin()
-	}
+// 	// doFirst {
+// 	// 	println "doFirst"
+// 	// 	// dockerLogin
+// 	// }
 
-	doLast {
-		dockerLogout()
+// 	// doLast {
+// 	// 	println "doLast"
+// 	// 	// dockerLogout
+// 	// }
+// }
+
+afterEvaluate {
+	// dockerPushFullTag.enabled canPushDockerImage
+	// dockerPushShortCommitTag.enabled canPushDockerImage
+	def dockerPushTasks = tasks.findAll{t -> t.name.contains("dockerPush")}
+	for(t in dockerPushTasks) {
+		t.enabled = canPushDockerImage
 	}
 }
+
+// docker push
+dockerTagsPush {
+	enabled = canPushDockerImage
+	dependsOn dockerLogin
+	finalizedBy dockerLogout
+}
+
 
 
 

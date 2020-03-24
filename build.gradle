@@ -154,8 +154,6 @@ docker {
     buildArgs([BUILD_VERSION: project.version])
 }
 
-canPushDockerImage = true
-
 // docker build
 tasks.docker {
 	enabled = canBuildDockerImage

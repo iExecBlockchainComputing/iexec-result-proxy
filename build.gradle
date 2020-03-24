@@ -108,7 +108,6 @@ def hasNexusProperties = !nexusUser.isEmpty() && !nexusPassword.isEmpty()
 
 def canUploadArchives = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
 def canPushDockerImage = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
-// def canPushDockerImage = true
 def canBuildDockerImage = isMasterBranch || isDevelopBranch || project.hasProperty('forceDockerBuild')
 
 // ######################
@@ -138,6 +137,9 @@ uploadArchives {
 // #	  docker		#
 // ######################
 
+// build, tag & push image
+// ./gradlew docker dockerTagDev dockerTagsPush
+
 def dockerImageBaseName = 'nexus.iex.ec/iexec-result-proxy'
 def gitShortCommit = 'git rev-parse --short HEAD'.execute().text.trim()
 def dockerImageTag = isSnapshotVersion ? "${version}-${gitShortCommit}" : version
@@ -146,7 +148,7 @@ docker {
     name 					"${dockerImageBaseName}:${dockerImageTag}"
 	tag 'FullTag', 			"${dockerImageBaseName}:${dockerImageTag}"
     tag 'ShortCommitTag',	"${dockerImageBaseName}:${gitShortCommit}"
-    // tag 'DevTag',			"${dockerImageBaseName}:dev"
+    tag 'Dev',				"${dockerImageBaseName}:dev"
     dockerfile file('Dockerfile')
     files "build/libs/iexec-result-proxy-${project.version}.jar"
     buildArgs([BUILD_VERSION: project.version])
@@ -159,41 +161,14 @@ tasks.docker {
 
 // docker login
 task dockerLogin(type: Exec) {
-	// println "dockerLogin"
 	enabled = canPushDockerImage
 	commandLine('sh', '-c', "docker login -u ${nexusUser} -p ${nexusPassword} nexus.iex.ec")
 }
 
 // docker logout
 task dockerLogout(type: Exec) {
-	// println "dockerLogout"
 	enabled = canPushDockerImage
 	commandLine('sh', '-c', 'docker logout nexus.iex.ec')
-}
-
-// // docker push
-// dockerPush {
-// 	enabled = canPushDockerImage
-// 	finalizedBy dockerLogout
-
-// 	// doFirst {
-// 	// 	println "doFirst"
-// 	// 	// dockerLogin
-// 	// }
-
-// 	// doLast {
-// 	// 	println "doLast"
-// 	// 	// dockerLogout
-// 	// }
-// }
-
-afterEvaluate {
-	// dockerPushFullTag.enabled canPushDockerImage
-	// dockerPushShortCommitTag.enabled canPushDockerImage
-	def dockerPushTasks = tasks.findAll{t -> t.name.contains("dockerPush")}
-	for(t in dockerPushTasks) {
-		t.enabled = canPushDockerImage
-	}
 }
 
 // docker push
@@ -203,53 +178,13 @@ dockerTagsPush {
 	finalizedBy dockerLogout
 }
 
-
-
-
-
-
-
-
-
-// task pushImage(type: Exec) {
-//     if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
-//         commandLine("sh", "-c", "docker login -u " + project.nexusUser + " -p " + project.nexusPassword + " nexus.iex.ec && " +
-//                 "docker push " + getFullDockerImageName() + " && " +
-//                 "docker tag " + getFullDockerImageName() + " " + getDockerImageNameShortCommit() + " && " +
-//                 "docker push " + getDockerImageNameShortCommit() + " && " +
-//                 "docker logout")
-//     } else {
-//         println "Credentials for DockerHub are missing, the images cannot be pushed"
-//     }
-// }
-
-// pushImage.dependsOn buildImage
-// pushImage.enabled = isMasterBranch && project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// project.ext.getFullDockerImageName = {
-// 	return isSnapshotVersion ? "${dockerImageBaseName}:${version}-${gitShortCommit}"
-// 							 : "${dockerImageBaseName}:${version}"
-// }
-
-// project.ext.getDockerImageTag = {
-// 	return isSnapshotVersion ? "${dockerImageBaseName}:${version}-${gitShortCommit}"
-// 							 : "${dockerImageBaseName}:${version}"
-// }
-
-// project.ext.getDockerImageNameShortCommit = {
-//     return "${dockerImageBaseName}:${gitShortCommit}"
-// }
+// push task for every tag (dockerPushFullTag, dockerPushShortCommitTag)
+// should only run when canPushDockerImage == true
+afterEvaluate {
+	def dockerPushTasks = tasks.findAll{t -> t.name.contains("dockerPush")}
+	for(t in dockerPushTasks) {
+		t.enabled = canPushDockerImage
+	}
+	// don't push dev tag
+	dockerPushDev.enabled = false
+}

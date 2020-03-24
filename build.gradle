@@ -154,6 +154,8 @@ docker {
     buildArgs([BUILD_VERSION: project.version])
 }
 
+canPushDockerImage = true
+
 // docker build
 tasks.docker {
 	enabled = canBuildDockerImage
@@ -174,13 +176,18 @@ task dockerLogout(type: Exec) {
 // docker push
 dockerTagsPush {
 	enabled = canPushDockerImage
+	// shouldRunAfter tasks.docker
 	dependsOn dockerLogin
 	finalizedBy dockerLogout
 }
 
-// push task for every tag (dockerPushFullTag, dockerPushShortCommitTag)
-// should only run when canPushDockerImage == true
 afterEvaluate {
+	// don't tag if image is not build
+	for(t in tasks.findAll{e -> e.name.contains("dockerTag")}) {
+		t.enabled = canBuildDockerImage
+	}
+	// don't push tags if canPushDockerImage == false
+	// (dockerPushFullTag, dockerPushShortCommitTag)
 	def dockerPushTasks = tasks.findAll{t -> t.name.contains("dockerPush")}
 	for(t in dockerPushTasks) {
 		t.enabled = canPushDockerImage

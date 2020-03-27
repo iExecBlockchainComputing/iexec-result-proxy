@@ -18,20 +18,20 @@ import static org.springframework.http.ResponseEntity.ok;
 
 @Slf4j
 @RestController
-public class ResultProxyController {
+public class ProxyController {
 
-    private final ResultProxyService resultProxyService;
+    private final ResultProxyService proxyService;
     private final Eip712ChallengeService challengeService;
     private final AuthorizationService authorizationService;
     private final VersionService versionService;
     private final IpfsService ipfsService;
 
-    public ResultProxyController(ResultProxyService resultProxyService,
+    public ProxyController(ResultProxyService proxyService,
                                  Eip712ChallengeService challengeService,
                                  AuthorizationService authorizationService,
                                  VersionService versionService,
                                  IpfsService ipfsService) {
-        this.resultProxyService = resultProxyService;
+        this.proxyService = proxyService;
         this.challengeService = challengeService;
         this.authorizationService = authorizationService;
         this.versionService = versionService;
@@ -49,7 +49,7 @@ public class ResultProxyController {
 
         boolean authorizedAndCanUploadResult = authorizationService.isValidJwt(token) &&
                 //authorizationService.isAuthorizationValid(auth) &&
-                resultProxyService.canUploadResult(model.getChainTaskId(),
+                proxyService.canUploadResult(model.getChainTaskId(),
                         tokenWalletAddress,//auth.getWalletAddress(),
                         model.getZip());
 
@@ -59,7 +59,7 @@ public class ResultProxyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        String resultLink = resultProxyService.addResult(
+        String resultLink = proxyService.addResult(
                 Result.builder()
                         .chainTaskId(model.getChainTaskId())
                         .image(model.getImage())
@@ -92,7 +92,7 @@ public class ResultProxyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        boolean isResultInDatabase = resultProxyService.doesResultExist(chainTaskId);
+        boolean isResultInDatabase = proxyService.doesResultExist(chainTaskId);
         if (!isResultInDatabase) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
@@ -107,7 +107,7 @@ public class ResultProxyController {
         if (!versionService.isSnapshot()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
-        Optional<byte[]> zip = resultProxyService.getResult(chainTaskId);
+        Optional<byte[]> zip = proxyService.getResult(chainTaskId);
         if (!zip.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
@@ -135,10 +135,10 @@ public class ResultProxyController {
                                             @RequestParam(name = "chainId") Integer chainId) throws IOException {
         //Authorization auth = authorizationService.getAuthorizationFromToken(token);
 
-        boolean isPublicResult = resultProxyService.isPublicResult(chainTaskId);
+        boolean isPublicResult = proxyService.isPublicResult(chainTaskId);
         boolean isAuthorizedOwnerOfResult =
                 //auth != null &&
-                resultProxyService.isOwnerOfResult(chainId, chainTaskId, authorizationService.getWalletAddressFromJwtString(token))
+                proxyService.isOwnerOfResult(chainId, chainTaskId, authorizationService.getWalletAddressFromJwtString(token))
                 && authorizationService.isValidJwt(token);
                 //&& authorizationService.isAuthorizationValid(auth);
 
@@ -147,7 +147,7 @@ public class ResultProxyController {
                 //challengeService.invalidateEip712ChallengeString(auth.getChallenge());
             }
 
-            Optional<byte[]> zip = resultProxyService.getResult(chainTaskId);
+            Optional<byte[]> zip = proxyService.getResult(chainTaskId);
             if (!zip.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
             }

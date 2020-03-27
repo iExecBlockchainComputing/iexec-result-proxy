@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class ResultProxyServiceTest {
+public class ProxyServiceTest {
 
     @Mock
     private IexecHubService iexecHubService;
@@ -33,7 +33,7 @@ public class ResultProxyServiceTest {
 
 
     @InjectMocks
-    private ResultProxyService resultProxyService;
+    private ProxyService proxyService;
 
     private Integer chainId;
     private String chainDealId;
@@ -56,7 +56,7 @@ public class ResultProxyServiceTest {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(false);
         when(mongoResultService.doesResultExist(chainTaskId)).thenReturn(true);
 
-        assertThat(resultProxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ResultProxyServiceTest {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(true);
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(true);
 
-        assertThat(resultProxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
     }
 
     @Test
@@ -73,7 +73,7 @@ public class ResultProxyServiceTest {
         when(mongoResultService.doesResultExist(chainTaskId)).thenReturn(true);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(false);
 
-        assertThat(resultProxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ResultProxyServiceTest {
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(true);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(false);
 
-        assertThat(resultProxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ResultProxyServiceTest {
         when(mongoResultService.doesResultExist(chainTaskId)).thenReturn(false);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(true);
 
-        assertThat(resultProxyService.canUploadResult(chainTaskId, walletAddress, zip)).isTrue();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isTrue();
     }
 
     //@Test
@@ -100,7 +100,7 @@ public class ResultProxyServiceTest {
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(false);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(true);
 
-        assertThat(resultProxyService.canUploadResult(chainTaskId, walletAddress, zip)).isTrue();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isTrue();
     }
 
     @Test
@@ -109,14 +109,14 @@ public class ResultProxyServiceTest {
         String beneficiary = BytesUtils.EMPTY_ADDRESS;
         when(iexecHubService.getChainTask("0x1")).thenReturn(Optional.of(ChainTask.builder().dealid(chainDealId).build()));
         when(iexecHubService.getChainDeal(chainDealId)).thenReturn(Optional.of(ChainDeal.builder().requester(requester).beneficiary(beneficiary).build()));
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
     }
 
     @Test
     public void isNotAuthorizedToGetResultSinceCannotGetChainTask() {
         when(iexecHubService.getChainTask("0x1")).thenReturn(Optional.empty());
 
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ResultProxyServiceTest {
         when(iexecHubService.getChainTask("0x1")).thenReturn(Optional.of(ChainTask.builder().dealid(chainDealId).build()));
         when(iexecHubService.getChainDeal(chainDealId)).thenReturn(Optional.empty());
 
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
     }
 
     @Test
@@ -132,7 +132,7 @@ public class ResultProxyServiceTest {
         String beneficiary = "0xb";
         when(iexecHubService.getChainTask("0x1")).thenReturn(Optional.of(ChainTask.builder().dealid(chainDealId).build()));
         when(iexecHubService.getChainDeal(chainDealId)).thenReturn(Optional.of(ChainDeal.builder().beneficiary(beneficiary).build()));
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId, "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
     }
 
     @Test
@@ -140,7 +140,7 @@ public class ResultProxyServiceTest {
         String beneficiary = "0xb";
         when(iexecHubService.getChainTask("0x1")).thenReturn(Optional.of(ChainTask.builder().dealid(chainDealId).build()));
         when(iexecHubService.getChainDeal(chainDealId)).thenReturn(Optional.of(ChainDeal.builder().beneficiary(beneficiary).build()));
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId,"0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId,"0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E")).isFalse();
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ResultProxyServiceTest {
                 .build();
         when(iexecHubService.getTaskDescriptionFromChain(chainTaskId)).thenReturn(Optional.of(taskDescription));
 
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId, "0xbeneficiary")).isTrue();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId, "0xbeneficiary")).isTrue();
     }
 
     @Test
@@ -168,19 +168,19 @@ public class ResultProxyServiceTest {
                 .build();
         when(iexecHubService.getTaskDescriptionFromChain(chainTaskId)).thenReturn(Optional.of(taskDescription));
 
-        assertThat(resultProxyService.isOwnerOfResult(chainId, chainTaskId, "0xrequester")).isTrue();
+        assertThat(proxyService.isOwnerOfResult(chainId, chainTaskId, "0xrequester")).isTrue();
     }
 
     @Test
     public void isPublicResult() {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(true);
-        assertThat(resultProxyService.isPublicResult(chainTaskId)).isTrue();
+        assertThat(proxyService.isPublicResult(chainTaskId)).isTrue();
     }
 
     @Test
     public void isNotPublicResult() {
         String beneficiary = "0xb";
         when(iexecHubService.getTaskBeneficiary(chainTaskId, chainId)).thenReturn(Optional.of(beneficiary));
-        assertThat(resultProxyService.isPublicResult(chainTaskId)).isFalse();
+        assertThat(proxyService.isPublicResult(chainTaskId)).isFalse();
     }
 }

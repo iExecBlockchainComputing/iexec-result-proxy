@@ -19,13 +19,13 @@ import java.util.Optional;
  * Service class to manage all the results. If the result is public, it will be stored on IPFS. If there is a dedicated
  * beneficiary, the result will be pushed to mongo.
  */
-public class ResultProxyService {
+public class ProxyService {
 
     private final IexecHubService iexecHubService;
     private final MongoResultService mongoResultService;
     private final IpfsResultService ipfsResultService;
 
-    public ResultProxyService(IexecHubService iexecHubService,
+    public ProxyService(IexecHubService iexecHubService,
                               MongoResultService mongoResultService,
                               IpfsResultService ipfsResultService) {
         this.iexecHubService = iexecHubService;

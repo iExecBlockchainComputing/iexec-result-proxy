@@ -3,7 +3,7 @@ package com.iexec.resultproxy.ipfs;
 import com.iexec.common.utils.BytesUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.proxy.Result;
-import com.iexec.resultproxy.proxy.ResultRepo;
+import com.iexec.resultproxy.proxy.AbstractResultRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class IpfsResultService extends ResultRepo {
+public class IpfsResultService extends AbstractResultRepo {
 
 
     private static final String IPFS_ADDRESS_PREFIX = "/ipfs/";

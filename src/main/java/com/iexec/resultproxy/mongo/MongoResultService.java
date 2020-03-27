@@ -1,7 +1,7 @@
 package com.iexec.resultproxy.mongo;
 
 import com.iexec.resultproxy.proxy.Result;
-import com.iexec.resultproxy.proxy.ResultRepo;
+import com.iexec.resultproxy.proxy.AbstractResultRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class MongoResultService extends ResultRepo {
+public class MongoResultService extends AbstractResultRepo {
 
     private final GridFsOperations gridOperations;
 

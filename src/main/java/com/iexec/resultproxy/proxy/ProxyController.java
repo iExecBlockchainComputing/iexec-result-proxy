@@ -112,7 +112,7 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + ResultRepo.getResultFilename(chainTaskId) + ".zip")
+                .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
                 .body(zip.get());
     }
 
@@ -152,7 +152,7 @@ public class ProxyController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
             }
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + ResultRepo.getResultFilename(chainTaskId) + ".zip")
+                    .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
                     .body(zip.get());
         }
 
@@ -169,7 +169,7 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + ResultRepo.getResultFilename(ipfsHash) + ".zip")
+                .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(ipfsHash) + ".zip")
                 .body(zip.get());
     }
 

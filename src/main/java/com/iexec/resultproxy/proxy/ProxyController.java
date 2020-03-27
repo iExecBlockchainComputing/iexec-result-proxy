@@ -20,13 +20,13 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 public class ProxyController {
 
-    private final ResultProxyService proxyService;
+    private final ProxyService proxyService;
     private final Eip712ChallengeService challengeService;
     private final AuthorizationService authorizationService;
     private final VersionService versionService;
     private final IpfsService ipfsService;
 
-    public ProxyController(ResultProxyService proxyService,
+    public ProxyController(ProxyService proxyService,
                                  Eip712ChallengeService challengeService,
                                  AuthorizationService authorizationService,
                                  VersionService versionService,

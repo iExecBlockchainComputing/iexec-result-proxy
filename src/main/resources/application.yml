@@ -23,8 +23,3 @@ chain:
 ipfs:
   host: ${IEXEC_IPFS_HOST:127.0.0.1}
   port: ${IEXEC_IPFS_PORT:5001}
-
-# resultRepository:
-#   protocol: ${IEXEC_RESULT_REPOSITORY_PROTOCOL:https}
-#   host: ${IEXEC_RESULT_REPOSITORY_HOST:localhost}
-#   port: ${IEXEC_RESULT_REPOSITORY_PORT:18443}

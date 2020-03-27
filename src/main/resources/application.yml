@@ -1,6 +1,13 @@
 
 server:
-  port: ${IEXEC_CORE_HTTPS_PORT:18443}
+  port: ${IEXEC_RESULT_PROXY_PORT:18092}
+
+spring:
+  data:
+    mongodb:
+      database: iexec
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
 
 chain:
     id: ${IEXEC_CHAIN_ID:17}

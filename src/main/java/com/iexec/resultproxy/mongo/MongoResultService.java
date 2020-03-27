@@ -2,7 +2,6 @@ package com.iexec.resultproxy.mongo;
 
 import com.iexec.resultproxy.proxy.Result;
 import com.iexec.resultproxy.proxy.ResultRepo;
-import com.iexec.resultproxy.configuration.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -20,12 +19,9 @@ import java.util.Optional;
 public class MongoResultService extends ResultRepo {
 
     private final GridFsOperations gridOperations;
-    private final Configuration resultRepositoryConfig;
 
-    public MongoResultService(GridFsOperations gridOperations,
-                              Configuration resultRepositoryConfig) {
+    public MongoResultService(GridFsOperations gridOperations) {
         this.gridOperations = gridOperations;
-        this.resultRepositoryConfig = resultRepositoryConfig;
     }
 
     @Override
@@ -36,7 +32,8 @@ public class MongoResultService extends ResultRepo {
         InputStream inputStream = new ByteArrayInputStream(data);
         String resultFileName = getResultFilename(result.getChainTaskId());
         gridOperations.store(inputStream, resultFileName, result);
-        return resultRepositoryConfig.getResultRepositoryURL() + "/results/" + result.getChainTaskId();
+        // return resultRepositoryConfig.getResultRepositoryURL() + "/results/" + result.getChainTaskId();
+        return "/results/" + result.getChainTaskId();
     }
 
     @Override

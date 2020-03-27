@@ -2,7 +2,11 @@ version: '3.4'
 
 services:
   iexec-result-proxy:
-    image: iexec-result-proxy
+    image: nexus.iex.ec/iexec-result-proxy:dev
     build: .
     ports:
-      - 18443
+      - 18443:8080
+    #debug
+      # - 5005:5005
+    # environment:
+    #   JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y

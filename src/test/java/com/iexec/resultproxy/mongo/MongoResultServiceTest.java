@@ -11,7 +11,6 @@ import java.util.Optional;
 import com.iexec.common.chain.ChainDeal;
 import com.iexec.common.chain.ChainTask;
 import com.iexec.resultproxy.chain.IexecHubService;
-import com.iexec.resultproxy.configuration.Configuration;
 import com.iexec.resultproxy.proxy.Result;
 import com.mongodb.client.gridfs.model.GridFSFile;
 
@@ -32,9 +31,6 @@ public class MongoResultServiceTest {
 
     @Mock
     private GridFsOperations gridFsOperations;
-
-    @Mock
-    private Configuration resultRepositoryConfig;
 
     @InjectMocks
     private MongoResultService mongoResultService;
@@ -100,10 +96,9 @@ public class MongoResultServiceTest {
         ChainDeal chainDeal = ChainDeal.builder().beneficiary("beneficiary").build();
         when(iexecHubService.getChainDeal(any())).thenReturn(Optional.of(chainDeal));
 
-        when(resultRepositoryConfig.getResultRepositoryURL()).thenReturn("dummyPath");
         String resultLink = mongoResultService.addResult(result, dataBytes);
 
-        assertThat(resultLink).isEqualTo("dummyPath/results/0x1");
+        assertThat(resultLink).isEqualTo("/results/0x1");
         Mockito.verify(gridFsOperations, Mockito.times(1))
             .store(any(), any(), Mockito.eq(result));
     }

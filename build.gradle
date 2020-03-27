@@ -111,21 +111,6 @@ def canBuildDockerImage = isMasterBranch || isDevelopBranch || project.hasProper
 // #   create version   #
 // ######################
 
-// task createVersion {
-// 	doLast {
-// 		DumperOptions options = new DumperOptions()
-// 		options.setPrettyFlow(true)
-// 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
-// 		Yaml yaml = new Yaml(options)
-// 		File yamlFile = new File('src/main/resources/application.yml')
-// 		def yamlText = yaml.load(yamlFile.text)
-// 		yamlText.version = version
-// 		yamlFile.withWriter {
-// 			writer -> yaml.dump(yamlText, writer)
-// 		}
-// 	}
-// }
-
 task createVersion (type: Exec) {
 	description 'Set version in application.yml'
 	commandLine('sh', '-c', "sed -i 's/^version.*/version: ${version}/' src/main/resources/application.yml")

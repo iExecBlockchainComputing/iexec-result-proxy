@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class VersionService {
 
-    @Value("version")
+    @Value("${version}")
     private String version;
 
     public String getVersion() {

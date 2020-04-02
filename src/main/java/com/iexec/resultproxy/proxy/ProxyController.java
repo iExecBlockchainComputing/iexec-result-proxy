@@ -49,6 +49,19 @@ public class ProxyController {
         this.ipfsService = ipfsService;
     }
 
+    @GetMapping(value = "/results/challenge")
+    public ResponseEntity<Eip712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
+        Eip712Challenge eip712Challenge = challengeService.generateEip712Challenge(chainId);//TODO generate challenge from walletAddress
+        return ResponseEntity.ok(eip712Challenge);
+    }
+
+    @PostMapping(value = "/results/login")
+    public ResponseEntity<String> getToken(@RequestParam(name = "chainId") Integer chainId,
+                                           @RequestBody String signedEip712Challenge) {
+        String jwtString = authorizationService.getOrCreateJwt(signedEip712Challenge);
+        return ResponseEntity.ok(jwtString);
+    }
+
     @PostMapping("/results")
     public ResponseEntity<String> addResult(
             @RequestHeader("Authorization") String token,
@@ -125,19 +138,6 @@ public class ProxyController {
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
                 .body(zip.get());
-    }
-
-    @GetMapping(value = "/results/challenge")
-    public ResponseEntity<Eip712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
-        Eip712Challenge eip712Challenge = challengeService.generateEip712Challenge(chainId);//TODO generate challenge from walletAddress
-        return ResponseEntity.ok(eip712Challenge);
-    }
-
-    @PostMapping(value = "/results/login")
-    public ResponseEntity<String> getToken(@RequestParam(name = "chainId") Integer chainId,
-                                           @RequestBody String signedEip712Challenge) {
-        String jwtString = authorizationService.getOrCreateJwt(signedEip712Challenge);
-        return ResponseEntity.ok(jwtString);
     }
 
     @GetMapping(value = "/results/{chainTaskId}", produces = "application/zip")

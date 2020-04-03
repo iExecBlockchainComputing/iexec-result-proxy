@@ -65,7 +65,7 @@ dependencies {
     // ipfs
     implementation 'com.github.ipfs:java-ipfs-http-client:1.2.3'
 
-    // jason web token
+    // json web token
     implementation 'io.jsonwebtoken:jjwt:0.7.0'
 
     // expiring map

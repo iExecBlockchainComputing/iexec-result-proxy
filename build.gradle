@@ -1,50 +1,202 @@
 plugins {
-	id 'java'
-	id 'eclipse'
-	id 'maven'
-	id 'jacoco'
-	id 'org.springframework.boot' version '2.2.5.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id 'eclipse'
+    id 'maven'
+    id 'jacoco'
+    id 'org.springframework.boot' version '2.2.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'com.palantir.docker' version '0.25.0'
+    // id 'org.sonarqube' version '2.7'
+    // id 'com.palantir.graal' version '0.6.0-112-gca0b727'
 }
 
-group = 'com.iexec.result-proxy'
 version = '0.0.1-SNAPSHOT'
+group = 'com.iexec.result-proxy'
 sourceCompatibility = 11
 targetCompatibility = 11
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://nexus.iex.ec/repository/maven-public/'
+    }
+    maven {
+        url 'https://jitpack.io'
+    }
 }
 
-repositories {
-	mavenCentral()
-	maven { url "https://nexus.iex.ec/repository/maven-public/" }
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    deployerJars
 }
 
 ext {
-	set('springCloudVersion', "Hoxton.SR3")
+    set('springCloudVersion', 'Hoxton.SR3')
+    set('iexecCommonVersion', '4.1.0-SNAPSHOT')
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
-	testImplementation 'org.springframework.security:spring-security-test'
+    // iexec
+    implementation "com.iexec.common:iexec-common:${iexecCommonVersion}"
+    // implementation files("../iexec-common/build/libs/iexec-common-${iexecCommonVersion}.jar")
+
+    // spring
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    // test
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-inline:2.13.0' // activates mocking final classes/methods
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // swagger
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+
+    // ipfs
+    implementation 'com.github.ipfs:java-ipfs-http-client:1.2.3'
+
+    // json web token
+    implementation 'io.jsonwebtoken:jjwt:0.7.0'
+
+    // expiring map
+    implementation 'net.jodah:expiringmap:0.5.8'
+
+    // package cloud
+    deployerJars 'io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6'
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+// the test coverage report is
+// created just before the build
+build.dependsOn jacocoTestReport
+
+// ######################
+// #     build meta     #
+// ######################
+
+def gitBranch = 'git name-rev --name-only HEAD'.execute().text.trim()
+def isMasterBranch = gitBranch == 'master'
+def isDevelopBranch = gitBranch == 'develop'
+def isSnapshotVersion = project.version.contains('SNAPSHOT')
+
+def nexusUser = project.hasProperty('nexusUser') ? project.getProperty('nexusUser') : ''
+def nexusPassword = project.hasProperty('nexusPassword') ? project.getProperty('nexusPassword') : ''
+def hasNexusProperties = !nexusUser.isEmpty() && !nexusPassword.isEmpty()
+
+def canUploadArchives = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
+def canPushDockerImage = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
+def canBuildDockerImage = isMasterBranch || isDevelopBranch || project.hasProperty('forceDockerBuild')
+
+// ######################
+// #   create version   #
+// ######################
+
+task createVersion (type: Exec) {
+    description 'Set version in application.yml'
+    commandLine('sh', '-c', "sed -i 's/^version.*/version: ${version}/' src/main/resources/application.yml")
+}
+
+compileJava.dependsOn createVersion
+
+// ######################
+// #   upload archive   #
+// ######################
+
+project.ext.getNexusMaven = {
+    def nexusMavenBase = 'https://nexus.iex.ec/repository'
+    if (isSnapshotVersion) {
+        return nexusMavenBase + '/maven-snapshots/'
+    } else {
+        return nexusMavenBase + '/maven-releases/'
+    }
+}
+
+uploadArchives {
+    enabled = canUploadArchives
+    repositories.mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: getNexusMaven()) {
+            authentication(userName: nexusUser, password: nexusPassword)
+        }
+    }
+}
+
+// ######################
+// #	  docker		#
+// ######################
+
+// build, tag & push image
+// ./gradlew docker dockerTagDev dockerTagsPush
+
+def dockerImageBaseName = 'nexus.iex.ec/iexec-result-proxy'
+def gitShortCommit = 'git rev-parse --short HEAD'.execute().text.trim()
+def dockerImageTag = isSnapshotVersion ? "${version}-${gitShortCommit}" : version
+
+docker {
+    name 					"${dockerImageBaseName}:${dockerImageTag}"
+    tag 'FullTag', 			"${dockerImageBaseName}:${dockerImageTag}"
+    tag 'ShortCommitTag',	"${dockerImageBaseName}:${gitShortCommit}"
+    tag 'Dev',				"${dockerImageBaseName}:dev"
+    dockerfile file('Dockerfile')
+    files "build/libs/iexec-result-proxy-${project.version}.jar"
+    buildArgs([BUILD_VERSION: project.version])
+}
+
+// docker build
+tasks.docker {
+    enabled = canBuildDockerImage
+}
+
+// docker login
+task dockerLogin(type: Exec) {
+    enabled = canPushDockerImage
+    commandLine('sh', '-c', "docker login -u ${nexusUser} -p ${nexusPassword} nexus.iex.ec")
+}
+
+// docker logout
+task dockerLogout(type: Exec) {
+    enabled = canPushDockerImage
+    commandLine('sh', '-c', 'docker logout nexus.iex.ec')
+}
+
+// docker push
+dockerTagsPush {
+    enabled = canPushDockerImage
+    // shouldRunAfter tasks.docker
+    dependsOn dockerLogin
+    finalizedBy dockerLogout
+}
+
+afterEvaluate {
+    // don't tag if image is not build
+    for(t in tasks.findAll{e -> e.name.contains("dockerTag")}) {
+        t.enabled = canBuildDockerImage
+    }
+    // don't push tags if canPushDockerImage == false
+    // (dockerPushFullTag, dockerPushShortCommitTag)
+    def dockerPushTasks = tasks.findAll{t -> t.name.contains("dockerPush")}
+    for(t in dockerPushTasks) {
+        t.enabled = canPushDockerImage
+    }
+    // don't push dev tag
+    dockerPushDev.enabled = false
 }

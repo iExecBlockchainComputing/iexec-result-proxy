@@ -1,0 +1,69 @@
+version: '3.4'
+
+networks:
+  iexec-net:
+
+
+services:
+
+  result-proxy:
+    image: nexus.iex.ec/iexec-result-proxy:dev
+    container_name: result-proxy
+    environment:
+      - IEXEC_PRIVATE_CHAIN_ADDRESS=http://chain:8545
+      - IEXEC_PUBLIC_CHAIN_ADDRESS=http://chain:8545
+      - MONGO_HOST=result-proxy-mongo
+      - MONGO_PORT=47017
+      - IEXEC_IPFS_HOST=ipfs
+    ports:
+      - 18092:18092
+    networks:
+      - iexec-net
+
+  result-proxy-mongo:
+    image: mongo:4-xenial
+    container_name: result-proxy-mongo
+    entrypoint: "/bin/bash"
+    command: -c "mongod --bind_ip_all --port 47017"
+    ports:
+      - 47017:47017
+    networks:
+      - iexec-net
+
+  result-proxy-mongo-ui:
+    image: mongo-express:0.49
+    container_name: result-proxy-mongo-ui
+    environment:
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+      - ME_CONFIG_MONGODB_PORT=47017
+      - ME_CONFIG_MONGODB_SERVER=result-proxy-mongo
+      - VCAP_APP_PORT=8084
+    ports:
+      - 8084:8084
+    networks:
+      - iexec-net
+    depends_on:
+      - result-proxy-mongo
+    restart: on-failure
+
+  ipfs:
+    image: ipfs/go-ipfs:v0.4.20
+    container_name: ipfs
+    volumes:
+      - /tmp/ipfs-docker-staging:/export
+      - /tmp/ipfs-docker-data:/data/ipfs
+    ports:
+      - 8080:8080
+      - 4001:4001
+      - 5001:5001
+    restart: on-failure
+    networks:
+      - iexec-net
+  chain:
+    image: nexus.iex.ec/poco-chain:lv3.0.35-2
+    container_name: chain
+    ports:
+      - 8545:8545
+    networks:
+      - iexec-net

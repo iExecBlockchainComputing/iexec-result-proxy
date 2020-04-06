@@ -161,9 +161,19 @@ docker {
     buildArgs([BUILD_VERSION: project.version])
 }
 
+task buildImage {
+    enabled = canBuildDockerImage
+    dependsOn tasks.docker
+}
+
 // docker build
 tasks.docker {
     enabled = canBuildDockerImage
+}
+
+task pushImage {
+    enabled = canPushDockerImage
+    dependsOn dockerTagsPush
 }
 
 // docker login
@@ -199,4 +209,7 @@ afterEvaluate {
     }
     // don't push dev tag
     dockerPushDev.enabled = false
+
+    // create :dev tag after image build
+    buildImage.dependsOn dockerTagDev
 }

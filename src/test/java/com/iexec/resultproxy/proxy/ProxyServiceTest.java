@@ -56,7 +56,7 @@ public class ProxyServiceTest {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(false);
         when(mongoResultService.doesResultExist(chainTaskId)).thenReturn(true);
 
-        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress)).isFalse();
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ProxyServiceTest {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(true);
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(true);
 
-        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress)).isFalse();
     }
 
     @Test
@@ -73,7 +73,7 @@ public class ProxyServiceTest {
         when(mongoResultService.doesResultExist(chainTaskId)).thenReturn(true);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(false);
 
-        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress)).isFalse();
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ProxyServiceTest {
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(true);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(false);
 
-        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isFalse();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress)).isFalse();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ProxyServiceTest {
         when(mongoResultService.doesResultExist(chainTaskId)).thenReturn(false);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(true);
 
-        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isTrue();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress)).isTrue();
     }
 
     //@Test
@@ -100,7 +100,7 @@ public class ProxyServiceTest {
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(false);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(true);
 
-        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress, zip)).isTrue();
+        assertThat(proxyService.canUploadResult(chainTaskId, walletAddress)).isTrue();
     }
 
     @Test

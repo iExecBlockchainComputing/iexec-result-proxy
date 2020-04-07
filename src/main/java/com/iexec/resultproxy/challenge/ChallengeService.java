@@ -14,11 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class ChallengeService {
-    /**
-     * TODO:
-     * Rename AuthorizationService to JwtService
-     * Rename Authorization to SignedChallenge
-     */
 
     private Eip712ChallengeService eip712ChallengeService;
 

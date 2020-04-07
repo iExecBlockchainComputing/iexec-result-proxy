@@ -59,6 +59,9 @@ public class ProxyController {
     public ResponseEntity<String> getToken(@RequestParam(name = "chainId") Integer chainId,
                                            @RequestBody String signedEip712Challenge) {
         String jwtString = authorizationService.getOrCreateJwt(signedEip712Challenge);
+        if (jwtString == null || jwtString.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+        }
         return ResponseEntity.ok(jwtString);
     }
 
@@ -67,15 +70,10 @@ public class ProxyController {
             @RequestHeader("Authorization") String token,
             @RequestBody ResultModel model) {
 
-        //Authorization auth = authorizationService.getAuthorizationFromToken(token);
-
         String tokenWalletAddress = authorizationService.getWalletAddressFromJwtString(token);
 
         boolean authorizedAndCanUploadResult = authorizationService.isValidJwt(token) &&
-                //authorizationService.isAuthorizationValid(auth) &&
-                proxyService.canUploadResult(model.getChainTaskId(),
-                        tokenWalletAddress,//auth.getWalletAddress(),
-                        model.getZip());
+                proxyService.canUploadResult(model.getChainTaskId(), tokenWalletAddress, model.getZip());
 
         // TODO check if the result to be added is the correct result for that task
 

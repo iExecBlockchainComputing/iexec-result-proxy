@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import com.iexec.common.result.ResultModel;
 import com.iexec.common.result.eip712.Eip712Challenge;
-import com.iexec.resultproxy.auth.ChallengeService;
-import com.iexec.resultproxy.auth.SignedChallenge;
+import com.iexec.resultproxy.challenge.ChallengeService;
+import com.iexec.resultproxy.challenge.SignedChallenge;
 import com.iexec.resultproxy.ipfs.IpfsService;
 import com.iexec.resultproxy.jwt.JwtService;
 import com.iexec.resultproxy.version.VersionService;

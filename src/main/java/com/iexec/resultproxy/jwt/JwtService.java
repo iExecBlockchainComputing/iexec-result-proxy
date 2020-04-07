@@ -3,7 +3,7 @@ package com.iexec.resultproxy.jwt;
 import java.util.Date;
 import java.util.Optional;
 
-import com.iexec.resultproxy.auth.SignedChallenge;
+import com.iexec.resultproxy.challenge.SignedChallenge;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

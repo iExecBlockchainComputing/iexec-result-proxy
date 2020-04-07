@@ -1,4 +1,4 @@
-package com.iexec.resultproxy.auth;
+package com.iexec.resultproxy.challenge;
 
 import lombok.Builder;
 import lombok.Data;

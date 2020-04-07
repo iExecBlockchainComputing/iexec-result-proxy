@@ -1,4 +1,4 @@
-package com.iexec.resultproxy.auth;
+package com.iexec.resultproxy.challenge;
 
 import com.iexec.common.result.eip712.Eip712Challenge;
 import com.iexec.common.utils.BytesUtils;

@@ -57,7 +57,7 @@ public class ProxyService {
             return isActive && isRequesterCredentials;
         } else {
             // check if result has been already uploaded
-            if (doesResultExist(chainTaskId)) {
+            if (isResultFound(chainTaskId)) {
                 log.error("Trying to upload result that has been already uploaded [chainTaskId:{}, uploadRequester:{}]",
                         chainTaskId, walletAddress);
                 return false;
@@ -76,7 +76,7 @@ public class ProxyService {
         }
     }
 
-    boolean doesResultExist(String chainTaskId) {
+    boolean isResultFound(String chainTaskId) {
         if (isPublicResult(chainTaskId)) {
             return false; //return ipfsResultService.doesResultExist(chainTaskId);
             /*

@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.iexec.resultproxy.challenge.SignedChallenge;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
@@ -14,8 +13,11 @@ import io.jsonwebtoken.Jwts;
 @Service
 public class JwtService {
 
-    @Autowired
-    JwtRepository jwtRepository;
+    private JwtRepository jwtRepository;
+
+    public JwtService(JwtRepository jwtRepository) {
+        this.jwtRepository = jwtRepository;        
+    }
 
     public String getOrCreateJwt(SignedChallenge auth) {
         String jwtString;

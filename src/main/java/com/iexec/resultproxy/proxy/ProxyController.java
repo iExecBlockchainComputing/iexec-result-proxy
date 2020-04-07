@@ -60,12 +60,14 @@ public class ProxyController {
                                         @RequestBody String token) {
         SignedChallenge signedChallenge = challengeService.tokenToSignedChallengeObject(token);
         if (!challengeService.isSignedChallengeValid(signedChallenge)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         String jwtString = jwtService.getOrCreateJwt(signedChallenge);
         if (jwtString == null || jwtString.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+
         challengeService.invalidateChallenge(signedChallenge.getChallenge());
         return ResponseEntity.ok(jwtString);
     }
@@ -74,7 +76,7 @@ public class ProxyController {
     public ResponseEntity<String> addResult(@RequestHeader("Authorization") String token,
                                             @RequestBody ResultModel model) {
 
-        if (jwtService.isValidJwt(token)) {
+        if (!jwtService.isValidJwt(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
@@ -146,7 +148,7 @@ public class ProxyController {
         String walletAddress = jwtService.getWalletAddressFromJwtString(token);
         boolean isPublicResult = proxyService.isPublicResult(chainTaskId);
         boolean isOwnerOfResult = proxyService.isOwnerOfResult(chainId, chainTaskId, walletAddress);
-        if (!isOwnerOfResult || !isPublicResult) {
+        if (!isOwnerOfResult && !isPublicResult) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();            
         }
 

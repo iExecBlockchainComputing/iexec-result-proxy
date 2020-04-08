@@ -1,4 +1,4 @@
-package com.iexec.resultproxy.auth;
+package com.iexec.resultproxy.challenge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;

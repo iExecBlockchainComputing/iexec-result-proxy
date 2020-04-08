@@ -7,9 +7,10 @@ import java.util.Optional;
 
 import com.iexec.common.result.ResultModel;
 import com.iexec.common.result.eip712.Eip712Challenge;
-import com.iexec.resultproxy.auth.AuthorizationService;
-import com.iexec.resultproxy.auth.Eip712ChallengeService;
+import com.iexec.resultproxy.challenge.ChallengeService;
+import com.iexec.resultproxy.challenge.SignedChallenge;
 import com.iexec.resultproxy.ipfs.IpfsService;
+import com.iexec.resultproxy.jwt.JwtService;
 import com.iexec.resultproxy.version.VersionService;
 
 import org.springframework.http.HttpStatus;
@@ -26,60 +27,65 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @RestController
 public class ProxyController {
 
+    private final ChallengeService challengeService;
+    private final JwtService jwtService;
     private final ProxyService proxyService;
-    private final Eip712ChallengeService challengeService;
-    private final AuthorizationService authorizationService;
-    private final VersionService versionService;
     private final IpfsService ipfsService;
+    private final VersionService versionService;
 
-    public ProxyController(ProxyService proxyService,
-                                 Eip712ChallengeService challengeService,
-                                 AuthorizationService authorizationService,
-                                 VersionService versionService,
-                                 IpfsService ipfsService) {
-        this.proxyService = proxyService;
+    public ProxyController(ChallengeService challengeService,
+                           JwtService jwtService,
+                           ProxyService proxyService,
+                           IpfsService ipfsService,
+                           VersionService versionService) {
         this.challengeService = challengeService;
-        this.authorizationService = authorizationService;
-        this.versionService = versionService;
+        this.jwtService = jwtService;
+        this.proxyService = proxyService;
         this.ipfsService = ipfsService;
+        this.versionService = versionService;
     }
 
     @GetMapping(value = "/results/challenge")
     public ResponseEntity<Eip712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
-        Eip712Challenge eip712Challenge = challengeService.generateEip712Challenge(chainId);//TODO generate challenge from walletAddress
+        Eip712Challenge eip712Challenge = challengeService.createChallenge(chainId); // TODO generate challenge from walletAddress
         return ResponseEntity.ok(eip712Challenge);
     }
 
     @PostMapping(value = "/results/login")
-    public ResponseEntity<String> getToken(@RequestParam(name = "chainId") Integer chainId,
-                                           @RequestBody String signedEip712Challenge) {
-        String jwtString = authorizationService.getOrCreateJwt(signedEip712Challenge);
+    public ResponseEntity<String> login(@RequestParam(name = "chainId") Integer chainId,
+                                        @RequestBody String token) {
+        SignedChallenge signedChallenge = challengeService.tokenToSignedChallengeObject(token);
+        if (!challengeService.isSignedChallengeValid(signedChallenge)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String jwtString = jwtService.getOrCreateJwt(signedChallenge);
+        if (jwtString == null || jwtString.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        challengeService.invalidateChallenge(signedChallenge.getChallenge());
         return ResponseEntity.ok(jwtString);
     }
 
     @PostMapping("/results")
-    public ResponseEntity<String> addResult(
-            @RequestHeader("Authorization") String token,
-            @RequestBody ResultModel model) {
+    public ResponseEntity<String> addResult(@RequestHeader("Authorization") String token,
+                                            @RequestBody ResultModel model) {
 
-        //Authorization auth = authorizationService.getAuthorizationFromToken(token);
+        if (!jwtService.isValidJwt(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+        }
 
-        String tokenWalletAddress = authorizationService.getWalletAddressFromJwtString(token);
-
-        boolean authorizedAndCanUploadResult = authorizationService.isValidJwt(token) &&
-                //authorizationService.isAuthorizationValid(auth) &&
-                proxyService.canUploadResult(model.getChainTaskId(),
-                        tokenWalletAddress,//auth.getWalletAddress(),
-                        model.getZip());
+        String walletAddress = jwtService.getWalletAddressFromJwtString(token);
+        boolean canUploadResult = proxyService.canUploadResult(model.getChainTaskId(), walletAddress);
 
         // TODO check if the result to be added is the correct result for that task
 
-        if (!authorizedAndCanUploadResult) {
+        if (!canUploadResult) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
@@ -97,33 +103,22 @@ public class ProxyController {
         }
 
         log.info("Result uploaded successfully [chainTaskId:{}, uploadRequester:{}, resultLink:{}]",
-                model.getChainTaskId(), tokenWalletAddress, resultLink);
-
-        challengeService.invalidateEip712ChallengeString(tokenWalletAddress);
+                model.getChainTaskId(), walletAddress, resultLink);
 
         return ok(resultLink);
     }
 
     @RequestMapping(method = RequestMethod.HEAD, path = "/results/{chainTaskId}")
-    public ResponseEntity<String> isResultUploaded(
-            @PathVariable(name = "chainTaskId") String chainTaskId,
-            @RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> isResultUploaded(@PathVariable(name = "chainTaskId") String chainTaskId,
+                                                   @RequestHeader("Authorization") String token) {
 
-        //Authorization auth = authorizationService.getAuthorizationFromToken(token);
-
-        //if (!authorizationService.isAuthorizationValid(auth)) {
-        if (!authorizationService.isValidJwt(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+        if (!jwtService.isValidJwt(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        boolean isResultInDatabase = proxyService.doesResultExist(chainTaskId);
-        if (!isResultInDatabase) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
-        }
-
-        //challengeService.invalidateEip712ChallengeString(auth.getChallenge());
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT.value()).build();
+        boolean isResultFound = proxyService.isResultFound(chainTaskId);
+        HttpStatus status = isResultFound ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status).build();
     }
 
     @GetMapping(value = "/results/{chainTaskId}/snap", produces = "application/zip")
@@ -136,38 +131,36 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
+                .header("Content-Disposition", "attachment; filename="
+                        + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
                 .body(zip.get());
     }
 
     @GetMapping(value = "/results/{chainTaskId}", produces = "application/zip")
     public ResponseEntity<byte[]> getResult(@PathVariable("chainTaskId") String chainTaskId,
-                                            @RequestHeader(name = "Authorization", required = false) String token,
+                                            @RequestHeader(name = "Authorization") String token,
                                             @RequestParam(name = "chainId") Integer chainId) throws IOException {
-        //Authorization auth = authorizationService.getAuthorizationFromToken(token);
 
-        boolean isPublicResult = proxyService.isPublicResult(chainTaskId);
-        boolean isAuthorizedOwnerOfResult =
-                //auth != null &&
-                proxyService.isOwnerOfResult(chainId, chainTaskId, authorizationService.getWalletAddressFromJwtString(token))
-                && authorizationService.isValidJwt(token);
-                //&& authorizationService.isAuthorizationValid(auth);
-
-        if (isAuthorizedOwnerOfResult || isPublicResult) {//TODO: IPFS fetch from chainTaskId
-            if (isAuthorizedOwnerOfResult) {
-                //challengeService.invalidateEip712ChallengeString(auth.getChallenge());
-            }
-
-            Optional<byte[]> zip = proxyService.getResult(chainTaskId);
-            if (!zip.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
-            }
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
-                    .body(zip.get());
+        if (!jwtService.isValidJwt(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
+        String walletAddress = jwtService.getWalletAddressFromJwtString(token);
+        boolean isPublicResult = proxyService.isPublicResult(chainTaskId);
+        boolean isOwnerOfResult = proxyService.isOwnerOfResult(chainId, chainTaskId, walletAddress);
+        if (!isOwnerOfResult && !isPublicResult) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();            
+        }
+
+        Optional<byte[]> zip = proxyService.getResult(chainTaskId);
+        if (!zip.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
+        }
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename="
+                        + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
+                .body(zip.get());
     }
 
     /*
@@ -180,7 +173,8 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + AbstractResultRepo.getResultFilename(ipfsHash) + ".zip")
+                .header("Content-Disposition", "attachment; filename="
+                        + AbstractResultRepo.getResultFilename(ipfsHash) + ".zip")
                 .body(zip.get());
     }
 

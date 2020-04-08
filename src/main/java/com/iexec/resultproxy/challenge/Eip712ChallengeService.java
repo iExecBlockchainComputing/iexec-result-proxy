@@ -1,18 +1,18 @@
-package com.iexec.resultproxy.auth;
-
-import com.iexec.common.result.eip712.Eip712Challenge;
-import com.iexec.common.result.eip712.Eip712ChallengeUtils;
-import lombok.extern.slf4j.Slf4j;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
-import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.stereotype.Service;
+package com.iexec.resultproxy.challenge;
 
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
+import com.iexec.common.result.eip712.Eip712Challenge;
+import com.iexec.common.result.eip712.Eip712ChallengeUtils;
+
+import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.stereotype.Service;
+
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
+
 @Service
-@Slf4j
 public class Eip712ChallengeService {
 
     private int challengeId;
@@ -33,8 +33,7 @@ public class Eip712ChallengeService {
         return Base64.encodeBase64URLSafeString(token);
     }
 
-    // TODO: (re)make this method protected
-    public Eip712Challenge generateEip712Challenge(Integer chainId) {
+    Eip712Challenge generateEip712Challenge(Integer chainId) {
         Eip712Challenge eip712Challenge = new Eip712Challenge(generateRandomToken(), chainId);
         this.saveEip712ChallengeString(Eip712ChallengeUtils.getEip712ChallengeString(eip712Challenge));
         return eip712Challenge;
@@ -49,8 +48,7 @@ public class Eip712ChallengeService {
         return challengeMap.containsValue(eip712ChallengeString);
     }
 
-    // TODO: (re)make this method protected
-    public void invalidateEip712ChallengeString(String eip712ChallengeString) {
+    void invalidateEip712ChallengeString(String eip712ChallengeString) {
         challengeMap.entrySet().removeIf(entry -> entry.getValue().equals(eip712ChallengeString));
     }
 

@@ -1,4 +1,4 @@
-package com.iexec.resultproxy.auth;
+package com.iexec.resultproxy.challenge;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Getter;
 @Data
 @Builder
 @Getter
-public class Authorization {
+public class SignedChallenge {
 
     private String challenge;
     private String challengeSignature;

@@ -10,6 +10,7 @@ import com.iexec.common.result.eip712.Eip712Challenge;
 import com.iexec.resultproxy.challenge.ChallengeService;
 import com.iexec.resultproxy.challenge.SignedChallenge;
 import com.iexec.resultproxy.ipfs.IpfsService;
+import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
 import com.iexec.resultproxy.version.VersionService;
 
@@ -36,17 +37,20 @@ public class ProxyController {
     private final ProxyService proxyService;
     private final IpfsService ipfsService;
     private final VersionService versionService;
+    private IpfsNameService ipfsNameService;
 
     public ProxyController(ChallengeService challengeService,
                            JwtService jwtService,
                            ProxyService proxyService,
                            IpfsService ipfsService,
-                           VersionService versionService) {
+                           VersionService versionService,
+                           IpfsNameService ipfsNameService) {
         this.challengeService = challengeService;
         this.jwtService = jwtService;
         this.proxyService = proxyService;
         this.ipfsService = ipfsService;
         this.versionService = versionService;
+        this.ipfsNameService = ipfsNameService;
     }
 
     @GetMapping(value = "/results/challenge")
@@ -176,6 +180,18 @@ public class ProxyController {
                 .header("Content-Disposition", "attachment; filename="
                         + AbstractResultRepo.getResultFilename(ipfsHash) + ".zip")
                 .body(zip.get());
+    }
+
+    /*
+    *   Retrieves ipfsHash for taskId if required
+    * */
+    @GetMapping("/results/{chainTaskId}/ipfshash")
+    public ResponseEntity<String> getIpfsHashForTask(@PathVariable("chainTaskId") String chainTaskId){
+        String ipfsHashForTask = ipfsNameService.getIpfsHashForTask(chainTaskId);
+        if (ipfsHashForTask.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
+        }
+        return ResponseEntity.ok(ipfsHashForTask);
     }
 
 }

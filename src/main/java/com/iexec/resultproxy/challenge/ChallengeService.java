@@ -42,20 +42,20 @@ public class ChallengeService {
                 .build();
     }
 
-    public boolean isSignedChallengeValid(SignedChallenge authorization) {
-        if (authorization == null) {
-            log.error("Authorization should not be null [authorization:{}]", authorization);
+    public boolean isSignedChallengeValid(SignedChallenge signedChallenge) {
+        if (signedChallenge == null) {
+            log.error("Signed challenge should not be null [SignedChallenge:{}]", signedChallenge);
             return false;
         }
 
-        String eip712ChallengeString = authorization.getChallenge();
-        String challengeSignature = authorization.getChallengeSignature();
-        String walletAddress = authorization.getWalletAddress();
+        String eip712ChallengeString = signedChallenge.getChallenge();
+        String challengeSignature = signedChallenge.getChallengeSignature();
+        String walletAddress = signedChallenge.getWalletAddress();
 
         challengeSignature = Numeric.cleanHexPrefix(challengeSignature);
 
         if (challengeSignature.length() < 130) {
-            log.error("Eip712ChallengeString has a bad signature format [downloadRequester:{}]", walletAddress);
+            log.error("Eip712ChallengeString has a bad signature format [requester:{}]", walletAddress);
             return false;
         }
         String r = challengeSignature.substring(0, 64);
@@ -64,14 +64,14 @@ public class ChallengeService {
 
         //ONE: check if eip712Challenge is in eip712Challenge map
         if (!eip712ChallengeService.containsEip712ChallengeString(eip712ChallengeString)) {
-            log.error("Eip712ChallengeString provided doesn't match any challenge [downloadRequester:{}]", walletAddress);
+            log.error("Eip712ChallengeString provided doesn't match any challenge [requester:{}]", walletAddress);
             return false;
         }
 
         //TWO: check if ecrecover on eip712Challenge & signature match address
         if (!SignatureUtils.doesSignatureMatchesAddress(BytesUtils.stringToBytes(r), BytesUtils.stringToBytes(s),
                 eip712ChallengeString, StringUtils.lowerCase(walletAddress))) {
-            log.error("Signature provided doesn't match walletAddress [downloadRequester:{}, sign.r:{}, sign.s:{}, eip712ChallengeString:{}]",
+            log.error("Signature provided doesn't match walletAddress [requester:{}, sign.r:{}, sign.s:{}, eip712ChallengeString:{}]",
                     walletAddress, r, s, eip712ChallengeString);
             return false;
         }

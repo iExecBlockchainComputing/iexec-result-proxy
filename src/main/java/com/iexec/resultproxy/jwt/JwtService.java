@@ -19,16 +19,16 @@ public class JwtService {
         this.jwtRepository = jwtRepository;        
     }
 
-    public String getOrCreateJwt(SignedChallenge auth) {
+    public String getOrCreateJwt(SignedChallenge signedChallenge) {
         String jwtString;
-        Optional<Jwt> oExistingJwt = findByWalletAddress(auth.getWalletAddress());
+        Optional<Jwt> oExistingJwt = findByWalletAddress(signedChallenge.getWalletAddress());
 
         if (oExistingJwt.isPresent()) {
             jwtString = oExistingJwt.get().getJwtString(); // TODO generate new token
         } else {
-            jwtString = Jwts.builder().setAudience(auth.getWalletAddress()).setIssuedAt(new Date())
+            jwtString = Jwts.builder().setAudience(signedChallenge.getWalletAddress()).setIssuedAt(new Date())
                     .setSubject(RandomStringUtils.randomAlphanumeric(64)).compact();
-            save(new Jwt(auth.getWalletAddress(), jwtString));
+            save(new Jwt(signedChallenge.getWalletAddress(), jwtString));
         }
 
         return jwtString;

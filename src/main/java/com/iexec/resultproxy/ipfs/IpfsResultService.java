@@ -3,8 +3,8 @@ package com.iexec.resultproxy.ipfs;
 import java.util.Optional;
 
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
-import com.iexec.resultproxy.proxy.AbstractResultStorage;
-import com.iexec.resultproxy.proxy.Result;
+import com.iexec.resultproxy.result.AbstractResultStorage;
+import com.iexec.resultproxy.result.Result;
 
 import org.springframework.stereotype.Service;
 

@@ -12,6 +12,8 @@ import com.iexec.resultproxy.challenge.SignedChallenge;
 import com.iexec.resultproxy.ipfs.IpfsService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
+import com.iexec.resultproxy.result.AbstractResultStorage;
+import com.iexec.resultproxy.result.Result;
 import com.iexec.resultproxy.version.VersionService;
 
 import org.springframework.http.HttpStatus;
@@ -136,7 +138,7 @@ public class ProxyController {
         }
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename="
-                        + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
+                        + AbstractResultStorage.getResultFilename(chainTaskId) + ".zip")
                 .body(zip.get());
     }
 
@@ -163,7 +165,7 @@ public class ProxyController {
 
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename="
-                        + AbstractResultRepo.getResultFilename(chainTaskId) + ".zip")
+                        + AbstractResultStorage.getResultFilename(chainTaskId) + ".zip")
                 .body(zip.get());
     }
 
@@ -178,7 +180,7 @@ public class ProxyController {
         }
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename="
-                        + AbstractResultRepo.getResultFilename(ipfsHash) + ".zip")
+                        + AbstractResultStorage.getResultFilename(ipfsHash) + ".zip")
                 .body(zip.get());
     }
 

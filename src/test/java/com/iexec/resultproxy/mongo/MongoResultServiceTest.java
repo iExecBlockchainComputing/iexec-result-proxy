@@ -11,7 +11,7 @@ import java.util.Optional;
 import com.iexec.common.chain.ChainDeal;
 import com.iexec.common.chain.ChainTask;
 import com.iexec.resultproxy.chain.IexecHubService;
-import com.iexec.resultproxy.proxy.Result;
+import com.iexec.resultproxy.result.Result;
 import com.mongodb.client.gridfs.model.GridFSFile;
 
 import org.apache.commons.io.IOUtils;

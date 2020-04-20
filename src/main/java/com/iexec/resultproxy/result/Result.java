@@ -1,4 +1,4 @@
-package com.iexec.resultproxy.proxy;
+package com.iexec.resultproxy.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

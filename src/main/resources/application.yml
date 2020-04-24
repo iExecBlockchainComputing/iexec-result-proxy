@@ -1,7 +1,7 @@
 version: 0.0.1-SNAPSHOT
 
 server:
-  port: ${IEXEC_RESULT_PROXY_PORT:18092}
+  port: ${IEXEC_RESULT_PROXY_PORT:18089}
 
 spring:
   data:

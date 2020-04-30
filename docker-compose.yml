@@ -16,7 +16,7 @@ services:
       - MONGO_PORT=47017
       - IEXEC_IPFS_HOST=ipfs
     ports:
-      - 18092:18092
+      - 18089:18089
     networks:
       - iexec-net
 

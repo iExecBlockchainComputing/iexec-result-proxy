@@ -27,9 +27,6 @@ public class ChainConfig {
     @Value("${chain.hubAddress}")
     private String hubAddress;
 
-    @Value("${chain.poolAddress}")
-    private String poolAddress;
-
     @Value("${chain.startBlockNumber}")
     private long startBlockNumber;
 

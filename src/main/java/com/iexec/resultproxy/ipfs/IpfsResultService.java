@@ -1,17 +1,15 @@
 package com.iexec.resultproxy.ipfs;
 
-import com.iexec.resultproxy.ipfs.task.IpfsName;
-import com.iexec.resultproxy.ipfs.task.IpfsNameService;
-import com.iexec.resultproxy.proxy.AbstractResultRepo;
-import com.iexec.resultproxy.proxy.Result;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
+import com.iexec.resultproxy.ipfs.task.IpfsNameService;
+import com.iexec.resultproxy.result.AbstractResultStorage;
+import com.iexec.resultproxy.result.Result;
+
+import org.springframework.stereotype.Service;
+
 @Service
-@Slf4j
-public class IpfsResultService extends AbstractResultRepo {
+public class IpfsResultService extends AbstractResultStorage {
 
 
     private static final String IPFS_ADDRESS_PREFIX = "/ipfs/";

@@ -1,9 +1,9 @@
-package com.iexec.resultproxy.proxy;
+package com.iexec.resultproxy.result;
 
 import java.util.Optional;
 
 
-public abstract class AbstractResultRepo {
+public abstract class AbstractResultStorage {
 
     private static final String RESULT_FILENAME_PREFIX = "iexec-result-";
 

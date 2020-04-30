@@ -1,22 +1,24 @@
 package com.iexec.resultproxy.mongo;
 
-import com.iexec.resultproxy.proxy.Result;
-import com.iexec.resultproxy.proxy.AbstractResultRepo;
-import lombok.extern.slf4j.Slf4j;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
+
+import com.iexec.resultproxy.result.AbstractResultStorage;
+import com.iexec.resultproxy.result.Result;
+
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class MongoResultService extends AbstractResultRepo {
+public class MongoResultService extends AbstractResultStorage {
 
     private final GridFsOperations gridOperations;
 

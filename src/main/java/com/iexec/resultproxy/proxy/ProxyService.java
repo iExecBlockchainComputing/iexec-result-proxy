@@ -10,6 +10,7 @@ import com.iexec.common.task.TaskDescription;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
 import com.iexec.resultproxy.mongo.MongoResultService;
+import com.iexec.resultproxy.result.Result;
 
 import org.springframework.stereotype.Service;
 

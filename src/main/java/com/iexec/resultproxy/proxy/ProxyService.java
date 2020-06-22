@@ -79,7 +79,7 @@ public class ProxyService {
 
     boolean isResultFound(String chainTaskId) {
         if (isPublicResult(chainTaskId)) {
-            return false; //return ipfsResultService.doesResultExist(chainTaskId);
+            return ipfsResultService.doesResultExist(chainTaskId);
             /*
              * We should probably not check if result exists when IPFS (timeout issues)(?)
              * */

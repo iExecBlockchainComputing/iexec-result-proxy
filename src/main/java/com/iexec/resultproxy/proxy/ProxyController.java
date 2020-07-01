@@ -78,7 +78,7 @@ public class ProxyController {
         return ResponseEntity.ok(jwtString);
     }
 
-    @PostMapping("/results")
+    @PostMapping("/")
     public ResponseEntity<String> addResult(@RequestHeader("Authorization") String token,
                                             @RequestBody ResultModel model) {
 

@@ -84,46 +84,7 @@ public class ProxyService {
         return ipfsResultService.addResult(result, data);
     }
 
-    public boolean isPublicResult(String chainTaskId) {
-        return iexecHubService.isPublicResult(chainTaskId, 0);
-    }
-
     Optional<byte[]> getResult(String chainTaskId) throws IOException {
         return ipfsResultService.getResult(chainTaskId);
-    }
-
-    /*
-     * TODO 1:  Use an iexecHubService loaded with ResultRepo credentials
-     * TODO 2:  Make possible to call this iexecHubService with a 'chainId' at runtime
-     */
-    boolean isOwnerOfResult(Integer chainId, String chainTaskId, String downloaderAddress) {
-        Optional<TaskDescription> oTask = iexecHubService.getTaskDescriptionFromChain(chainTaskId);
-
-        if (oTask.isEmpty()){
-            log.error("Failed to getTaskDescriptionFromChain for isOwnerOfResult() method [chainTaskId:{}, downloaderAddress:{}]",
-                    chainTaskId, downloaderAddress);
-            return false;
-        }
-
-        TaskDescription task = oTask.get();
-
-        downloaderAddress = downloaderAddress.toLowerCase();
-
-        if (task.isTeeTask()){//Push TEE result with beneficiary credentials not implemented yet, so we check the requester
-            if (downloaderAddress.equalsIgnoreCase(task.getRequester())) {
-                return true;
-            }
-            log.error("Set requester doesn't match downloaderAddress [chainTaskId:{}, downloaderAddress:{}, " +
-                    "requester:{}]", chainTaskId, downloaderAddress, task.getRequester());
-            return false;
-        }
-
-        if (downloaderAddress.equalsIgnoreCase(task.getBeneficiary())) {
-            return true;
-        }
-
-        log.error("Set beneficiary doesn't match downloaderAddress [chainTaskId:{}, downloaderAddress:{}, " +
-                "beneficiary:{}]", chainTaskId, downloaderAddress, task.getBeneficiary());
-        return false;
     }
 }

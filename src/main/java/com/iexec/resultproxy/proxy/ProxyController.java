@@ -151,13 +151,6 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        String walletAddress = jwtService.getWalletAddressFromJwtString(token);
-        boolean isPublicResult = proxyService.isPublicResult(chainTaskId);
-        boolean isOwnerOfResult = proxyService.isOwnerOfResult(chainId, chainTaskId, walletAddress);
-        if (!isOwnerOfResult && !isPublicResult) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();            
-        }
-
         Optional<byte[]> zip = proxyService.getResult(chainTaskId);
         if (!zip.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();

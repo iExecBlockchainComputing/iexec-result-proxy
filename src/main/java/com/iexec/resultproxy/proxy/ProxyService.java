@@ -9,7 +9,6 @@ import com.iexec.common.chain.ChainTaskStatus;
 import com.iexec.common.task.TaskDescription;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
-import com.iexec.resultproxy.mongo.MongoResultService;
 import com.iexec.resultproxy.result.Result;
 
 import org.springframework.stereotype.Service;
@@ -25,14 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ProxyService {
 
     private final IexecHubService iexecHubService;
-    private final MongoResultService mongoResultService;
     private final IpfsResultService ipfsResultService;
 
     public ProxyService(IexecHubService iexecHubService,
-                              MongoResultService mongoResultService,
                               IpfsResultService ipfsResultService) {
         this.iexecHubService = iexecHubService;
-        this.mongoResultService = mongoResultService;
         this.ipfsResultService = ipfsResultService;
     }
 
@@ -78,29 +74,14 @@ public class ProxyService {
     }
 
     boolean isResultFound(String chainTaskId) {
-        if (isPublicResult(chainTaskId)) {
-            return ipfsResultService.doesResultExist(chainTaskId);
-            /*
-             * We should probably not check if result exists when IPFS (timeout issues)(?)
-             * */
-        }
-        return mongoResultService.doesResultExist(chainTaskId);
+        return ipfsResultService.doesResultExist(chainTaskId);
     }
 
     String addResult(Result result, byte[] data) {
         if (result == null || result.getChainTaskId() == null) {
             return "";
         }
-
-        if (iexecHubService.isTeeTask(result.getChainTaskId())){
-            return ipfsResultService.addResult(result, data);
-        }
-
-        if (iexecHubService.isPublicResult(result.getChainTaskId(), 0)) {
-            return ipfsResultService.addResult(result, data);
-        } else {
-            return mongoResultService.addResult(result, data);
-        }
+        return ipfsResultService.addResult(result, data);
     }
 
     public boolean isPublicResult(String chainTaskId) {
@@ -108,13 +89,6 @@ public class ProxyService {
     }
 
     Optional<byte[]> getResult(String chainTaskId) throws IOException {
-        if (iexecHubService.isTeeTask(chainTaskId)){
-            return ipfsResultService.getResult(chainTaskId);
-        }
-
-        if (!isPublicResult(chainTaskId)) {
-            return mongoResultService.getResult(chainTaskId);
-        }
         return ipfsResultService.getResult(chainTaskId);
     }
 

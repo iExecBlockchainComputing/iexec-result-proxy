@@ -9,7 +9,6 @@ import com.iexec.common.chain.ChainTaskStatus;
 import com.iexec.common.task.TaskDescription;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
-import com.iexec.resultproxy.mongo.MongoResultService;
 import com.iexec.resultproxy.result.Result;
 
 import org.springframework.stereotype.Service;
@@ -25,14 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ProxyService {
 
     private final IexecHubService iexecHubService;
-    private final MongoResultService mongoResultService;
     private final IpfsResultService ipfsResultService;
 
     public ProxyService(IexecHubService iexecHubService,
-                              MongoResultService mongoResultService,
                               IpfsResultService ipfsResultService) {
         this.iexecHubService = iexecHubService;
-        this.mongoResultService = mongoResultService;
         this.ipfsResultService = ipfsResultService;
     }
 
@@ -78,78 +74,17 @@ public class ProxyService {
     }
 
     boolean isResultFound(String chainTaskId) {
-        if (isPublicResult(chainTaskId)) {
-            return ipfsResultService.doesResultExist(chainTaskId);
-            /*
-             * We should probably not check if result exists when IPFS (timeout issues)(?)
-             * */
-        }
-        return mongoResultService.doesResultExist(chainTaskId);
+        return ipfsResultService.doesResultExist(chainTaskId);
     }
 
     String addResult(Result result, byte[] data) {
         if (result == null || result.getChainTaskId() == null) {
             return "";
         }
-
-        if (iexecHubService.isTeeTask(result.getChainTaskId())){
-            return ipfsResultService.addResult(result, data);
-        }
-
-        if (iexecHubService.isPublicResult(result.getChainTaskId(), 0)) {
-            return ipfsResultService.addResult(result, data);
-        } else {
-            return mongoResultService.addResult(result, data);
-        }
-    }
-
-    public boolean isPublicResult(String chainTaskId) {
-        return iexecHubService.isPublicResult(chainTaskId, 0);
+        return ipfsResultService.addResult(result, data);
     }
 
     Optional<byte[]> getResult(String chainTaskId) throws IOException {
-        if (iexecHubService.isTeeTask(chainTaskId)){
-            return ipfsResultService.getResult(chainTaskId);
-        }
-
-        if (!isPublicResult(chainTaskId)) {
-            return mongoResultService.getResult(chainTaskId);
-        }
         return ipfsResultService.getResult(chainTaskId);
-    }
-
-    /*
-     * TODO 1:  Use an iexecHubService loaded with ResultRepo credentials
-     * TODO 2:  Make possible to call this iexecHubService with a 'chainId' at runtime
-     */
-    boolean isOwnerOfResult(Integer chainId, String chainTaskId, String downloaderAddress) {
-        Optional<TaskDescription> oTask = iexecHubService.getTaskDescriptionFromChain(chainTaskId);
-
-        if (oTask.isEmpty()){
-            log.error("Failed to getTaskDescriptionFromChain for isOwnerOfResult() method [chainTaskId:{}, downloaderAddress:{}]",
-                    chainTaskId, downloaderAddress);
-            return false;
-        }
-
-        TaskDescription task = oTask.get();
-
-        downloaderAddress = downloaderAddress.toLowerCase();
-
-        if (task.isTeeTask()){//Push TEE result with beneficiary credentials not implemented yet, so we check the requester
-            if (downloaderAddress.equalsIgnoreCase(task.getRequester())) {
-                return true;
-            }
-            log.error("Set requester doesn't match downloaderAddress [chainTaskId:{}, downloaderAddress:{}, " +
-                    "requester:{}]", chainTaskId, downloaderAddress, task.getRequester());
-            return false;
-        }
-
-        if (downloaderAddress.equalsIgnoreCase(task.getBeneficiary())) {
-            return true;
-        }
-
-        log.error("Set beneficiary doesn't match downloaderAddress [chainTaskId:{}, downloaderAddress:{}, " +
-                "beneficiary:{}]", chainTaskId, downloaderAddress, task.getBeneficiary());
-        return false;
     }
 }

@@ -34,7 +34,7 @@ configurations {
 
 ext {
     set('springCloudVersion', 'Hoxton.SR3')
-    set('iexecCommonVersion', '4.1.0-SNAPSHOT')
+    set('iexecCommonVersion', '5.0.0-SNAPSHOT')
 }
 
 dependencies {

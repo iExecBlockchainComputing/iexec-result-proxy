@@ -1,10 +1,5 @@
 package com.iexec.resultproxy.proxy;
 
-import static org.springframework.http.ResponseEntity.ok;
-
-import java.io.IOException;
-import java.util.Optional;
-
 import com.iexec.common.result.ResultModel;
 import com.iexec.common.result.eip712.Eip712Challenge;
 import com.iexec.resultproxy.challenge.ChallengeService;
@@ -15,22 +10,18 @@ import com.iexec.resultproxy.jwt.JwtService;
 import com.iexec.resultproxy.result.AbstractResultStorage;
 import com.iexec.resultproxy.result.Result;
 import com.iexec.resultproxy.version.VersionService;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.Optional;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @Slf4j
+@CrossOrigin
 @RestController
 public class ProxyController {
 
@@ -178,10 +169,10 @@ public class ProxyController {
     }
 
     /*
-    *   Retrieves ipfsHash for taskId if required
-    * */
+     *   Retrieves ipfsHash for taskId if required
+     * */
     @GetMapping("/results/{chainTaskId}/ipfshash")
-    public ResponseEntity<String> getIpfsHashForTask(@PathVariable("chainTaskId") String chainTaskId){
+    public ResponseEntity<String> getIpfsHashForTask(@PathVariable("chainTaskId") String chainTaskId) {
         String ipfsHashForTask = ipfsNameService.getIpfsHashForTask(chainTaskId);
         if (ipfsHashForTask.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();

@@ -10,7 +10,7 @@ plugins {
     // id 'com.palantir.graal' version '0.6.0-112-gca0b727'
 }
 
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 group = 'com.iexec.result-proxy'
 sourceCompatibility = 11
 targetCompatibility = 11

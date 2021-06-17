@@ -1,4 +1,4 @@
-version: 6.0.0
+version: 6.1.0-SNAPSHOT
 
 server:
   port: ${IEXEC_RESULT_PROXY_PORT:13200}

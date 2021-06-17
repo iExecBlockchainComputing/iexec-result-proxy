@@ -1,14 +1,14 @@
-version: 1.0.0
+version: 6.0.0
 
 server:
-  port: ${IEXEC_RESULT_PROXY_PORT:18089}
+  port: ${IEXEC_RESULT_PROXY_PORT:13200}
 
 spring:
   data:
     mongodb:
       database: iexec
       host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
+      port: ${MONGO_PORT:13202}
 
 chain:
     id: ${IEXEC_CHAIN_ID:17}

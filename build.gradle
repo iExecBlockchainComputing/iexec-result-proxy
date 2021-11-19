@@ -29,7 +29,6 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    deployerJars
 }
 
 ext {
@@ -73,9 +72,6 @@ dependencies {
 
     // expiring map
     implementation 'net.jodah:expiringmap:0.5.8'
-
-    // package cloud
-    deployerJars 'io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6'
 }
 
 dependencyManagement {
@@ -154,7 +150,7 @@ publishing {
 publish.enabled = canUploadArchives
 
 // ######################
-// #	  docker		#
+// #	  docker        #
 // ######################
 
 // build, tag & push image

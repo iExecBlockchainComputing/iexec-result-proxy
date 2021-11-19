@@ -38,7 +38,6 @@ ext {
 dependencies {
     // iexec
     implementation "com.iexec.common:iexec-common:${iexecCommonVersion}"
-    // implementation files("../iexec-common/build/libs/iexec-common-${iexecCommonVersion}.jar")
 
     // Web3j issues, see core build.gradle
     implementation 'com.squareup.okhttp3:okhttp:4.3.1'

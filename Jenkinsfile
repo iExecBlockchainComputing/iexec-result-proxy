@@ -36,9 +36,10 @@ pipeline {
 
         stage('Build/Upload Docker image') {
             when {
-                anyOf{
+                anyOf {
                     branch 'master'
                     branch 'develop'
+                    branch 'feature/*'
                 }
             }
             steps {

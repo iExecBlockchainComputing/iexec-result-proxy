@@ -6,8 +6,6 @@ plugins {
     id 'jacoco'
     id 'org.sonarqube' version '3.3'
     id 'maven-publish'
-    id 'com.palantir.docker' version '0.25.0'
-    // id 'com.palantir.graal' version '0.6.0-112-gca0b727'
 }
 
 group = 'com.iexec.result-proxy'
@@ -101,18 +99,18 @@ tasks.sonarqube.dependsOn tasks.jacocoTestReport
 // #     build meta     #
 // ######################
 
-def gitBranch = 'git name-rev --name-only HEAD'.execute().text.trim()
+def gitBranch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+def gitShortCommit = 'git rev-parse --short=8 HEAD'.execute().text.trim()
 def isMasterBranch = gitBranch == 'master'
 def isDevelopBranch = gitBranch == 'develop'
-def isSnapshotVersion = project.version.contains('SNAPSHOT')
+def isSnapshotVersion = project.version.endsWith('-SNAPSHOT')
 
 def nexusUser = project.hasProperty('nexusUser') ? project.getProperty('nexusUser') : ''
 def nexusPassword = project.hasProperty('nexusPassword') ? project.getProperty('nexusPassword') : ''
 def hasNexusProperties = !nexusUser.isEmpty() && !nexusPassword.isEmpty()
 
-def canUploadArchives = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
-def canPushDockerImage = (isMasterBranch || isDevelopBranch ) && hasNexusProperties
-def canBuildDockerImage = isMasterBranch || isDevelopBranch || project.hasProperty('forceDockerBuild')
+def canUploadArchives  = (isMasterBranch || isDevelopBranch) && hasNexusProperties
+def canPushDockerImage = (isMasterBranch || isDevelopBranch) && hasNexusProperties
 
 // ######################
 // #   create version   #
@@ -158,76 +156,36 @@ publishing {
 
 publish.enabled = canUploadArchives
 
-// ######################
-// #	  docker        #
-// ######################
+String imageName   = 'nexus.iex.ec/iexec-result-proxy'
 
-// build, tag & push image
-// ./gradlew docker dockerTagDev dockerTagsPush
+ext.bootJarPath = relativePath(tasks.bootJar.outputs.files.singleFile)
+ext.ociImageNameFull = ""
 
-def dockerImageBaseName = 'nexus.iex.ec/iexec-result-proxy'
-def gitShortCommit = 'git rev-parse --short HEAD'.execute().text.trim()
-def dockerImageTag = isSnapshotVersion ? "${version}-${gitShortCommit}" : version
-
-docker {
-    name 					"${dockerImageBaseName}:${dockerImageTag}"
-    tag 'FullTag', 			"${dockerImageBaseName}:${dockerImageTag}"
-    tag 'ShortCommitTag',	"${dockerImageBaseName}:${gitShortCommit}"
-    tag 'Dev',				"${dockerImageBaseName}:dev"
-    dockerfile file('Dockerfile')
-    files "build/libs/iexec-result-proxy-${project.version}.jar"
-    buildArgs([BUILD_VERSION: project.version])
+if (gitBranch.equals('master') || gitBranch.startsWith('release/') || gitBranch.startsWith('hotfix/')) {
+    ext.ociImageNameFull = imageName + ':' + version
+}
+if (gitBranch.equals('develop')) {
+    ext.ociImageNameFull = imageName + ':dev-' + gitShortCommit
+}
+if (gitBranch.startsWith('feature/') || gitBranch.startsWith('bugfix/')) {
+    ext.ociImageNameFull = imageName + ':feature-' + gitShortCommit
 }
 
-task buildImage {
-    enabled = canBuildDockerImage
-    dependsOn tasks.docker
+ext.ociImageNameDev         = imageName + ':dev'
+ext.ociImageNameShortCommit = imageName + ':' + gitShortCommit
+
+task buildImage(type: Exec) {
+    dependsOn tasks.bootJar
+    description 'Build OCI image'
+    commandLine("sh", "-c", "docker build --build-arg spring_boot_jar=$bootJarPath -t $ociImageNameFull ."
+            + " && docker tag $ociImageNameFull $ociImageNameDev")
 }
 
-// docker build
-tasks.docker {
-    enabled = canBuildDockerImage
-}
-
-task pushImage {
-    enabled = canPushDockerImage
-    dependsOn dockerTagsPush
-}
-
-// docker login
-task dockerLogin(type: Exec) {
-    enabled = canPushDockerImage
-    commandLine('sh', '-c', "docker login -u ${nexusUser} -p ${nexusPassword} nexus.iex.ec")
-}
-
-// docker logout
-task dockerLogout(type: Exec) {
-    enabled = canPushDockerImage
-    commandLine('sh', '-c', 'docker logout nexus.iex.ec')
-}
-
-// docker push
-dockerTagsPush {
-    enabled = canPushDockerImage
-    // shouldRunAfter tasks.docker
-    dependsOn dockerLogin
-    finalizedBy dockerLogout
-}
-
-afterEvaluate {
-    // don't tag if image is not build
-    for(t in tasks.findAll{e -> e.name.contains("dockerTag")}) {
-        t.enabled = canBuildDockerImage
-    }
-    // don't push tags if canPushDockerImage == false
-    // (dockerPushFullTag, dockerPushShortCommitTag)
-    def dockerPushTasks = tasks.findAll{t -> t.name.contains("dockerPush")}
-    for(t in dockerPushTasks) {
-        t.enabled = canPushDockerImage
-    }
-    // don't push dev tag
-    dockerPushDev.enabled = false
-
-    // create :dev tag after image build
-    buildImage.dependsOn dockerTagDev
+task pushImage(type: Exec) {
+    dependsOn tasks.buildImage
+    commandLine("sh", "-c", "docker login -u $nexusUser -p $nexusPassword nexus.iex.ec"
+            + " && docker tag  $ociImageNameFull $ociImageNameShortCommit"
+            + " && docker push $ociImageNameShortCommit"
+            + " && docker push $ociImageNameFull"
+            + " && docker logout")
 }

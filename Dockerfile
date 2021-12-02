@@ -1,10 +1,10 @@
 FROM openjdk:11.0.3-jre-slim
 
-ARG BUILD_VERSION
+ARG spring_boot_jar
 
-# the jar file is copied from "build/docker/"
-# by the gradle plugin "docker"
-COPY iexec-result-proxy-${BUILD_VERSION}.jar iexec-result-proxy.jar
+RUN test -n "$spring_boot_jar"
+
+COPY $spring_boot_jar iexec-result-proxy.jar
 
 # For Spring-Boot project, use the entrypoint
 # below to reduce Tomcat startup time.

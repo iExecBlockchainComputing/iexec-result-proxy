@@ -83,6 +83,8 @@ test {
     useJUnitPlatform()
 }
 
+task itest
+
 // the test coverage report is
 // created just before the build
 jacoco {

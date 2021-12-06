@@ -165,6 +165,8 @@ publish.enabled = canUploadArchives
 // build, tag & push image
 // ./gradlew docker dockerTagDev dockerTagsPush
 
+ext.bootJarPath = relativePath(tasks.bootJar.outputs.files.singleFile)
+
 def dockerImageBaseName = 'nexus.iex.ec/iexec-result-proxy'
 def gitShortCommit = 'git rev-parse --short HEAD'.execute().text.trim()
 def dockerImageTag = isSnapshotVersion ? "${version}-${gitShortCommit}" : version

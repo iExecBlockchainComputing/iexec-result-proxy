@@ -81,7 +81,10 @@ test {
     useJUnitPlatform()
 }
 
-task itest
+task itest {
+    group 'Verification'
+    description 'Runs the integration tests.'
+}
 
 // the test coverage report is
 // created just before the build

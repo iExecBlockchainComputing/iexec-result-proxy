@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.iexec.common.result.eip712.Eip712Challenge;
 import com.iexec.common.result.eip712.Eip712ChallengeUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,11 @@ import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 
 @Service
+@Slf4j
 public class Eip712ChallengeService {
 
     private int challengeId;
-    private ExpiringMap<Integer, String> challengeMap;
+    private final ExpiringMap<Integer, String> challengeMap;
 
     Eip712ChallengeService() {
         this.challengeMap = ExpiringMap.builder()
@@ -41,15 +43,21 @@ public class Eip712ChallengeService {
 
     private void saveEip712ChallengeString(String eip712ChallengeString) {
         challengeId++;
-        challengeMap.put(challengeId, eip712ChallengeString);
+        synchronized (challengeMap) {
+            challengeMap.put(challengeId, eip712ChallengeString);
+        }
     }
 
     boolean containsEip712ChallengeString(String eip712ChallengeString) {
-        return challengeMap.containsValue(eip712ChallengeString);
+        synchronized (challengeMap) {
+            return challengeMap.containsValue(eip712ChallengeString);
+        }
     }
 
     void invalidateEip712ChallengeString(String eip712ChallengeString) {
-        challengeMap.entrySet().removeIf(entry -> entry.getValue().equals(eip712ChallengeString));
+        synchronized (challengeMap) {
+            challengeMap.entrySet().removeIf(entry -> entry.getValue().equals(eip712ChallengeString));
+        }
     }
 
 }

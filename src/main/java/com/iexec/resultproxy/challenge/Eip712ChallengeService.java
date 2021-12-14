@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.iexec.common.result.eip712.Eip712Challenge;
 import com.iexec.common.result.eip712.Eip712ChallengeUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
@@ -13,17 +14,24 @@ import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 
 @Service
+@Slf4j
 public class Eip712ChallengeService {
 
-    private int challengeId;
-    private ExpiringMap<Integer, String> challengeMap;
+    /**
+     * Contains all valid challenges.
+     * They expire after a certain amount of time.
+     * Once a challenge has been used, it becomes invalid.
+     * <br>
+     * This could technically be a simple Collection of {@code eip712Challenge},
+     * but there's currently no out-of-the-box Collection with expiration settings.
+     */
+    private final ExpiringMap<String, String> challenges;
 
     Eip712ChallengeService() {
-        this.challengeMap = ExpiringMap.builder()
+        this.challenges = ExpiringMap.builder()
                 .expiration(60, TimeUnit.MINUTES)
                 .expirationPolicy(ExpirationPolicy.CREATED)
                 .build();
-        challengeId = 0;
     }
 
     private static String generateRandomToken() {
@@ -39,17 +47,25 @@ public class Eip712ChallengeService {
         return eip712Challenge;
     }
 
+    /**
+     * This operation is thread-safe.
+     */
     private void saveEip712ChallengeString(String eip712ChallengeString) {
-        challengeId++;
-        challengeMap.put(challengeId, eip712ChallengeString);
+        challenges.put(eip712ChallengeString, null);
     }
 
+    /**
+     * This operation is thread-safe.
+     */
     boolean containsEip712ChallengeString(String eip712ChallengeString) {
-        return challengeMap.containsValue(eip712ChallengeString);
+        return challenges.containsKey(eip712ChallengeString);
     }
 
+    /**
+     * This operation is thread-safe.
+     */
     void invalidateEip712ChallengeString(String eip712ChallengeString) {
-        challengeMap.entrySet().removeIf(entry -> entry.getValue().equals(eip712ChallengeString));
+        challenges.remove(eip712ChallengeString);
     }
 
 }

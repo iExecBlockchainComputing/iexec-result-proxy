@@ -47,14 +47,23 @@ public class Eip712ChallengeService {
         return eip712Challenge;
     }
 
+    /**
+     * This operation is thread-safe.
+     */
     private void saveEip712ChallengeString(String eip712ChallengeString) {
         challenges.put(eip712ChallengeString, eip712ChallengeString);
     }
 
+    /**
+     * This operation is thread-safe.
+     */
     boolean containsEip712ChallengeString(String eip712ChallengeString) {
         return challenges.containsKey(eip712ChallengeString);
     }
 
+    /**
+     * This operation is thread-safe.
+     */
     void invalidateEip712ChallengeString(String eip712ChallengeString) {
         challenges.remove(eip712ChallengeString);
     }

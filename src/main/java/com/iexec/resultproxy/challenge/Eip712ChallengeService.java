@@ -48,7 +48,7 @@ public class Eip712ChallengeService {
     }
 
     private void saveEip712ChallengeString(String eip712ChallengeString) {
-        challenges.put(eip712ChallengeString, eip712ChallengeString);
+        challenges.put(eip712ChallengeString, null);
     }
 
     boolean containsEip712ChallengeString(String eip712ChallengeString) {

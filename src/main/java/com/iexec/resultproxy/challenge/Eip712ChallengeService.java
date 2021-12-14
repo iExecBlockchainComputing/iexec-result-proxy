@@ -17,15 +17,21 @@ import net.jodah.expiringmap.ExpiringMap;
 @Slf4j
 public class Eip712ChallengeService {
 
-    private int challengeId;
-    private final ExpiringMap<Integer, String> challengeMap;
+    /**
+     * Contains all valid challenges.
+     * They expire after a certain amount of time.
+     * Once a challenge has been used, it becomes invalid.
+     * <br>
+     * This could technically be a simple Collection of {@code eip712Challenge},
+     * but there's currently no out-of-the-box Collection with expiration settings.
+     */
+    private final ExpiringMap<String, String> challenges;
 
     Eip712ChallengeService() {
-        this.challengeMap = ExpiringMap.builder()
+        this.challenges = ExpiringMap.builder()
                 .expiration(60, TimeUnit.MINUTES)
                 .expirationPolicy(ExpirationPolicy.CREATED)
                 .build();
-        challengeId = 0;
     }
 
     private static String generateRandomToken() {
@@ -42,22 +48,15 @@ public class Eip712ChallengeService {
     }
 
     private void saveEip712ChallengeString(String eip712ChallengeString) {
-        challengeId++;
-        synchronized (challengeMap) {
-            challengeMap.put(challengeId, eip712ChallengeString);
-        }
+        challenges.put(eip712ChallengeString, eip712ChallengeString);
     }
 
     boolean containsEip712ChallengeString(String eip712ChallengeString) {
-        synchronized (challengeMap) {
-            return challengeMap.containsValue(eip712ChallengeString);
-        }
+        return challenges.containsKey(eip712ChallengeString);
     }
 
     void invalidateEip712ChallengeString(String eip712ChallengeString) {
-        synchronized (challengeMap) {
-            challengeMap.entrySet().removeIf(entry -> entry.getValue().equals(eip712ChallengeString));
-        }
+        challenges.remove(eip712ChallengeString);
     }
 
 }

@@ -27,6 +27,10 @@ public class JwtService {
 
     public String getOrCreateJwt(SignedChallenge signedChallenge) {
         String jwtString;
+
+        // Synchronizing the following is mandatory:
+        // we need to ensure there won't be 2 different JWT issued for the same wallet.
+        // This is ensured by making synchronous the get-and-save operation.
         synchronized (locks.computeIfAbsent(signedChallenge.getWalletAddress(), key -> new Object())) {
             Optional<Jwt> oExistingJwt = findByWalletAddress(signedChallenge.getWalletAddress());
 

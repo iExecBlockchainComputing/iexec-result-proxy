@@ -1,4 +1,4 @@
-version: 7.0.1-NEXT-SNASPHOT
+version: 7.0.1-NEXT-SNAPSHOT
 
 server:
   port: ${IEXEC_RESULT_PROXY_PORT:13200}

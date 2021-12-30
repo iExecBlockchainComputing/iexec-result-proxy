@@ -83,7 +83,6 @@ public class ProxyController {
         // TODO check if the result to be added is the correct result for that task
 
         if (!canUploadResult) {
-            log.warn("[DEBUG] Unauthorized to upload result [walletAddress: {}, chainTaskId: {}]", walletAddress, model.getChainTaskId());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
@@ -97,7 +96,6 @@ public class ProxyController {
                 model.getZip());
 
         if (resultLink.isEmpty()) {
-            log.warn("[DEBUG] Can't upload empty result [walletAddress: {}, chainTaskId: {}]", walletAddress, model.getChainTaskId());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).build();
         }
 

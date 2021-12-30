@@ -9,6 +9,7 @@ spring:
       database: iexec
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:13202}
+      auto-index-creation: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher # see https://stackoverflow.com/a/70037507/7421571

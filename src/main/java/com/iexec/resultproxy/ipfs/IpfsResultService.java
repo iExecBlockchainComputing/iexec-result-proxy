@@ -1,14 +1,15 @@
 package com.iexec.resultproxy.ipfs;
 
-import java.util.Optional;
-
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.result.AbstractResultStorage;
 import com.iexec.resultproxy.result.Result;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
+@Slf4j
 public class IpfsResultService extends AbstractResultStorage {
 
 
@@ -41,6 +42,7 @@ public class IpfsResultService extends AbstractResultStorage {
     @Override
     public Optional<byte[]> getResult(String chainTaskId) {
         String ipfsHash = ipfsNameService.getIpfsHashForTask(chainTaskId);
+        log.info("[DEBUG] Found IPFS hash: {}", ipfsHash);
         if (!ipfsHash.isEmpty()) {
             return ipfsService.get(ipfsHash);
         }

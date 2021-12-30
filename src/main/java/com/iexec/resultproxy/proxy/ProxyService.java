@@ -1,8 +1,5 @@
 package com.iexec.resultproxy.proxy;
 
-import java.io.IOException;
-import java.util.Optional;
-
 import com.iexec.common.chain.ChainContributionStatus;
 import com.iexec.common.chain.ChainTask;
 import com.iexec.common.chain.ChainTaskStatus;
@@ -10,10 +7,10 @@ import com.iexec.common.task.TaskDescription;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
 import com.iexec.resultproxy.result.Result;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -84,7 +81,8 @@ public class ProxyService {
         return ipfsResultService.addResult(result, data);
     }
 
-    Optional<byte[]> getResult(String chainTaskId) throws IOException {
+    Optional<byte[]> getResult(String chainTaskId) {
+        log.info("[DEBUG] Getting result for {}", chainTaskId);
         return ipfsResultService.getResult(chainTaskId);
     }
 }

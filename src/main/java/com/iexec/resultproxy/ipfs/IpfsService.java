@@ -26,6 +26,7 @@ public class IpfsService {
         } catch (Exception e) {
             log.error("Exception when inializing IPFS [exception:{}]", e.getMessage());
             log.warn("Shutting down the service since IPFS is necessary");
+            e.printStackTrace();
             System.exit(1);
         }
     }

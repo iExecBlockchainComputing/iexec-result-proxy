@@ -68,7 +68,7 @@ public class IpfsService implements SmartLifecycle {
 
     @Recover
     public void start(RuntimeException exception) {
-        log.error("Exception when initializing IPFS [exception:{}]", exception.getMessage());
+        log.error("Exception when initializing IPFS connection", exception);
         log.warn("Shutting down the service since IPFS is necessary");
         throw exception;
     }

@@ -7,7 +7,6 @@ import io.ipfs.api.NamedStreamable;
 import io.ipfs.multihash.Multihash;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -61,19 +60,16 @@ public class IpfsService implements SmartLifecycle {
     }
 
     @Override
-    @Retryable(maxAttempts = 10,
-            backoff = @Backoff(
-                    delay = 1000
-            ))
+    @Retryable(maxAttempts = 10)
     public void start() {
         this.ipfs = new IPFS(multiAddress);
     }
 
     @Recover
-    public void start(Throwable t) {
-        log.error("Exception when initializing IPFS [exception:{}]", t.getMessage());
-        log.warn("Shutting down the service since IPFS is necessary");
-        System.exit(1);
+    public void start(RuntimeException exception) {
+        log.error("Exception when initializing IPFS connection", exception);
+        log.warn("Shutting down service since IPFS is necessary");
+        throw exception;
     }
 
     @Override

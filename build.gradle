@@ -12,6 +12,15 @@ group = 'com.iexec.result-proxy'
 sourceCompatibility = 11
 targetCompatibility = 11
 
+ext {
+    springCloudVersion = 'Hoxton.SR3'
+    gitBranch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+}
+
+if (gitBranch != 'main' && gitBranch != 'master' && ! (gitBranch ==~ '(release|hotfix|support)/.*')) {
+    version += '-NEXT-SNAPSHOT'
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -27,10 +36,6 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-}
-
-ext {
-    set('springCloudVersion', 'Hoxton.SR3')
 }
 
 dependencies {

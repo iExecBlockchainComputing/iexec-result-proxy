@@ -11,7 +11,6 @@ import org.springframework.retry.annotation.EnableRetry;
 
 
 @SpringBootApplication
-@Configuration
 @EnableRetry
 public class Application implements CommandLineRunner {
 

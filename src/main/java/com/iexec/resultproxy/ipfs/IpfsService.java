@@ -6,6 +6,9 @@ import io.ipfs.api.MerkleNode;
 import io.ipfs.api.NamedStreamable;
 import io.ipfs.multihash.Multihash;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,21 +16,15 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class IpfsService {
+public class IpfsService implements SmartLifecycle {
 
     private IPFS ipfs;
+    private final String multiAddress;
 
     public IpfsService(IpfsConfig ipfsConfig) {
         String ipfsHost = ipfsConfig.getHost();
         String ipfsNodeIp = NetworkUtils.isIPAddress(ipfsHost) ? ipfsHost : NetworkUtils.convertHostToIp(ipfsHost);
-        String multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + ipfsConfig.getPort();
-        try {
-            ipfs = new IPFS(multiAddress);
-        } catch (Exception e) {
-            log.error("Exception when inializing IPFS [exception:{}]", e.getMessage());
-            log.warn("Shutting down the service since IPFS is necessary");
-            System.exit(1);
-        }
+        this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + ipfsConfig.getPort();
     }
 
     public Optional<byte[]> get(String ipfsHash) {
@@ -62,4 +59,26 @@ public class IpfsService {
         }
     }
 
+    @Override
+    @Retryable(maxAttempts = 10)
+    public void start() {
+        this.ipfs = new IPFS(multiAddress);
+    }
+
+    @Recover
+    public void start(RuntimeException exception) {
+        log.error("Exception when initializing IPFS connection", exception);
+        log.warn("Shutting down service since IPFS is necessary");
+        throw exception;
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public boolean isRunning() {
+        return ipfs != null;
+    }
 }

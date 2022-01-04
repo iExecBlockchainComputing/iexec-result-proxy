@@ -61,19 +61,16 @@ public class IpfsService implements SmartLifecycle {
     }
 
     @Override
-    @Retryable(maxAttempts = 10,
-            backoff = @Backoff(
-                    delay = 1000
-            ))
+    @Retryable(maxAttempts = 10)
     public void start() {
         this.ipfs = new IPFS(multiAddress);
     }
 
     @Recover
-    public void start(Throwable t) {
-        log.error("Exception when initializing IPFS [exception:{}]", t.getMessage());
+    public void start(RuntimeException exception) {
+        log.error("Exception when initializing IPFS [exception:{}]", exception.getMessage());
         log.warn("Shutting down the service since IPFS is necessary");
-        System.exit(1);
+        throw exception;
     }
 
     @Override

@@ -110,21 +110,6 @@ jacocoTestReport {
 tasks.test.finalizedBy    tasks.jacocoTestReport
 tasks.sonarqube.dependsOn tasks.jacocoTestReport
 
-// ######################
-// #   create version   #
-// ######################
-
-task createVersion (type: Exec) {
-    description 'Set version in application.yml'
-    commandLine('sh', '-c', "sed -i 's/^version.*/version: ${version}/' src/main/resources/application.yml")
-}
-
-compileJava.dependsOn createVersion
-
-// ######################
-// #   upload archive   #
-// ######################
-
 publishing {
     publications {
         maven(MavenPublication) {

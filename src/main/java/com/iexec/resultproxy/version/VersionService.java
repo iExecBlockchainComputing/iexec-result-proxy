@@ -2,15 +2,17 @@ package com.iexec.resultproxy.version;
 
 import com.iexec.common.utils.VersionUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VersionService {
 
-    @Autowired
-    BuildProperties buildProperties;
+    private final BuildProperties buildProperties;
+
+    public VersionService(BuildProperties buildProperties) {
+        this.buildProperties = buildProperties;
+    }
 
     public String getVersion() {
         return buildProperties.getVersion();

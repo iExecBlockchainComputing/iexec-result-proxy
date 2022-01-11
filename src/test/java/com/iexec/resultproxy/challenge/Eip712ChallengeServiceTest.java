@@ -12,6 +12,6 @@ public class Eip712ChallengeServiceTest {
 
     @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 }

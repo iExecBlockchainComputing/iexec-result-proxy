@@ -28,7 +28,7 @@ public class IpfsResultServiceTest {
 
     @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         chainTaskId = "0x1";
     }
 

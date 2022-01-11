@@ -30,7 +30,7 @@ public class ProxyServiceTest {
 
     @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         chainTaskId = "0x1";
         walletAddress = "0x123abc";
     }

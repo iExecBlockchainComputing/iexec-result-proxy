@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Service
-@Slf4j
 /**
  * Service class to manage all the results. If the result is public, it will be stored on IPFS. If there is a dedicated
  * beneficiary, the result will be pushed to mongo.
  */
+@Service
+@Slf4j
 public class ProxyService {
 
     private final IexecHubService iexecHubService;

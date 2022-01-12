@@ -50,11 +50,7 @@ public class JwtService {
 
         Optional<Jwt> oExistingJwt = findByWalletAddress(claimedWalletAddress);
 
-        if (!oExistingJwt.isPresent()) {
-            return false;
-        }
-
-        return jwtString.equals(oExistingJwt.get().getJwtString());
+        return oExistingJwt.isPresent() && jwtString.equals(oExistingJwt.get().getJwtString());
     }
 
     public String getWalletAddressFromJwtString(String jwtString) {

@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 
-public class IpfsResultServiceTest {
+class IpfsResultServiceTest {
 
     @Mock
     private IexecHubService iexecHubService;
@@ -27,14 +27,14 @@ public class IpfsResultServiceTest {
     private String chainTaskId;
 
     @BeforeEach
-    public void init() {
+    void init() {
         MockitoAnnotations.openMocks(this);
         chainTaskId = "0x1";
     }
 
     /*
     @Test
-    public void shouldGetIpfsHashFromChainTaskId() {
+    void shouldGetIpfsHashFromChainTaskId() {
         String resultLink = "/ipfs/QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA";
         when(iexecHubService.getTaskResults(chainTaskId, 0)).thenReturn(BytesUtils.bytesToString(resultLink.getBytes()));
 
@@ -42,7 +42,7 @@ public class IpfsResultServiceTest {
     }
 
     @Test
-    public void shouldNotGetIpfsHashFromChainTaskIdSinceNoTaskResult() {
+    void shouldNotGetIpfsHashFromChainTaskIdSinceNoTaskResult() {
         String resultLink = "/";
         when(iexecHubService.getTaskResults(chainTaskId, 0)).thenReturn(BytesUtils.bytesToString(resultLink.getBytes()));
 
@@ -50,14 +50,14 @@ public class IpfsResultServiceTest {
     }
 
     @Test
-    public void shouldNotGetIpfsHashFromChainTaskIdSinceNotHexaString() {
+    void shouldNotGetIpfsHashFromChainTaskIdSinceNotHexaString() {
         when(iexecHubService.getTaskResults(chainTaskId, 0)).thenReturn("0xefg");
 
         assertThat(ipfsResultService.getIpfsHashFromChainTaskId(chainTaskId)).isEmpty();
     }
 
     @Test
-    public void shouldNotGetIpfsHashFromChainTaskIdSinceNotIpfsLink() {
+    void shouldNotGetIpfsHashFromChainTaskIdSinceNotIpfsLink() {
         String resultLink = "https://customrepo.com/results/abc";
         when(iexecHubService.getTaskResults(chainTaskId, 0)).thenReturn(BytesUtils.bytesToString(resultLink.getBytes()));
 
@@ -65,7 +65,7 @@ public class IpfsResultServiceTest {
     }
 
     @Test
-    public void shouldNotGetIpfsHashFromChainTaskIdSinceNotIpfsHash() {
+    void shouldNotGetIpfsHashFromChainTaskIdSinceNotIpfsHash() {
         String resultLink = "/ipfs/ipfs/123";
         when(iexecHubService.getTaskResults(chainTaskId, 0)).thenReturn(BytesUtils.bytesToString(resultLink.getBytes()));
 

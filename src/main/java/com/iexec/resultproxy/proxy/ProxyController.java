@@ -124,7 +124,7 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
         Optional<byte[]> zip = proxyService.getResult(chainTaskId);
-        if (!zip.isPresent()) {
+        if (zip.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
         return ResponseEntity.ok()
@@ -143,7 +143,7 @@ public class ProxyController {
         }
 
         Optional<byte[]> zip = proxyService.getResult(chainTaskId);
-        if (!zip.isPresent()) {
+        if (zip.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
 
@@ -159,7 +159,7 @@ public class ProxyController {
     @GetMapping(value = "/results/ipfs/{ipfsHash}", produces = "application/zip")
     public ResponseEntity<byte[]> getResult(@PathVariable("ipfsHash") String ipfsHash) {
         Optional<byte[]> zip = ipfsService.get(ipfsHash);
-        if (!zip.isPresent()) {
+        if (zip.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
         }
         return ResponseEntity.ok()

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 public class JwtService {
-    private final ContextualLockRunner<String> locks = new ContextualLockRunner<>();
+    private final ContextualLockRunner<String> contextualLockRunner = new ContextualLockRunner<>();
 
     private final JwtRepository jwtRepository;
 
@@ -24,7 +24,7 @@ public class JwtService {
         // Synchronizing the following is mandatory:
         // we need to ensure there won't be 2 different JWT issued for the same wallet.
         // This is ensured by making synchronous the get-and-save operation.
-        return locks.applyWithLock(walletAddress, this::getOrCreateJwt);
+        return contextualLockRunner.applyWithLock(walletAddress, this::getOrCreateJwt);
     }
 
     private String getOrCreateJwt(String walletAddress) {

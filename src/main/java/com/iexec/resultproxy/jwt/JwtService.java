@@ -1,6 +1,6 @@
 package com.iexec.resultproxy.jwt;
 
-import com.iexec.common.utils.TargetedLock;
+import com.iexec.common.utils.ContextualLockRunner;
 import com.iexec.resultproxy.challenge.SignedChallenge;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 public class JwtService {
-    private final TargetedLock<String> locks = new TargetedLock<>();
+    private final ContextualLockRunner<String> locks = new ContextualLockRunner<>();
 
     private final JwtRepository jwtRepository;
 

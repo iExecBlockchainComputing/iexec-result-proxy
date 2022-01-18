@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class AuthorizationServiceTest {
+class AuthorizationServiceTest {
 
     @Mock
     private Eip712ChallengeService eip712ChallengeService;
@@ -23,20 +23,20 @@ public class AuthorizationServiceTest {
 
 
     @BeforeEach
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    void init() {
+        MockitoAnnotations.openMocks(this);
         challenge = "0xb7a099c5998bb07a9e30ad6faaa79ddfc70c3475134957de7343ddb13f4c382a";
         challengeSignature = "0x1b0b90d9f17a30d42492c8a2f98a24374600729a98d4e0b663a44ed48b589cab0e445eec300245e590150c7d88340d902c27e0d8673f3257cb8393f647d6c75c1b";
         address = "0xabcd1339Ec7e762e639f4887E2bFe5EE8023E23E";
     }
 
     @Test
-    public void isNotAuthorizedToGetResultSinceNullAuthorization() {
+    void isNotAuthorizedToGetResultSinceNullAuthorization() {
         assertThat(challengeService.isSignedChallengeValid(null)).isFalse();
     }
 
     @Test
-    public void isNotAuthorizedToGetResultSinceNoChallengeInMap() {
+    void isNotAuthorizedToGetResultSinceNoChallengeInMap() {
         when(eip712ChallengeService.containsEip712ChallengeString(challenge)).thenReturn(false);
         SignedChallenge authorization = SignedChallenge.builder()
                 .challenge(challenge)
@@ -47,7 +47,7 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void isNotAuthorizedToGetResultSinceChallengeSignatureIsWrong() {
+    void isNotAuthorizedToGetResultSinceChallengeSignatureIsWrong() {
         when(eip712ChallengeService.containsEip712ChallengeString(challenge)).thenReturn(true);
         SignedChallenge authorization = SignedChallenge.builder()
                 .challenge(challenge)
@@ -58,7 +58,7 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void isNotAuthorizedToGetResultSinceChallengeSignatureIsBadFormat() {
+    void isNotAuthorizedToGetResultSinceChallengeSignatureIsBadFormat() {
         when(eip712ChallengeService.containsEip712ChallengeString(challenge)).thenReturn(true);
         SignedChallenge authorization = SignedChallenge.builder()
                 .challenge(challenge)
@@ -69,7 +69,7 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void isNotAuthorizedToGetResultSinceChallengeSignatureIsBadFormat2() {
+    void isNotAuthorizedToGetResultSinceChallengeSignatureIsBadFormat2() {
         when(eip712ChallengeService.containsEip712ChallengeString(challenge)).thenReturn(true);
         SignedChallenge authorization = SignedChallenge.builder()
                 .challenge(challenge)
@@ -80,19 +80,19 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void shouldNotGetAuthorizationFromTokenSinceNullToken() {
+    void shouldNotGetAuthorizationFromTokenSinceNullToken() {
         assertThat(challengeService.tokenToSignedChallengeObject(null)).isNull();
     }
 
     @Test
-    public void shouldNotGetAuthorizationFromTokenSinceTokenNotValid() {
+    void shouldNotGetAuthorizationFromTokenSinceTokenNotValid() {
         String token = "bad_token";
 
         assertThat(challengeService.tokenToSignedChallengeObject(token)).isNull();
     }
 
     @Test
-    public void shouldGetAuthorizationFromToken() {
+    void shouldGetAuthorizationFromToken() {
         String token = "not_bad_token";
 
         assertThat(challengeService.tokenToSignedChallengeObject(token)).isNotNull();

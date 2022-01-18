@@ -4,36 +4,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;;
+import org.mockito.MockitoAnnotations;
 
 
-public class IpfsServiceTest {
+class IpfsServiceTest {
 
     @BeforeEach
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    void init() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void shouldBeIpfsHash() {
+    void shouldBeIpfsHash() {
         String hash = "QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA";
         assertThat(IpfsService.isIpfsHash(hash)).isTrue();
     }
 
     @Test
-    public void shouldBeIpfsHashSinceWrongLength() {
+    void shouldBeIpfsHashSinceWrongLength() {
         String hash = "QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbU";
         assertThat(IpfsService.isIpfsHash(hash)).isFalse();
     }
 
     @Test
-    public void shouldBeIpfsHashSinceNotIpfsHash() {
+    void shouldBeIpfsHashSinceNotIpfsHash() {
         String hash = "abcd";
         assertThat(IpfsService.isIpfsHash(hash)).isFalse();
     }
 
     @Test
-    public void shouldBeIpfsHashSinceNotIpfsEmpty() {
+    void shouldBeIpfsHashSinceNotIpfsEmpty() {
         String hash = "";
         assertThat(IpfsService.isIpfsHash(hash)).isFalse();
     }

@@ -8,27 +8,29 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'com.iexec.result-proxy'
-sourceCompatibility = 11
-targetCompatibility = 11
-
 ext {
     springCloudVersion = '2021.0.0'
     gitBranch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
 }
 
-if (gitBranch != 'main' && gitBranch != 'master' && ! (gitBranch ==~ '(release|hotfix|support)/.*')) {
-    version += '-NEXT-SNAPSHOT'
-}
+allprojects {
+    group = 'com.iexec.result-proxy'
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url 'https://nexus.iex.ec/repository/maven-public/'
+    if (gitBranch != 'main' && gitBranch != 'master' && !(gitBranch ==~ '(release|hotfix|support)/.*')) {
+        version += '-NEXT-SNAPSHOT'
     }
-    maven {
-        url 'https://jitpack.io'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://nexus.iex.ec/repository/maven-public/'
+        }
+        maven {
+            url 'https://jitpack.io'
+        }
     }
 }
 

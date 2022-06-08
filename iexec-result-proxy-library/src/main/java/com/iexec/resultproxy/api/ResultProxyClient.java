@@ -16,8 +16,8 @@
 
 package com.iexec.resultproxy.api;
 
+import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.result.ResultModel;
-import com.iexec.common.result.eip712.Eip712Challenge;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -32,7 +32,7 @@ import feign.Response;
 public interface ResultProxyClient {
 
     @RequestLine("GET /results/challenge?chainId={chainId}")
-    Eip712Challenge getChallenge(@Param("chainId") int chainId);
+    EIP712Challenge getChallenge(@Param("chainId") int chainId);
 
     @RequestLine("POST /results/login?chainId={chainId}")
     String login(@Param("chainId") int chainId, String token);

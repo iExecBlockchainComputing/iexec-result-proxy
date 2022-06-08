@@ -1,21 +1,20 @@
 package com.iexec.resultproxy.challenge;
 
-import java.security.SecureRandom;
-import java.util.concurrent.TimeUnit;
-
-import com.iexec.common.result.eip712.Eip712Challenge;
-import com.iexec.common.result.eip712.Eip712ChallengeUtils;
-
+import com.iexec.common.chain.eip712.EIP712Domain;
+import com.iexec.common.chain.eip712.entity.Challenge;
+import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import lombok.extern.slf4j.Slf4j;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
+import java.security.SecureRandom;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class Eip712ChallengeService {
+public class EIP712ChallengeService {
 
     /**
      * Contains all valid challenges.
@@ -26,24 +25,26 @@ public class Eip712ChallengeService {
      * but there's currently no out-of-the-box Collection with expiration settings.
      */
     private final ExpiringMap<String, String> challenges;
+    private final SecureRandom secureRandom = new SecureRandom();
 
-    Eip712ChallengeService() {
+    EIP712ChallengeService() {
         this.challenges = ExpiringMap.builder()
                 .expiration(60, TimeUnit.MINUTES)
                 .expirationPolicy(ExpirationPolicy.CREATED)
                 .build();
     }
 
-    private static String generateRandomToken() {
-        SecureRandom secureRandom = new SecureRandom();
+    private String generateRandomToken() {
         byte[] token = new byte[32];
         secureRandom.nextBytes(token);
         return Base64.encodeBase64URLSafeString(token);
     }
 
-    Eip712Challenge generateEip712Challenge(Integer chainId) {
-        Eip712Challenge eip712Challenge = new Eip712Challenge(generateRandomToken(), chainId);
-        this.saveEip712ChallengeString(Eip712ChallengeUtils.getEip712ChallengeString(eip712Challenge));
+    EIP712Challenge generateEip712Challenge(Integer chainId) {
+        final EIP712Domain domain = new EIP712Domain("iExec Core", "1", chainId, null);
+        final Challenge challenge = new Challenge(generateRandomToken());
+        EIP712Challenge eip712Challenge = new EIP712Challenge(domain, challenge);
+        this.saveEip712ChallengeString(eip712Challenge.getHash());
         return eip712Challenge;
     }
 

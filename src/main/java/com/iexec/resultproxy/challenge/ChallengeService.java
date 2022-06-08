@@ -1,6 +1,6 @@
 package com.iexec.resultproxy.challenge;
 
-import com.iexec.common.result.eip712.Eip712Challenge;
+import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.utils.BytesUtils;
 import com.iexec.common.utils.SignatureUtils;
 
@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChallengeService {
 
-    private Eip712ChallengeService eip712ChallengeService;
+    private final EIP712ChallengeService eip712ChallengeService;
 
-    ChallengeService(Eip712ChallengeService challengeService) {
+    ChallengeService(EIP712ChallengeService challengeService) {
         this.eip712ChallengeService = challengeService;
     }
 
-    public Eip712Challenge createChallenge(Integer chainId) {
+    public EIP712Challenge createChallenge(Integer chainId) {
         return eip712ChallengeService.generateEip712Challenge(chainId);
     }
 

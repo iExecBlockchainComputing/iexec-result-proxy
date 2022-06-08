@@ -12,7 +12,7 @@ import org.mockito.MockitoAnnotations;
 class AuthorizationServiceTest {
 
     @Mock
-    private Eip712ChallengeService eip712ChallengeService;
+    private EIP712ChallengeService eip712ChallengeService;
 
     @InjectMocks
     private ChallengeService challengeService;

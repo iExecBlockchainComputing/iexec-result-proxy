@@ -1,7 +1,7 @@
 package com.iexec.resultproxy.jwt;
 
+import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.ContextualLockRunner;
-import com.iexec.resultproxy.challenge.SignedChallenge;
 import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;

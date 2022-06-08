@@ -1,6 +1,7 @@
 package com.iexec.resultproxy.challenge;
 
 import com.iexec.common.chain.eip712.entity.EIP712Challenge;
+import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.BytesUtils;
 import com.iexec.common.utils.SignatureUtils;
 
@@ -36,7 +37,7 @@ public class ChallengeService {
 
         String[] parts = token.split("_");
         return SignedChallenge.builder()
-                .challenge(parts[0])
+                .challengeHash(parts[0])
                 .challengeSignature(parts[1])
                 .walletAddress(parts[2])
                 .build();
@@ -44,11 +45,11 @@ public class ChallengeService {
 
     public boolean isSignedChallengeValid(SignedChallenge signedChallenge) {
         if (signedChallenge == null) {
-            log.error("Signed challenge should not be null [SignedChallenge:{}]", signedChallenge);
+            log.error("Signed challenge should not be null [SignedChallenge:null]");
             return false;
         }
 
-        String eip712ChallengeString = signedChallenge.getChallenge();
+        String eip712ChallengeString = signedChallenge.getChallengeHash();
         String challengeSignature = signedChallenge.getChallengeSignature();
         String walletAddress = signedChallenge.getWalletAddress();
 

@@ -41,7 +41,7 @@ public class EIP712ChallengeService {
     }
 
     EIP712Challenge generateEip712Challenge(Integer chainId) {
-        final EIP712Domain domain = new EIP712Domain("iExec Result Proxy", "1", chainId, null);
+        final EIP712Domain domain = new EIP712Domain("iExec Result Repository", "1", chainId, null);
         final Challenge challenge = new Challenge(generateRandomToken());
         EIP712Challenge eip712Challenge = new EIP712Challenge(domain, challenge);
         this.saveEip712ChallengeString(eip712Challenge.getHash());

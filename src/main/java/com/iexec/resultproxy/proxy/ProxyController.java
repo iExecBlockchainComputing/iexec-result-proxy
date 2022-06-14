@@ -1,9 +1,9 @@
 package com.iexec.resultproxy.proxy;
 
+import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.result.ResultModel;
-import com.iexec.common.result.eip712.Eip712Challenge;
+import com.iexec.common.security.SignedChallenge;
 import com.iexec.resultproxy.challenge.ChallengeService;
-import com.iexec.resultproxy.challenge.SignedChallenge;
 import com.iexec.resultproxy.ipfs.IpfsService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
@@ -47,8 +47,8 @@ public class ProxyController {
     }
 
     @GetMapping(value = "/results/challenge")
-    public ResponseEntity<Eip712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
-        Eip712Challenge eip712Challenge = challengeService.createChallenge(chainId); // TODO generate challenge from walletAddress
+    public ResponseEntity<EIP712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
+        EIP712Challenge eip712Challenge = challengeService.createChallenge(chainId); // TODO generate challenge from walletAddress
         return ResponseEntity.ok(eip712Challenge);
     }
 
@@ -65,7 +65,7 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        challengeService.invalidateChallenge(signedChallenge.getChallenge());
+        challengeService.invalidateChallenge(signedChallenge.getChallengeHash());
         return ResponseEntity.ok(jwtString);
     }
 

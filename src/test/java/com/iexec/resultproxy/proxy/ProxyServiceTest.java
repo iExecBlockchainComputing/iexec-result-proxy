@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class ProxyServiceTest {
+class ProxyServiceTest {
 
     @Mock
     private IexecHubService iexecHubService;
@@ -29,14 +29,14 @@ public class ProxyServiceTest {
     private String walletAddress;
 
     @BeforeEach
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    void init() {
+        MockitoAnnotations.openMocks(this);
         chainTaskId = "0x1";
         walletAddress = "0x123abc";
     }
 
     @Test
-    public void isNotAbleToUploadSinceResultAlreadyExistsWithIpfs() {
+    void isNotAbleToUploadSinceResultAlreadyExistsWithIpfs() {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(true);
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(true);
 
@@ -44,7 +44,7 @@ public class ProxyServiceTest {
     }
 
     @Test
-    public void isNotAbleToUploadSinceChainStatusIsNotRevealedWithIpfs() {
+    void isNotAbleToUploadSinceChainStatusIsNotRevealedWithIpfs() {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(true);
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(true);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(false);
@@ -53,7 +53,7 @@ public class ProxyServiceTest {
     }
 
     @Test
-    public void isAbleToUploadWithIpfs() {
+    void isAbleToUploadWithIpfs() {
         when(iexecHubService.isPublicResult(chainTaskId, 0)).thenReturn(true);
         when(ipfsResultService.doesResultExist(chainTaskId)).thenReturn(false);
         when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(true);

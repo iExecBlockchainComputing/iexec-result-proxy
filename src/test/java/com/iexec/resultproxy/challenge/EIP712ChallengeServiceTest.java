@@ -5,13 +5,13 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
 
-public class Eip712ChallengeServiceTest {
+class EIP712ChallengeServiceTest {
 
     @InjectMocks
-    private Eip712ChallengeService eip712ChallengeService;
+    private EIP712ChallengeService eip712ChallengeService;
 
     @BeforeEach
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    void init() {
+        MockitoAnnotations.openMocks(this);
     }
 }

@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.2.5.RELEASE'
+    id 'org.springframework.boot' version '2.6.2'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'eclipse'
     id 'jacoco'
@@ -8,18 +8,29 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'com.iexec.result-proxy'
-sourceCompatibility = 11
-targetCompatibility = 11
+ext {
+    springCloudVersion = '2021.0.0'
+    gitBranch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+}
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url 'https://nexus.iex.ec/repository/maven-public/'
+allprojects {
+    group = 'com.iexec.result-proxy'
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    if (gitBranch != 'main' && gitBranch != 'master' && !(gitBranch ==~ '(release|hotfix|support)/.*')) {
+        version += '-NEXT-SNAPSHOT'
     }
-    maven {
-        url 'https://jitpack.io'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://nexus.intra.iex.ec/repository/maven-public/'
+        }
+        maven {
+            url 'https://jitpack.io'
+        }
     }
 }
 
@@ -27,10 +38,6 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-}
-
-ext {
-    set('springCloudVersion', 'Hoxton.SR3')
 }
 
 dependencies {
@@ -45,6 +52,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation "org.springframework.retry:spring-retry"
 
     // test
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -57,9 +65,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // swagger
-    implementation 'io.springfox:springfox-swagger2:2.9.2'
-    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    // Spring Doc
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.3'
 
     // ipfs
     implementation 'com.github.ipfs:java-ipfs-http-client:1.3.3'
@@ -75,6 +82,10 @@ dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
+}
+
+springBoot {
+    buildInfo()
 }
 
 test {
@@ -100,21 +111,6 @@ jacocoTestReport {
 tasks.test.finalizedBy    tasks.jacocoTestReport
 tasks.sonarqube.dependsOn tasks.jacocoTestReport
 
-// ######################
-// #   create version   #
-// ######################
-
-task createVersion (type: Exec) {
-    description 'Set version in application.yml'
-    commandLine('sh', '-c', "sed -i 's/^version.*/version: ${version}/' src/main/resources/application.yml")
-}
-
-compileJava.dependsOn createVersion
-
-// ######################
-// #   upload archive   #
-// ######################
-
 publishing {
     publications {
         maven(MavenPublication) {
@@ -133,7 +129,7 @@ publishing {
     }
 }
 
-ext.bootJarPath    = relativePath(tasks.bootJar.outputs.files.singleFile)
+ext.jarPathForOCI  = relativePath(tasks.bootJar.outputs.files.singleFile)
 ext.gitShortCommit = 'git rev-parse --short=8 HEAD'.execute().text.trim()
 ext.ociImageName   = 'local/' + ['bash', '-c', 'basename $(git config --get remote.origin.url) .git'].execute().text.trim()
 
@@ -141,6 +137,6 @@ task buildImage(type: Exec) {
     group       'Build'
     description 'Builds an OCI image from a Dockerfile.'
     dependsOn   tasks.bootJar
-    commandLine ("sh", "-c", "docker build --build-arg spring_boot_jar=$bootJarPath -t $ociImageName:$gitShortCommit ."
+    commandLine ("sh", "-c", "docker build --build-arg jar=$jarPathForOCI -t $ociImageName:$gitShortCommit ."
             + " && docker tag $ociImageName:$gitShortCommit $ociImageName:dev")
 }

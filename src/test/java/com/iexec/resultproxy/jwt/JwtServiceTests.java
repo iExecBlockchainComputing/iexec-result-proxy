@@ -21,7 +21,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -34,6 +33,7 @@ import org.web3j.crypto.Keys;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.iexec.resultproxy.jwt.JwtService.KEY_SIZE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,7 +80,7 @@ class JwtServiceTests {
         String badToken = Jwts.builder()
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
-                .setSubject(RandomStringUtils.randomAlphanumeric(64))
+                .setSubject(UUID.randomUUID().toString())
                 .signWith(SignatureAlgorithm.HS256, badJwtKey)
                 .compact();
         assertAll(
@@ -96,7 +96,7 @@ class JwtServiceTests {
         String unsignedToken = Jwts.builder()
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
-                .setSubject(RandomStringUtils.randomAlphanumeric(64))
+                .setSubject(UUID.randomUUID().toString())
                 .compact();
         assertAll(
                 () -> verifyNoInteractions(jwtRepository),
@@ -152,7 +152,7 @@ class JwtServiceTests {
         String unsignedToken = Jwts.builder()
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
-                .setSubject(RandomStringUtils.randomAlphanumeric(64))
+                .setSubject(UUID.randomUUID().toString())
                 .compact();
         boolean isValid = jwtService.isValidJwt(unsignedToken);
         assertAll(
@@ -166,7 +166,7 @@ class JwtServiceTests {
         String badToken = Jwts.builder()
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
-                .setSubject(RandomStringUtils.randomAlphanumeric(64))
+                .setSubject(UUID.randomUUID().toString())
                 .signWith(SignatureAlgorithm.HS256, badJwtKey)
                 .compact();
         boolean isValid = jwtService.isValidJwt(badToken);

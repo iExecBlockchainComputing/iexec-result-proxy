@@ -21,12 +21,12 @@ import com.iexec.common.utils.ContextualLockRunner;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -65,7 +65,7 @@ public class JwtService {
         return Jwts.builder()
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
-                .setSubject(RandomStringUtils.randomAlphanumeric(64))
+                .setSubject(UUID.randomUUID().toString())
                 .signWith(SignatureAlgorithm.HS256, jwtKey)
                 .compact();
     }

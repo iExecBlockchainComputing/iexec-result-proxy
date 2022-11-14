@@ -23,6 +23,9 @@ ipfs:
   host: ${IEXEC_IPFS_HOST:127.0.0.1}
   port: ${IEXEC_IPFS_PORT:5001}
 
+jwt:
+  key-path: /data/.key
+
 springdoc:
   packagesToScan: com.iexec.resultproxy
   pathsToMatch: /**

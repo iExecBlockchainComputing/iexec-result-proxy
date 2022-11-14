@@ -17,19 +17,24 @@
 package com.iexec.resultproxy.jwt;
 
 import com.iexec.common.security.SignedChallenge;
+import com.iexec.common.utils.FileHelper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
@@ -42,9 +47,11 @@ import static org.mockito.Mockito.*;
 
 class JwtServiceTests {
 
+    @TempDir
+    private static Path tmpDir;
+    private JwtConfig jwtConfig;
     @Mock
     private JwtRepository jwtRepository;
-    @InjectMocks
     private JwtService jwtService;
     private String walletAddress;
     private static final byte[] badJwtKey = SecureRandom.getSeed(KEY_SIZE);
@@ -59,10 +66,46 @@ class JwtServiceTests {
     }
 
     @BeforeEach
-    void init() {
+    void init() throws IOException {
+        jwtConfig = new JwtConfig(String.join(File.separator, tmpDir.toString(), ".key"));
         MockitoAnnotations.openMocks(this);
         walletAddress = getWalletAddress();
+        jwtService = new JwtService(jwtConfig, jwtRepository);
     }
+
+    @Test
+    void shouldNotCreateServiceWhenCorruptKey() throws IOException {
+        Path keyFilePath = Path.of(jwtConfig.getKeyPath());
+        Files.deleteIfExists(keyFilePath);
+        FileHelper.createFileWithContent(jwtConfig.getKeyPath(), UUID.randomUUID().toString());
+        assertThrows(IllegalArgumentException.class,
+                () -> new JwtService(jwtConfig, jwtRepository));
+        Files.deleteIfExists(keyFilePath);
+    }
+
+    //region key persistence
+    @Test
+    void shouldValidateTokenWhenKeyFileExists() throws IOException {
+        String token = jwtService.createJwt(walletAddress);
+        JwtService newService = new JwtService(jwtConfig, jwtRepository);
+        assertAll(
+                () -> assertEquals(walletAddress, jwtService.getWalletAddressFromJwtString(token)),
+                () -> assertEquals(walletAddress, newService.getWalletAddressFromJwtString(token))
+        );
+    }
+
+    @Test
+    void shouldNotValidateTokenWhenKeyFileRecreated() throws IOException {
+        String token = jwtService.createJwt(walletAddress);
+        Files.deleteIfExists(Path.of(jwtConfig.getKeyPath()));
+        JwtService newService = new JwtService(jwtConfig, jwtRepository);
+        assertAll(
+                () -> assertEquals(walletAddress, jwtService.getWalletAddressFromJwtString(token)),
+                () -> assertThrows(SignatureException.class,
+                        () -> newService.getWalletAddressFromJwtString(token))
+        );
+    }
+    //endregion
 
     //region createJwt and getWalletAddressFromJwtString
     @Test
@@ -86,8 +129,7 @@ class JwtServiceTests {
         assertAll(
                 () -> verifyNoInteractions(jwtRepository),
                 () -> assertThrows(SignatureException.class,
-                        () -> jwtService.getWalletAddressFromJwtString(badToken),
-                        "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.")
+                        () -> jwtService.getWalletAddressFromJwtString(badToken))
         );
     }
 

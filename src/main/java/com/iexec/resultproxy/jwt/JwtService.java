@@ -18,12 +18,17 @@ package com.iexec.resultproxy.jwt;
 
 import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.ContextualLockRunner;
+import com.iexec.common.utils.FileHelper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,12 +37,13 @@ import java.util.UUID;
 @Service
 public class JwtService {
     static final int KEY_SIZE = 128;
-    private static final byte[] jwtKey = SecureRandom.getSeed(KEY_SIZE);
+    private final byte[] jwtKey;
     private final ContextualLockRunner<String> contextualLockRunner = new ContextualLockRunner<>();
     private final JwtRepository jwtRepository;
 
-    public JwtService(JwtRepository jwtRepository) {
+    public JwtService(JwtConfig jwtConfig, JwtRepository jwtRepository) throws IOException {
         this.jwtRepository = jwtRepository;
+        this.jwtKey = initKey(jwtConfig.getKeyPath());
     }
 
     public String getOrCreateJwt(SignedChallenge signedChallenge) {
@@ -46,6 +52,16 @@ public class JwtService {
         // we need to ensure there won't be 2 different JWT issued for the same wallet.
         // This is ensured by making synchronous the get-and-save operation.
         return contextualLockRunner.applyWithLock(walletAddress, this::getOrCreateJwt);
+    }
+
+    private byte[] initKey(String jwtKeyPath) throws IOException {
+        Path path = Path.of(jwtKeyPath);
+        if (!path.toFile().exists()) {
+            String content = Base64.getEncoder().encodeToString(SecureRandom.getSeed(KEY_SIZE));
+            FileHelper.createFileWithContent(jwtKeyPath, content);
+        }
+        String payload = Files.readString(path);
+        return Base64.getDecoder().decode(payload);
     }
 
     private String getOrCreateJwt(String walletAddress) {

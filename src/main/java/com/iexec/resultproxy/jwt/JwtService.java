@@ -57,7 +57,10 @@ public class JwtService {
     private byte[] initKey(String jwtKeyPath) throws IOException {
         Path path = Path.of(jwtKeyPath);
         if (!path.toFile().exists()) {
-            String content = Base64.getEncoder().encodeToString(SecureRandom.getSeed(KEY_SIZE));
+            SecureRandom random = new SecureRandom();
+            byte[] bytes = new byte[KEY_SIZE];
+            random.nextBytes(bytes);
+            String content = Base64.getEncoder().encodeToString(bytes);
             FileHelper.createFileWithContent(jwtKeyPath, content);
         }
         String payload = Files.readString(path);

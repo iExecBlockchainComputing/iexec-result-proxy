@@ -1,16 +1,13 @@
 package com.iexec.resultproxy.ipfs;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
-@Component
-@Getter
+@Data
+@ConstructorBinding
+@ConfigurationProperties(prefix = "ipfs")
 public class IpfsConfig {
-
-    @Value("${ipfs.host}")
-    private String host;
-
-    @Value("${ipfs.port}")
-    private String port;
+    private final String host;
+    private final String port;
 }

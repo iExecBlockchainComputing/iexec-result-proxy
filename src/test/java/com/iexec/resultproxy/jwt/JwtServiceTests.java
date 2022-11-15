@@ -22,6 +22,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -56,13 +57,10 @@ class JwtServiceTests {
     private String walletAddress;
     private static final byte[] badJwtKey = SecureRandom.getSeed(KEY_SIZE);
 
+    @SneakyThrows
     private String getWalletAddress() {
-        try {
-            ECKeyPair ecKeyPair = Keys.createEcKeyPair();
-            return Credentials.create(ecKeyPair).getAddress();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+        return Credentials.create(ecKeyPair).getAddress();
     }
 
     @BeforeEach

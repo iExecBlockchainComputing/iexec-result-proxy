@@ -74,7 +74,7 @@ class JwtServiceTests {
     }
 
     @Test
-    void shouldNotCreateServiceWhenCorruptKey() throws IOException {
+    void shouldNotCreateServiceWhenKeyNotBase64Encoded() throws IOException {
         Path keyFilePath = Path.of(jwtConfig.getKeyPath());
         Files.deleteIfExists(keyFilePath);
         FileHelper.createFileWithContent(jwtConfig.getKeyPath(), UUID.randomUUID().toString());

@@ -1,38 +1,20 @@
 package com.iexec.resultproxy.chain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
-@Component
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
+@ConstructorBinding
+@ConfigurationProperties(prefix = "chain")
+//TODO: validate configuration property names and use the same set of names everywhere (blockchain-adapter-api, sms)
 public class ChainConfig {
-
-    @Value("${chain.id}")
-    private Integer chainId;
-
-    @Value("${chain.sidechain}")
-    private boolean isSidechain;
-
-    @Value("${chain.privateAddress}")
-    private String privateChainAddress;
-
-    @Value("${chain.publicAddress}")
-    private String publicChainAddress;
-
-    @Value("${chain.hubAddress}")
-    private String hubAddress;
-
-    @Value("${chain.startBlockNumber}")
-    private long startBlockNumber;
-
-    @Value("${chain.gasPriceMultiplier}")
-    private float gasPriceMultiplier;
-
-    @Value("${chain.gasPriceCap}")
-    private long gasPriceCap;
+    private final int id;
+    private final boolean sidechain;
+    private final String privateAddress;
+    private final String publicAddress;
+    private final String hubAddress;
+    private final long startBlockNumber;
+    private final float gasPriceMultiplier;
+    private final long gasPriceCap;
 }

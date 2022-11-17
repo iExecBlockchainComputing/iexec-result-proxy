@@ -9,13 +9,11 @@ import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
 import com.iexec.resultproxy.result.AbstractResultStorage;
 import com.iexec.resultproxy.result.Result;
-import com.iexec.resultproxy.version.VersionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -29,20 +27,17 @@ public class ProxyController {
     private final JwtService jwtService;
     private final ProxyService proxyService;
     private final IpfsService ipfsService;
-    private final VersionService versionService;
-    private IpfsNameService ipfsNameService;
+    private final IpfsNameService ipfsNameService;
 
     public ProxyController(ChallengeService challengeService,
                            JwtService jwtService,
                            ProxyService proxyService,
                            IpfsService ipfsService,
-                           VersionService versionService,
                            IpfsNameService ipfsNameService) {
         this.challengeService = challengeService;
         this.jwtService = jwtService;
         this.proxyService = proxyService;
         this.ipfsService = ipfsService;
-        this.versionService = versionService;
         this.ipfsNameService = ipfsNameService;
     }
 
@@ -118,25 +113,10 @@ public class ProxyController {
         return ResponseEntity.status(status).build();
     }
 
-    @GetMapping(value = "/results/{chainTaskId}/snap", produces = "application/zip")
-    public ResponseEntity<byte[]> getResultSnap(@PathVariable("chainTaskId") String chainTaskId) throws IOException {
-        if (!versionService.isSnapshot()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
-        }
-        Optional<byte[]> zip = proxyService.getResult(chainTaskId);
-        if (zip.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
-        }
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename="
-                        + AbstractResultStorage.getResultFilename(chainTaskId) + ".zip")
-                .body(zip.get());
-    }
-
     @GetMapping(value = "/results/{chainTaskId}", produces = "application/zip")
     public ResponseEntity<byte[]> getResult(@PathVariable("chainTaskId") String chainTaskId,
                                             @RequestHeader(name = "Authorization") String token,
-                                            @RequestParam(name = "chainId") Integer chainId) throws IOException {
+                                            @RequestParam(name = "chainId") Integer chainId) {
 
         if (!jwtService.isValidJwt(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();

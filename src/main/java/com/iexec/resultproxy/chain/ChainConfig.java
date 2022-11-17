@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @Data
 @ConstructorBinding
 @ConfigurationProperties(prefix = "chain")
+//TODO: validate configuration property names and use the same set of names everywhere (blockchain-adapter-api, sms)
 public class ChainConfig {
     private final int id;
     private final boolean sidechain;

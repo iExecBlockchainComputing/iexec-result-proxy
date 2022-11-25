@@ -4,7 +4,7 @@
 
 The iExec Result Proxy stores results of task executions to IPFS.
 
-The iExec Result Proxy is available as an OCI image on [dockerhub](https://hub.docker.com/r/iexechub/iexec-result-proxy/tags).
+The iExec Result Proxy is available as an OCI image on [Docker Hub](https://hub.docker.com/r/iexechub/iexec-result-proxy/tags).
 
 To run properly, the iExec Result Proxy requires:
 * A reachable blockchain node URL hosting iExec smart contracts.

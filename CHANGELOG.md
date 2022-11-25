@@ -28,8 +28,6 @@ All notable changes to this project will be documented in this file.
 
 ## [7.0.0] 2021-12-14
 
-* Not released on GitHub.
-
 * Highly improved throughput of the iExec protocol.
 
 ## [[6.1.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v6.1.0) 2021-10-27

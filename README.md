@@ -13,7 +13,7 @@ To run properly, the iExec Result Proxy requires:
 
 ## Configuration
 
-You can configure the result-proxy with the following properties:
+You can configure the iExec Result Proxy with the following properties:
 
 | Environment variable | Description | Type | Default value |
 | --- | --- | --- | --- |

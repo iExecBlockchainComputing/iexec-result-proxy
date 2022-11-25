@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 
 * Use iexec-common 5.9.1.
 
-## [7.0.0] 2021-12-14
+## [[7.0.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.0.0) 2021-12-14
 
 * Highly improved throughput of the iExec protocol.
 

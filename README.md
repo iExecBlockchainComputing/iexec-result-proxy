@@ -1,4 +1,4 @@
-# iexec-result-proxy
+# iExec Result Proxy
 
 ## Overview
 

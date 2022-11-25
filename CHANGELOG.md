@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file.
 
 ## [7.0.0] 2021-12-14
 
-Not released on GitHub
+* Not released on GitHub
 
 * Highly improved throughput of the iExec protocol.
 

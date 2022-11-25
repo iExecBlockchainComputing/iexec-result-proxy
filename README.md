@@ -2,7 +2,7 @@
 
 ## Overview
 
-The iExec Result Proxy stores results of task executions to IPFS.
+The iExec Result Proxy stores results of iExec tasks to IPFS.
 
 The iExec Result Proxy is available as an OCI image on [Docker Hub](https://hub.docker.com/r/iexechub/iexec-result-proxy/tags).
 

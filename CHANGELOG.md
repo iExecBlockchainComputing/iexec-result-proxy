@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 
 * Fixed wallet address duplicate key on JWT.
 * Fix ConcurrentModificationException on authentication challenge map.
-* Upgrade automated build system
+* Upgrade automated build system.
 * Upgrade Jacoco/Sonarqube reporting and plugins.
 * Upgrade to Spring Boot 2.6.2.
 * Upgrade to Gradle 6.8.3.
@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file.
 
 ## [7.0.0] 2021-12-14
 
-* Not released on GitHub
+* Not released on GitHub.
 
 * Highly improved throughput of the iExec protocol.
 

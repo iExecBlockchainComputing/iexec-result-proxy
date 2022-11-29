@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [[7.1.1]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.1.1) 2022-11-25
+## [[7.1.1]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.1.1) 2022-11-29
 
 * Update build workflow to 2.1.2, update documentation in README and add CHANGELOG.
 

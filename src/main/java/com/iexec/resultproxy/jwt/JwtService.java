@@ -19,6 +19,7 @@ package com.iexec.resultproxy.jwt;
 import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.ContextualLockRunner;
 import com.iexec.common.utils.FileHelper;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -96,7 +94,7 @@ public class JwtService {
             Jwt jwt = findByWalletAddress(walletAddress).orElseThrow();
             jwtString = jwt.getJwtString();
             getWalletAddressFromJwtString(jwtString);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException | JwtException | NoSuchElementException e) {
             log.warn("Valid JWT token not found in storage, generating a new one");
             jwtString = createJwt(walletAddress);
             save(new Jwt(walletAddress, jwtString));
@@ -118,7 +116,7 @@ public class JwtService {
             String claimedWalletAddress = getWalletAddressFromJwtString(jwtString);
             Jwt existingJwt = findByWalletAddress(claimedWalletAddress).orElseThrow();
             return jwtString.equals(existingJwt.getJwtString());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | JwtException | NoSuchElementException e) {
             log.warn("Invalid JWT token [message:{}]", e.getMessage());
             return false;
         }

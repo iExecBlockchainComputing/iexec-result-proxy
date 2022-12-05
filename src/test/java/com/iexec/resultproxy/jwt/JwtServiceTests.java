@@ -141,8 +141,7 @@ class JwtServiceTests {
         assertAll(
                 () -> verifyNoInteractions(jwtRepository),
                 () -> assertThrows(UnsupportedJwtException.class,
-                        () -> jwtService.getWalletAddressFromJwtString(unsignedToken),
-                "Unsigned Claims JWTs are not supported.")
+                        () -> jwtService.getWalletAddressFromJwtString(unsignedToken))
         );
     }
     //endregion
@@ -161,6 +160,24 @@ class JwtServiceTests {
     }
 
     @Test
+    void createJwtIfPresentAndInvalid() {
+        String unsignedToken = Jwts.builder()
+                .setAudience(walletAddress)
+                .setIssuedAt(new Date())
+                .setSubject(UUID.randomUUID().toString())
+                .compact();
+        SignedChallenge signedChallenge = SignedChallenge.builder().walletAddress(walletAddress).build();
+        Jwt expectedJwt = new Jwt(walletAddress, unsignedToken);
+        when(jwtRepository.findByWalletAddress(walletAddress)).thenReturn(Optional.of(expectedJwt));
+        String resultToken = jwtService.getOrCreateJwt(signedChallenge);
+        assertAll(
+                () -> verify(jwtRepository).findByWalletAddress(walletAddress),
+                () -> assertNotEquals(unsignedToken, resultToken),
+                () -> assertEquals(walletAddress, jwtService.getWalletAddressFromJwtString(resultToken))
+        );
+    }
+
+    @Test
     void getJwtIfPresentInRepository() {
         String token = jwtService.createJwt(walletAddress);
         SignedChallenge signedChallenge = SignedChallenge.builder().walletAddress(walletAddress).build();
@@ -168,9 +185,8 @@ class JwtServiceTests {
         when(jwtRepository.findByWalletAddress(walletAddress)).thenReturn(Optional.of(expectedJwt));
         String resultToken = jwtService.getOrCreateJwt(signedChallenge);
         assertAll(
-                () -> verify(jwtRepository).findByWalletAddress(any()),
+                () -> verify(jwtRepository).findByWalletAddress(walletAddress),
                 () -> assertEquals(token, resultToken)
-
         );
     }
     //endregion

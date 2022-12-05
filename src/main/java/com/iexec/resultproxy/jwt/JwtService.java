@@ -19,6 +19,7 @@ package com.iexec.resultproxy.jwt;
 import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.ContextualLockRunner;
 import com.iexec.common.utils.FileHelper;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -80,13 +78,24 @@ public class JwtService {
         return Base64.getDecoder().decode(payload);
     }
 
+    /**
+     * Retrieves existing JWT from the database or creates it.
+     * <p>
+     * A new signed token will be created in the following cases:
+     * <ul>
+     * <li> If a JWT is not found, an exception will be thrown and a new token will be created.
+     * <li> If a JWT is found but was not signed with the correct key.
+     * @param walletAddress Ethereum address for which
+     * @return A valid JWT token signed with this instance key.
+     */
     private String getOrCreateJwt(String walletAddress) {
         String jwtString;
-        Optional<Jwt> oExistingJwt = findByWalletAddress(walletAddress);
-
-        if (oExistingJwt.isPresent()) {
-            jwtString = oExistingJwt.get().getJwtString(); // TODO generate new token
-        } else {
+        try {
+            Jwt jwt = findByWalletAddress(walletAddress).orElseThrow();
+            jwtString = jwt.getJwtString();
+            getWalletAddressFromJwtString(jwtString);
+        } catch (IllegalArgumentException | JwtException | NoSuchElementException e) {
+            log.warn("Valid JWT token not found in storage, generating a new one");
             jwtString = createJwt(walletAddress);
             save(new Jwt(walletAddress, jwtString));
         }
@@ -107,7 +116,7 @@ public class JwtService {
             String claimedWalletAddress = getWalletAddressFromJwtString(jwtString);
             Jwt existingJwt = findByWalletAddress(claimedWalletAddress).orElseThrow();
             return jwtString.equals(existingJwt.getJwtString());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | JwtException | NoSuchElementException e) {
             log.warn("Invalid JWT token [message:{}]", e.getMessage());
             return false;
         }

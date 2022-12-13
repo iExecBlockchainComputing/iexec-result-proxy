@@ -89,24 +89,15 @@ public class JwtService {
      * @return A valid JWT token signed with this instance key.
      */
     private String getOrCreateJwt(String walletAddress) {
-        Optional<Jwt> oJwt = findByWalletAddress(walletAddress);
-        if (oJwt.isEmpty()) {
-            log.info("JWT token does not exist in storage for {}, generating a new one", walletAddress);
-            Jwt jwt = new Jwt(walletAddress, createJwt(walletAddress));
-            save(jwt);
-            return jwt.getJwtString();
-        }
-        String jwtString;
+        Jwt jwt = findByWalletAddress(walletAddress).orElse(new Jwt(walletAddress, ""));
+        String jwtString = jwt.getJwtString();
         try {
-            jwtString = oJwt.get().getJwtString();
             getWalletAddressFromJwtString(jwtString);
-            log.info("Valid token found for {}", walletAddress);
+            log.info("Valid JWT token retrieved for {}", walletAddress);
         } catch (IllegalArgumentException | JwtException e) {
-            log.warn("Valid JWT token not found in storage for {}, generating a new one", walletAddress);
+            log.warn("Invalid JWT token retrieved for {}, generating a new one", walletAddress);
             jwtString = createJwt(walletAddress);
-            // Update existing JWT to keep ID
-            Jwt jwt = oJwt.get();
-            jwt.setJwtString(jwtString);
+            jwt = jwt.withNewToken(jwtString);
             save(jwt);
         }
         return jwtString;

@@ -101,8 +101,8 @@ public class JwtService {
         } catch (IllegalArgumentException | JwtException e) {
             log.warn("Invalid JWT token retrieved for {}, generating a new one", walletAddress);
             jwtString = createJwt(walletAddress);
-            jwt = jwt.withNewToken(jwtString);
-            save(jwt);
+            final Jwt newJwt = jwt.withNewToken(jwtString);
+            save(newJwt);
         }
         return jwtString;
     }

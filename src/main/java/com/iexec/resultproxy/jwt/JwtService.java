@@ -89,7 +89,11 @@ public class JwtService {
      * @return A valid JWT token signed with this instance key.
      */
     private String getOrCreateJwt(String walletAddress) {
-        Jwt jwt = findByWalletAddress(walletAddress).orElse(new Jwt(walletAddress, ""));
+        Jwt jwt = findByWalletAddress(walletAddress)
+                .orElseGet(() -> {
+                    log.info("JWT token does not exist for {}, generating a new one", walletAddress);
+                    return new Jwt(walletAddress, "");
+                });
         String jwtString = jwt.getJwtString();
         try {
             getWalletAddressFromJwtString(jwtString);

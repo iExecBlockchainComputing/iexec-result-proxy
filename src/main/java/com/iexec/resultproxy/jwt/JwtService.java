@@ -83,21 +83,26 @@ public class JwtService {
      * <p>
      * A new signed token will be created in the following cases:
      * <ul>
-     * <li> If a JWT is not found, an exception will be thrown and a new token will be created.
+     * <li> If a JWT is not found in storage for the given wallet address.
      * <li> If a JWT is found but was not signed with the correct key.
      * @param walletAddress Ethereum address for which
      * @return A valid JWT token signed with this instance key.
      */
     private String getOrCreateJwt(String walletAddress) {
-        String jwtString;
+        Jwt jwt = findByWalletAddress(walletAddress)
+                .orElseGet(() -> {
+                    log.info("JWT token does not exist for {}, generating a new one", walletAddress);
+                    return new Jwt(walletAddress, "");
+                });
+        String jwtString = jwt.getJwtString();
         try {
-            Jwt jwt = findByWalletAddress(walletAddress).orElseThrow();
-            jwtString = jwt.getJwtString();
             getWalletAddressFromJwtString(jwtString);
-        } catch (IllegalArgumentException | JwtException | NoSuchElementException e) {
-            log.warn("Valid JWT token not found in storage, generating a new one");
+            log.info("Valid JWT token retrieved for {}", walletAddress);
+        } catch (IllegalArgumentException | JwtException e) {
+            log.warn("Invalid JWT token retrieved for {}, generating a new one", walletAddress);
             jwtString = createJwt(walletAddress);
-            save(new Jwt(walletAddress, jwtString));
+            final Jwt newJwt = jwt.withNewToken(jwtString);
+            save(newJwt);
         }
         return jwtString;
     }

@@ -16,16 +16,18 @@
 
 package com.iexec.resultproxy.jwt;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Data
 @Document
+@Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Jwt {
 
     @Id
@@ -42,4 +44,9 @@ public class Jwt {
         this.walletAddress = walletAddress;
         this.jwtString = jwtString;
     }
+
+    public Jwt withNewToken(String jwtToken) {
+        return new Jwt(id, version, walletAddress, jwtToken);
+    }
+
 }

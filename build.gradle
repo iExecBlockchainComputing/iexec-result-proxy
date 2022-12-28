@@ -18,13 +18,9 @@ if (!project.hasProperty('gitBranch')) {
 
 allprojects {
     group = 'com.iexec.result-proxy'
-    sourceCompatibility = 11
-    targetCompatibility = 11
-
     if (gitBranch != 'main' && gitBranch != 'master' && !(gitBranch ==~ '(release|hotfix|support)/.*')) {
         version += '-NEXT-SNAPSHOT'
     }
-
     repositories {
         mavenLocal()
         mavenCentral()
@@ -40,6 +36,11 @@ allprojects {
         }
         maven {
             url 'https://jitpack.io'
+        }
+    }
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(11))
         }
     }
 }

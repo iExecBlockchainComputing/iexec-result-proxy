@@ -30,3 +30,9 @@ You can configure the iExec Result Proxy with the following properties:
 | IEXEC_GAS_PRICE_CAP | In Wei, will be used for transactions if `networkGasPrice * IEXEC_GAS_PRICE_MULTIPLIER > gasPriceCap`. | Integer | `22000000000` |
 | IEXEC_IPFS_HOST | Host to connect to the IPFS node. | String | `127.0.0.1` |
 | IEXEC_IPFS_PORT | Server port of the IPFS node. | Positive integer | `5001` |
+
+## Health checks
+
+A `/actuator/health` endpoint is enabled by default and can be accessed on the **IEXEC_RESULT_PROXY_PORT**.
+This endpoint allows to define health checks in an orchestrator or a [compose file](https://github.com/compose-spec/compose-spec/blob/master/spec.md#healthcheck).
+No default strategy has been implemented in the [Dockerfile](Dockerfile) at the moment.

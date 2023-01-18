@@ -33,6 +33,6 @@ You can configure the iExec Result Proxy with the following properties:
 
 ## Health checks
 
-A `/actuator/health` endpoint is enabled by default and can be accessed on the **IEXEC_RESULT_PROXY_PORT**.
+An health endpoint (`/actuator/health`) is enabled by default and can be accessed on the **IEXEC_RESULT_PROXY_PORT**.
 This endpoint allows to define health checks in an orchestrator or a [compose file](https://github.com/compose-spec/compose-spec/blob/master/spec.md#healthcheck).
 No default strategy has been implemented in the [Dockerfile](Dockerfile) at the moment.

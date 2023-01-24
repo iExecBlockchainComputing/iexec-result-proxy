@@ -5,16 +5,16 @@ All notable changes to this project will be documented in this file.
 ## [[8.0.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.0.0) 2023
 
 ### New Features
-* #60 Support Gramine framework for TEE tasks.
-* #70 Add iExec banner at startup.
+* Support Gramine framework for TEE tasks.
+* Add iExec banner at startup.
 ### Bug Fixes
-* #61 Sign issued JWT tokens.
-* #65 #64 Fix JWT tokens flow.
+* Sign issued JWT tokens.
+* Fix JWT tokens flow.
 ### Quality
-* #62 Clean controllers.
+* Clean controllers.
 ### Dependency Upgrades
-* #69 Upgrade to Spring Boot 2.6.14.
-* #67 Upgrade to Gradle 7.6.
+* Upgrade to Spring Boot 2.6.14.
+* Upgrade to Gradle 7.6.
 
 ## [[7.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.3.0) 2023-01-18
 

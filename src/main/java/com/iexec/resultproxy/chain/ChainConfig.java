@@ -12,9 +12,7 @@ public class ChainConfig {
     private final int id;
     private final boolean sidechain;
     private final String privateAddress;
-    private final String publicAddress;
     private final String hubAddress;
-    private final long startBlockNumber;
     private final float gasPriceMultiplier;
     private final long gasPriceCap;
 }

@@ -92,6 +92,13 @@ springBoot {
     buildInfo()
 }
 
+tasks.named("bootJar") {
+    manifest {
+        attributes("Implementation-Title": "iExec Result Proxy",
+                   "Implementation-Version": project.version)
+    }
+}
+
 test {
     useJUnitPlatform()
 }
@@ -118,7 +125,7 @@ tasks.sonarqube.dependsOn tasks.jacocoTestReport
 publishing {
     publications {
         maven(MavenPublication) {
-            artifact bootJar
+            artifact tasks.named("bootJar")
             from components.java
         }
     }

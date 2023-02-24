@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### New Features
 * Support Gramine framework for TEE tasks.
 * Add iExec banner at startup.
+* Show application version on banner.
 ### Bug Fixes
 * Sign issued JWT tokens.
 * Fix JWT tokens flow.

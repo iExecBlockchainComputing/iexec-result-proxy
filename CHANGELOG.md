@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 * Upgrade to Spring Boot 2.6.14.
 * Upgrade to Gradle 7.6.
 * Upgrade OkHttp to 4.9.0.
+* Upgrade java-http-ipfs-client to 1.4.0 for latest IPFS Kubo support.
 
 ## [[7.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.3.0) 2023-01-18
 

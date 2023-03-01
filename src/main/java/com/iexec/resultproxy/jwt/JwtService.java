@@ -22,6 +22,7 @@ import com.iexec.common.utils.FileHelper;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -112,7 +113,7 @@ public class JwtService {
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
                 .setSubject(UUID.randomUUID().toString())
-                .signWith(SignatureAlgorithm.HS256, jwtKey)
+                .signWith(Keys.hmacShaKeyFor(jwtKey), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -138,8 +139,9 @@ public class JwtService {
      * @return Wallet address extracted from the 'audience' claim
      */
     public String getWalletAddressFromJwtString(String jwtString) {
-        return Jwts.parser()
+        return Jwts.parserBuilder()
                 .setSigningKey(jwtKey)
+                .build()
                 .parseClaimsJws(jwtString)
                 .getBody()
                 .getAudience();

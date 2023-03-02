@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 * Upgrade OkHttp to 4.9.0.
 * Upgrade `java-http-ipfs-client` to 1.4.0 for latest IPFS Kubo support (v0.18.1).
 * Upgrade `jjwt` to `jjwt-api` 0.11.5.
+* Upgrade to `iexec-common` 7.0.0.
 
 ## [[7.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.3.0) 2023-01-18
 

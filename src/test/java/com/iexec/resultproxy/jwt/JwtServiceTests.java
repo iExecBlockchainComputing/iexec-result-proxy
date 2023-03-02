@@ -20,8 +20,8 @@ import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.FileHelper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.iexec.resultproxy.jwt.JwtService.KEY_SIZE;
+import static io.jsonwebtoken.security.Keys.hmacShaKeyFor;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -122,7 +123,7 @@ class JwtServiceTests {
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
                 .setSubject(UUID.randomUUID().toString())
-                .signWith(SignatureAlgorithm.HS256, badJwtKey)
+                .signWith(hmacShaKeyFor(badJwtKey), SignatureAlgorithm.HS256)
                 .compact();
         assertAll(
                 () -> verifyNoInteractions(jwtRepository),
@@ -223,7 +224,7 @@ class JwtServiceTests {
                 .setAudience(walletAddress)
                 .setIssuedAt(new Date())
                 .setSubject(UUID.randomUUID().toString())
-                .signWith(SignatureAlgorithm.HS256, badJwtKey)
+                .signWith(hmacShaKeyFor(badJwtKey), SignatureAlgorithm.HS256)
                 .compact();
         boolean isValid = jwtService.isValidJwt(badToken);
         assertAll (

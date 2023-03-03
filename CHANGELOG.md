@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [[8.0.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.0.0) 2023-03-03
+
+### New Features
+* Support Gramine framework for TEE tasks.
+* Add iExec banner at startup.
+* Show application version on banner.
+### Bug Fixes
+* Sign issued JWT tokens.
+* Fix JWT tokens flow.
+### Quality
+* Clean controllers.
+### Dependency Upgrades
+* Replace the deprecated `openjdk` Docker base image with `eclipse-temurin` and upgrade to Java 11.0.18 patch.
+* Upgrade to Spring Boot 2.6.14.
+* Upgrade to Gradle 7.6.
+* Upgrade OkHttp to 4.9.0.
+* Upgrade `java-http-ipfs-client` to 1.4.0 for latest IPFS Kubo support (v0.18.1).
+* Upgrade `jjwt` to `jjwt-api` 0.11.5.
+* Upgrade to `iexec-common` 7.0.0.
+* Upgrade to `jenkins-library` 2.4.0.
+
 ## [[7.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v7.3.0) 2023-01-18
 
 * Add endpoint to allow health checks.

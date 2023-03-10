@@ -63,6 +63,9 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation "org.springframework.retry:spring-retry"
 
+    // observability
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
     // test
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -82,7 +85,7 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:$jjwtVersion"
 
     // expiring map
-    implementation 'net.jodah:expiringmap:0.5.8'
+    implementation 'net.jodah:expiringmap:0.5.10'
 }
 
 dependencyManagement {

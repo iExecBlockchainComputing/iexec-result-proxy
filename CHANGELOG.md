@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2023
 
 ### New Features
-* Enable Prometheus actuator. (#84)
+- Enable Prometheus actuator. (#84)
 ### Bug Fixes
-* Fix link in changelog. (#83)
+- Fix link in changelog. (#83)
 ### Quality
 ### Dependency Upgrades
-* Upgrade to `expiringmap` 0.5.10. (#84)
+- Upgrade to `expiringmap` 0.5.10. (#84)
+- Upgrade to `iexec-common` 8.0.0. (#85)
+- Upgrade to `iexec-commons-poco` 1.0.2. (#85)
 
 ## [[8.0.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.0.0) 2023-03-03
 

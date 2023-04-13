@@ -48,7 +48,8 @@ allprojects {
 
 dependencies {
     // iexec
-    implementation "com.iexec.common:iexec-common:${iexecCommonVersion}"
+    implementation "com.iexec.commons:iexec-commons-poco:$iexecCommonsPocoVersion"
+    implementation "com.iexec.common:iexec-common:$iexecCommonVersion"
 
     // Web3j issues, see core build.gradle
     // NoSuchMethodError: 'okhttp3.RequestBody okhttp3.RequestBody.create(java.lang.String, okhttp3.MediaType)'

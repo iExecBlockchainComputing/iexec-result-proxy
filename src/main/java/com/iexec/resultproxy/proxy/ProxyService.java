@@ -57,13 +57,13 @@ public class ProxyService {
             }
             boolean isActive = chainTask.get().getStatus().equals(ChainTaskStatus.ACTIVE);
 
-            Optional<TaskDescription> taskDescription = iexecHubService.getTaskDescriptionFromChain(chainTaskId);
-            if (taskDescription.isEmpty()){
+            TaskDescription taskDescription = iexecHubService.getTaskDescription(chainTaskId);
+            if (taskDescription == null){
                 log.error("Trying to upload result for TEE but getTaskDescription failed [chainTaskId:{}, uploader:{}]",
                         chainTaskId, walletAddress);
                 return false;
             }
-            boolean isRequesterCredentials = taskDescription.get().getRequester().equalsIgnoreCase(walletAddress);
+            boolean isRequesterCredentials = taskDescription.getRequester().equalsIgnoreCase(walletAddress);
 
             return isActive && isRequesterCredentials;
         } else {

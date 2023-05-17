@@ -16,8 +16,8 @@
 
 package com.iexec.resultproxy.challenge;
 
-import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.security.SignedChallenge;
+import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import com.iexec.commons.poco.utils.BytesUtils;
 import com.iexec.commons.poco.utils.SignatureUtils;
 import lombok.extern.slf4j.Slf4j;

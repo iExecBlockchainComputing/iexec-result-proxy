@@ -16,8 +16,8 @@
 
 package com.iexec.resultproxy.api;
 
-import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.result.ResultModel;
+import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;

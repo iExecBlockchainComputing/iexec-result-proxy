@@ -1,8 +1,8 @@
 package com.iexec.resultproxy.proxy;
 
-import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.result.ResultModel;
 import com.iexec.common.security.SignedChallenge;
+import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import com.iexec.resultproxy.challenge.ChallengeService;
 import com.iexec.resultproxy.ipfs.IpfsService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;

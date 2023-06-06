@@ -10,13 +10,11 @@ spring:
       auto-index-creation: true # Auto-index creation is disabled by default starting with Spring Data MongoDB 3.x.
 
 chain:
-    id: ${IEXEC_CHAIN_ID:17}
-    sidechain: ${IEXEC_IS_SIDECHAIN:false}
-    privateAddress: ${IEXEC_PRIVATE_CHAIN_ADDRESS:http://localhost:8545}
-    publicAddress: ${IEXEC_PUBLIC_CHAIN_ADDRESS:http://localhost:8545}
-    block-time: ${IEXEC_BLOCK_TIME:PT5S}
-    hubAddress: ${IEXEC_HUB_ADDRESS:0xBF6B2B07e47326B7c8bfCb4A5460bef9f0Fd2002}
-    startBlockNumber: ${IEXEC_START_BLOCK_NUMBER:0}
+    id: ${IEXEC_CHAIN_ID:134}
+    sidechain: ${IEXEC_IS_SIDECHAIN:true}
+    privateAddress: ${IEXEC_PRIVATE_CHAIN_ADDRESS:https://bellecour.iex.ec}
+    hubAddress: ${IEXEC_HUB_ADDRESS:0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f}
+    blockTime: ${IEXEC_BLOCK_TIME:PT5S}
     gasPriceMultiplier: ${IEXEC_GAS_PRICE_MULTIPLIER:1.0} # txs will be sent with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
     gasPriceCap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
 

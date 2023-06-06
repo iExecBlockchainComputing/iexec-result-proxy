@@ -30,8 +30,8 @@ public class ChainConfig {
     private final int id;
     private final boolean sidechain;
     private final String privateAddress;
-    private final Duration blockTime;
     private final String hubAddress;
+    private final Duration blockTime;
     private final float gasPriceMultiplier;
     private final long gasPriceCap;
 }

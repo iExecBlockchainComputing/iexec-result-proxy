@@ -17,15 +17,20 @@
 package com.iexec.resultproxy.chain;
 
 import com.iexec.commons.poco.chain.Web3jAbstractService;
-
 import org.springframework.stereotype.Service;
 
 @Service
 public class Web3jService extends Web3jAbstractService {
 
     public Web3jService(ChainConfig chainConfig) {
-        super(chainConfig.getPrivateAddress(), chainConfig.getGasPriceMultiplier(), chainConfig.getGasPriceCap(),
-                chainConfig.isSidechain());
+        super(
+                chainConfig.getId(),
+                chainConfig.getPrivateAddress(),
+                chainConfig.getBlockTime(),
+                chainConfig.getGasPriceMultiplier(),
+                chainConfig.getGasPriceCap(),
+                chainConfig.isSidechain()
+        );
     }
 
 }

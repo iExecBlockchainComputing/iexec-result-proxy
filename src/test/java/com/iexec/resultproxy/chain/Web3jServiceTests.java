@@ -36,20 +36,23 @@ import static org.assertj.core.api.Assertions.assertThat;
         "chain.hubAddress=0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f",
         "chain.blockTime=PT5S",
         "chain.gasPriceMultiplier=1.0",
-        "chain.gasPriceCap=22000000000", })
-class ChainConfigTests {
-
+        "chain.gasPriceCap=22000000000" })
+class Web3jServiceTests {
     @Autowired
-    private ChainConfig config;
+    private ChainConfig chainConfig;
 
     @Test
-    void checkDefaultValues() {
+    void checkChainConfig() {
         ChainConfig expextedConfig = new ChainConfig(
                 134, true, "https://bellecour.iex.ec",
                 "0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f", Duration.ofSeconds(5),
                 1.0f, 22000000000L
         );
-        assertThat(config).isEqualTo(expextedConfig);
+        assertThat(chainConfig).isEqualTo(expextedConfig);
     }
 
+    @Test
+    void shouldCreateInstance() {
+        assertThat(new Web3jService(chainConfig)).isNotNull();
+    }
 }

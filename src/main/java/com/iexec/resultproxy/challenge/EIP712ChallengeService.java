@@ -1,8 +1,8 @@
 package com.iexec.resultproxy.challenge;
 
-import com.iexec.common.chain.eip712.EIP712Domain;
-import com.iexec.common.chain.eip712.entity.Challenge;
-import com.iexec.common.chain.eip712.entity.EIP712Challenge;
+import com.iexec.commons.poco.eip712.EIP712Domain;
+import com.iexec.commons.poco.eip712.entity.Challenge;
+import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;

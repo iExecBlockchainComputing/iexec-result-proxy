@@ -48,7 +48,8 @@ allprojects {
 
 dependencies {
     // iexec
-    implementation "com.iexec.common:iexec-common:${iexecCommonVersion}"
+    implementation "com.iexec.commons:iexec-commons-poco:$iexecCommonsPocoVersion"
+    implementation "com.iexec.common:iexec-common:$iexecCommonVersion"
 
     // Web3j issues, see core build.gradle
     // NoSuchMethodError: 'okhttp3.RequestBody okhttp3.RequestBody.create(java.lang.String, okhttp3.MediaType)'
@@ -62,6 +63,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation "org.springframework.retry:spring-retry"
+
+    // observability
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     // test
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -82,7 +86,7 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:$jjwtVersion"
 
     // expiring map
-    implementation 'net.jodah:expiringmap:0.5.8'
+    implementation 'net.jodah:expiringmap:0.5.10'
 }
 
 dependencyManagement {

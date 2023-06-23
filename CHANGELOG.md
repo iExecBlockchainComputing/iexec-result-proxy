@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [[8.1.1]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.1.1) 2023-06-23
+
+### Dependency Upgrades
+- Upgrade to `iexec-common` 8.2.1. (#92)
+- Upgrade to `iexec-commons-poco` 3.0.4.(#92)
+
 ## [[8.1.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.1.0) 2023-06-07
 
 ### New Features

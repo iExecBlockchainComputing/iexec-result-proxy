@@ -58,13 +58,6 @@ dependencies {
     // observability
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
-    // test
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-    }
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.mockito:mockito-inline:2.13.0' // activates mocking final classes/methods
-
     // Spring Doc
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.3'
 
@@ -78,6 +71,10 @@ dependencies {
 
     // expiring map
     implementation 'net.jodah:expiringmap:0.5.10'
+
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 dependencyManagement {

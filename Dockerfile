@@ -12,4 +12,4 @@ COPY $jar iexec-result-proxy.jar
 
 # For Spring-Boot project, use the entrypoint
 # below to reduce Tomcat startup time.
-ENTRYPOINT exec java -Djava.security.egd=file:/dev/./urandom -jar iexec-result-proxy.jar
+ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "iexec-result-proxy.jar" ]

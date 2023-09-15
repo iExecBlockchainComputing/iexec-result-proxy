@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### New Features
 - Remove `nexus.intra.iex.ec` repository. (#94)
+- Check result hash before uploading. (#101)
 ### Bug Fixes
 - Fix and harmonize `Dockerfile entrypoint` in all Spring Boot applications. (#98)
 ### Quality

@@ -73,9 +73,11 @@ public class ProxyController {
         }
 
         String walletAddress = jwtService.getWalletAddressFromJwtString(token);
-        boolean canUploadResult = proxyService.canUploadResult(model.getChainTaskId(), walletAddress);
-
-        // TODO check if the result to be added is the correct result for that task
+        boolean canUploadResult = proxyService.canUploadResult(
+                model.getChainTaskId(),
+                walletAddress,
+                model.getZip()
+        );
 
         if (!canUploadResult) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();

@@ -33,7 +33,8 @@ class ProxyServiceTest {
     private static final byte[] RESULT_ZIP = Base64.getDecoder().decode("UEsDBBQACAgIADhKL1cAAAAAAAAAAAAAAAANAAAAY29tcHV0ZWQuanNvbqtWSkktSS3KzczLLC7JTNbNLy0pKC3RLUgsyVCyUlDSz0ytSE2OB4rqF6UWl+aU6JVUlCjVAgBQSwcIv08alTcAAAA2AAAAUEsDBBQACAgIADhKL1cAAAAAAAAAAAAAAAAKAAAAcmVzdWx0LnR4dG2NsQrDMAxEd33FdbOhoL1boUM/wnCE4MFg2qEZOvjjK9tKhhIbW9LTnQQC6G8ET7DX/5CQhnlJHol3FQkGAuOAU9ENPaqZE45k6h0NSC/N0Ff231DzgW3qbWxqDqeCZuDYkfpCehIQoeYHEtMOR4NRcHKantF55JlrfV9xr2XNF5HHsi2fvCFoyd+8srw03iDyA1BLBwgqyEkSkwAAAE0BAABQSwECFAAUAAgICAA4Si9Xv08alTcAAAA2AAAADQAAAAAAAAAAAAAAAAAAAAAAY29tcHV0ZWQuanNvblBLAQIUABQACAgIADhKL1cqyEkSkwAAAE0BAAAKAAAAAAAAAAAAAAAAAHIAAAByZXN1bHQudHh0UEsFBgAAAAACAAIAcwAAAD0BAAAAAA==");
     /**
      * {@link ChainContribution} with a hash
-     * corresponding to {@link ProxyServiceTest#RESULT_ZIP} hash.
+     * corresponding to {@link ProxyServiceTest#RESULT_ZIP} hash,
+     * including a fixed ChainTask ID: {@literal 0x59d9b6c36d6db89bae058ff55de6e4d6a6f6e0da3f9ea02297fc8d6d5f5cedf1}.
      */
     private static final ChainContribution CHAIN_CONTRIBUTION = ChainContribution.builder()
             .resultHash("0x865e1ebff87de7928040a42383b46690a12a988b278eb880e0e641f5da3cc9d1")

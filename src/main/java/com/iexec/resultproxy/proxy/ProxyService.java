@@ -99,7 +99,7 @@ public class ProxyService {
     }
 
     /**
-     * A result is considered as valid if:
+     * A result for a standard task is considered as valid if:
      * <ul>
      * <li>It has an associated on-chain contribution
      * <li>The on-chain contribution result hash is the one we compute here again.

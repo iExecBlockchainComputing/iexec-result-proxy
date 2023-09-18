@@ -132,7 +132,7 @@ class ProxyServiceTest {
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
+        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService, never()).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 

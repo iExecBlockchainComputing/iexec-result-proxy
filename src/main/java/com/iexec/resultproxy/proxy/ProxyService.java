@@ -59,10 +59,6 @@ public class ProxyService {
 
 
     boolean canUploadResult(String chainTaskId, String walletAddress, byte[] zip) {
-        if (!isResultValid(chainTaskId, walletAddress, zip)) {
-            return false;
-        }
-
         if (iexecHubService.isTeeTask(chainTaskId)){
             Optional<ChainTask> chainTask = iexecHubService.getChainTask(chainTaskId);//TODO Add requester field to getChainTask
             if (chainTask.isEmpty()){
@@ -98,7 +94,7 @@ public class ProxyService {
                 return false;
             }
 
-            return true;
+            return isResultValid(chainTaskId, walletAddress, zip);
         }
     }
 

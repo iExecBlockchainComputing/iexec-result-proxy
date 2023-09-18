@@ -1,7 +1,6 @@
 package com.iexec.resultproxy.proxy;
 
 import com.iexec.commons.poco.chain.ChainContribution;
-import com.iexec.commons.poco.chain.ChainContributionStatus;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +15,8 @@ import java.io.File;
 import java.util.Base64;
 import java.util.Optional;
 
+import static com.iexec.commons.poco.chain.ChainContributionStatus.REVEALED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class ProxyServiceTest {
@@ -61,86 +60,95 @@ class ProxyServiceTest {
 
     @Test
     void isNotAbleToUploadSinceNoChainContribution() {
+        when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
+        when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
+        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.empty());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
 
+        verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
+        verify(proxyService).isResultFound(CHAIN_TASK_ID);
+        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
-        verify(iexecHubService, never()).isTeeTask(CHAIN_TASK_ID);
-        verify(proxyService, never()).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, ChainContributionStatus.REVEALED);
     }
 
     @Test
     void isNotAbleToUploadSinceCantWriteZip() {
+        when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
+        when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
+        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn("/this/path/does/not/exist");
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
 
+        verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
+        verify(proxyService).isResultFound(CHAIN_TASK_ID);
+        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
-        verify(iexecHubService, never()).isTeeTask(CHAIN_TASK_ID);
-        verify(proxyService, never()).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, ChainContributionStatus.REVEALED);
     }
 
     @Test
     void isNotAbleToUploadSinceWrongHash() {
+        when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
+        when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
+        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, new byte[] {})).isFalse();
 
+        verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
+        verify(proxyService).isResultFound(CHAIN_TASK_ID);
+        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
-        verify(iexecHubService, never()).isTeeTask(CHAIN_TASK_ID);
-        verify(proxyService, never()).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, ChainContributionStatus.REVEALED);
     }
 
     @Test
     void isNotAbleToUploadSinceResultAlreadyExistsWithIpfs() {
-        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
-        when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(true);
+        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
+        when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
 
-        verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, ChainContributionStatus.REVEALED);
+        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
+        verify(iexecHubService, never()).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
     @Test
     void isNotAbleToUploadSinceChainStatusIsNotRevealedWithIpfs() {
-        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
-        when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(true);
-        when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(false);
+        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(false);
+        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
+        when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
 
-        verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, ChainContributionStatus.REVEALED);
+        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
+        verify(iexecHubService, never()).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
     @Test
     void isAbleToUploadWithIpfs() {
-        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
-        when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
-        when(iexecHubService.isStatusTrueOnChain(any(), any(), any())).thenReturn(true);
+        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
+        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
+        when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isTrue();
 
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, ChainContributionStatus.REVEALED);
+        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
     }
 }

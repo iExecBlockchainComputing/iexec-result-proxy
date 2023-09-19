@@ -74,7 +74,7 @@ class ProxyServiceTest {
     }
 
     @Test
-    void isNotAbleToUploadSinceCantWriteZip() {
+    void isNotAbleToUploadSinceCannotWriteZip() {
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
         when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);

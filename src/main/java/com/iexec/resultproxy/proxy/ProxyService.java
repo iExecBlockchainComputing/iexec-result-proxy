@@ -126,7 +126,7 @@ public class ProxyService {
             try {
                 Files.write(Path.of(resultZipPath), zip);
             } catch (IOException e) {
-                log.error("Can't write result file [chainTaskId:{}, walletAddress:{}]", chainTaskId, walletAddress);
+                log.error("Can't write result file [chainTaskId:{}, uploader:{}]", chainTaskId, walletAddress);
                 return false;
             }
              FileHelper.unZipFile(resultZipPath, zipDestinationPath);

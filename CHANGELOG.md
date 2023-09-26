@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Check result hash before uploading. (#101)
 ### Bug Fixes
 - Fix and harmonize `Dockerfile entrypoint` in all Spring Boot applications. (#98)
+- Describe upload limits configuration in README.md. (#99)
 ### Quality
 - Upgrade to Gradle 8.2.1 with up-to-date plugins. (#97)
 ### Dependency Upgrades

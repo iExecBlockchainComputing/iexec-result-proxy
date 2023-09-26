@@ -17,6 +17,8 @@ All notable changes to this project will be documented in this file.
 - Upgrade to Spring Boot 2.7.14. (#96)
 - Upgrade to Spring Dependency Management Plugin 1.1.3. (#96)
 - Upgrade to `jenkins-library` 2.7.3. (#100)
+- Upgrade to `iexec-common` 8.3.0. (#102)
+- Upgrade to `iexec-common-poco` 3.1.0. (#102)
 
 ## [[8.1.1]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.1.1) 2023-06-23
 

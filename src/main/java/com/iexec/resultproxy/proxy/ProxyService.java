@@ -17,6 +17,10 @@
 package com.iexec.resultproxy.proxy;
 
 
+import com.iexec.common.result.ComputedFile;
+import com.iexec.common.utils.FileHelper;
+import com.iexec.common.worker.result.ResultUtils;
+import com.iexec.commons.poco.chain.ChainContribution;
 import com.iexec.commons.poco.chain.ChainContributionStatus;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
@@ -27,7 +31,14 @@ import com.iexec.resultproxy.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
+
+import static com.iexec.common.utils.IexecFileHelper.SLASH_IEXEC_OUT;
+import static com.iexec.common.utils.IexecFileHelper.readComputedFile;
 
 /**
  * Service class to manage all the results. If the result is public, it will be stored on IPFS. If there is a dedicated
@@ -47,7 +58,7 @@ public class ProxyService {
     }
 
 
-    boolean canUploadResult(String chainTaskId, String walletAddress) {
+    boolean canUploadResult(String chainTaskId, String walletAddress, byte[] zip) {
         if (iexecHubService.isTeeTask(chainTaskId)){
             Optional<ChainTask> chainTask = iexecHubService.getChainTask(chainTaskId);//TODO Add requester field to getChainTask
             if (chainTask.isEmpty()){
@@ -83,8 +94,62 @@ public class ProxyService {
                 return false;
             }
 
-            return true;
+            return isResultValid(chainTaskId, walletAddress, zip);
         }
+    }
+
+    /**
+     * A result for a standard task is considered as valid if:
+     * <ul>
+     * <li>It has an associated on-chain contribution
+     * <li>The on-chain contribution result hash is the one we compute here again.
+     * </ul>
+     *
+     * @param chainTaskId   ID of the task
+     * @param walletAddress Address of the uploader
+     * @param zip           Result as a zip
+     * @return {@literal true} if the result is valid, {@literal false} otherwise.
+     */
+    boolean isResultValid(String chainTaskId, String walletAddress, byte[] zip) {
+        final String resultFolderPath = getResultFolderPath(chainTaskId);
+        final String resultZipPath = resultFolderPath + ".zip";
+        final String zipDestinationPath = resultFolderPath + SLASH_IEXEC_OUT;
+        try {
+            final Optional<ChainContribution> oChainContribution = iexecHubService.getChainContribution(chainTaskId, walletAddress);
+            if (oChainContribution.isEmpty()) {
+                log.error("Trying to upload result but no on-chain contribution [chainTaskId:{}, uploader:{}]",
+                        chainTaskId, walletAddress);
+                return false;
+            }
+
+            final String onChainHash = oChainContribution.get().getResultHash();
+            try {
+                Files.write(Path.of(resultZipPath), zip);
+            } catch (IOException e) {
+                log.error("Can't write result file [chainTaskId:{}, uploader:{}]", chainTaskId, walletAddress);
+                return false;
+            }
+             FileHelper.unZipFile(resultZipPath, zipDestinationPath);
+
+            final ComputedFile computedFile = readComputedFile(chainTaskId, zipDestinationPath);
+            final String resultDigest = ResultUtils.computeWeb2ResultDigest(computedFile, resultFolderPath);
+            final String computedResultHash = ResultUtils.computeResultHash(chainTaskId, resultDigest);
+
+            if (!Objects.equals(computedResultHash, onChainHash)) {
+                log.error("Trying to upload result but on-chain result hash differs from given hash " +
+                                "[chainTaskId:{}, uploader:{}, onChainHash:{}, computedResultHash:{}]",
+                        chainTaskId, walletAddress, onChainHash, computedResultHash);
+                return false;
+            }
+
+            return true;
+        } finally {
+            FileHelper.deleteFolder(resultFolderPath);
+        }
+    }
+
+    String getResultFolderPath(String chainTaskId) {
+        return "/tmp/" + chainTaskId;
     }
 
     boolean isResultFound(String chainTaskId) {

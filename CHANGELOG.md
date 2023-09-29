@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2023
 
+## [[8.2.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.2.0) 2023-09-28
+
 ### New Features
 - Remove `nexus.intra.iex.ec` repository. (#94)
 - Check result hash before uploading. (#101)

@@ -10,20 +10,20 @@ spring:
       auto-index-creation: true # Auto-index creation is disabled by default starting with Spring Data MongoDB 3.x.
 
 chain:
-    id: ${IEXEC_CHAIN_ID:134}
-    sidechain: ${IEXEC_IS_SIDECHAIN:true}
-    privateAddress: ${IEXEC_PRIVATE_CHAIN_ADDRESS:https://bellecour.iex.ec}
-    hubAddress: ${IEXEC_HUB_ADDRESS:0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f}
-    blockTime: ${IEXEC_BLOCK_TIME:PT5S}
-    gasPriceMultiplier: ${IEXEC_GAS_PRICE_MULTIPLIER:1.0} # txs will be sent with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
-    gasPriceCap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
+  id: ${IEXEC_CHAIN_ID:134}
+  sidechain: ${IEXEC_IS_SIDECHAIN:true}
+  privateAddress: ${IEXEC_PRIVATE_CHAIN_ADDRESS:https://bellecour.iex.ec}
+  hubAddress: ${IEXEC_HUB_ADDRESS:0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f}
+  blockTime: ${IEXEC_BLOCK_TIME:PT5S}
+  gasPriceMultiplier: ${IEXEC_GAS_PRICE_MULTIPLIER:1.0} # txs will be sent with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
+  gasPriceCap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
 
 ipfs:
   host: ${IEXEC_IPFS_HOST:127.0.0.1}
   port: ${IEXEC_IPFS_PORT:5001}
 
 jwt:
-  key-path: /data/jwt-sign.key
+  key-path: /app/jwt-sign.key
 
 springdoc:
   packagesToScan: com.iexec.resultproxy

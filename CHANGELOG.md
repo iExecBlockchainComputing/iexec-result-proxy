@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Add and use a non-root user in the dockerfile. (#106)
 
+### Dependency Upgrades
+
+- Upgrade to `jenkins-library` 2.7.4. (#107)
+
 ## [[8.2.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.2.0) 2023-09-28
 
 ### New Features

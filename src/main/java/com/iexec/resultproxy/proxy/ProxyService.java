@@ -21,7 +21,6 @@ import com.iexec.common.result.ComputedFile;
 import com.iexec.common.utils.FileHelper;
 import com.iexec.common.worker.result.ResultUtils;
 import com.iexec.commons.poco.chain.ChainContribution;
-import com.iexec.commons.poco.chain.ChainContributionStatus;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
 import com.iexec.commons.poco.task.TaskDescription;
@@ -39,6 +38,7 @@ import java.util.Optional;
 
 import static com.iexec.common.utils.IexecFileHelper.SLASH_IEXEC_OUT;
 import static com.iexec.common.utils.IexecFileHelper.readComputedFile;
+import static com.iexec.commons.poco.chain.ChainContributionStatus.REVEALED;
 
 /**
  * Service class to manage all the results. If the result is public, it will be stored on IPFS. If there is a dedicated
@@ -59,17 +59,18 @@ public class ProxyService {
 
 
     boolean canUploadResult(String chainTaskId, String walletAddress, byte[] zip) {
-        if (iexecHubService.isTeeTask(chainTaskId)){
-            Optional<ChainTask> chainTask = iexecHubService.getChainTask(chainTaskId);//TODO Add requester field to getChainTask
-            if (chainTask.isEmpty()){
+        if (iexecHubService.isTeeTask(chainTaskId)) {
+            //TODO Add requester field to getChainTask
+            Optional<ChainTask> chainTask = iexecHubService.getChainTask(chainTaskId);
+            if (chainTask.isEmpty()) {
                 log.error("Trying to upload result for TEE but getChainTask failed [chainTaskId:{}, uploader:{}]",
                         chainTaskId, walletAddress);
                 return false;
             }
-            boolean isActive = chainTask.get().getStatus().equals(ChainTaskStatus.ACTIVE);
+            boolean isActive = chainTask.get().getStatus() == ChainTaskStatus.ACTIVE;
 
             Optional<TaskDescription> taskDescription = iexecHubService.getTaskDescriptionFromChain(chainTaskId);
-            if (taskDescription.isEmpty()){
+            if (taskDescription.isEmpty()) {
                 log.error("Trying to upload result for TEE but getTaskDescription failed [chainTaskId:{}, uploader:{}]",
                         chainTaskId, walletAddress);
                 return false;
@@ -85,15 +86,6 @@ public class ProxyService {
                 return false;
             }
 
-            // ContributionStatus of chainTask should be REVEALED
-            boolean isChainContributionStatusSetToRevealed = iexecHubService.isStatusTrueOnChain(chainTaskId,
-                    walletAddress, ChainContributionStatus.REVEALED);
-            if (!isChainContributionStatusSetToRevealed) {
-                log.error("Trying to upload result even though ChainContributionStatus is not REVEALED [chainTaskId:{}, uploadRequester:{}]",
-                        chainTaskId, walletAddress);
-                return false;
-            }
-
             return isResultValid(chainTaskId, walletAddress, zip);
         }
     }
@@ -102,7 +94,8 @@ public class ProxyService {
      * A result for a standard task is considered as valid if:
      * <ul>
      * <li>It has an associated on-chain contribution
-     * <li>The on-chain contribution result hash is the one we compute here again.
+     * <li>The associated on-chain contribution status is {@code REVEALED}
+     * <li>The on-chain contribution result hash is the one we compute here again
      * </ul>
      *
      * @param chainTaskId   ID of the task
@@ -116,8 +109,13 @@ public class ProxyService {
         final String zipDestinationPath = resultFolderPath + SLASH_IEXEC_OUT;
         try {
             final Optional<ChainContribution> oChainContribution = iexecHubService.getChainContribution(chainTaskId, walletAddress);
-            if (oChainContribution.isEmpty()) {
-                log.error("Trying to upload result but no on-chain contribution [chainTaskId:{}, uploader:{}]",
+            // ContributionStatus of chainTask should be REVEALED
+            boolean isChainContributionStatusSetToRevealed = oChainContribution
+                    .map(ChainContribution::getStatus)
+                    .filter(chainStatus -> chainStatus == REVEALED)
+                    .isPresent();
+            if (!isChainContributionStatusSetToRevealed) {
+                log.error("Trying to upload result even though ChainContributionStatus is not REVEALED [chainTaskId:{}, uploadRequester:{}]",
                         chainTaskId, walletAddress);
                 return false;
             }
@@ -129,7 +127,7 @@ public class ProxyService {
                 log.error("Can't write result file [chainTaskId:{}, uploader:{}]", chainTaskId, walletAddress);
                 return false;
             }
-             FileHelper.unZipFile(resultZipPath, zipDestinationPath);
+            FileHelper.unZipFile(resultZipPath, zipDestinationPath);
 
             final ComputedFile computedFile = readComputedFile(chainTaskId, zipDestinationPath);
             final String resultDigest = ResultUtils.computeWeb2ResultDigest(computedFile, resultFolderPath);

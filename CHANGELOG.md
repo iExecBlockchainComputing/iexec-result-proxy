@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2023
 
+### Bug Fixes
+
+- Remove duplicated call to blockchain in `ProxyService`. (#110)
+
 ### Quality
 
 - Add and use a non-root user in the dockerfile. (#106)

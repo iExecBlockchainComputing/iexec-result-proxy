@@ -15,7 +15,6 @@
  */
 package com.iexec.resultproxy.version;
 
-
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

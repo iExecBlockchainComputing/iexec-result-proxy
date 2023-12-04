@@ -53,4 +53,3 @@ public class VersionController {
         return ResponseEntity.ok(buildProperties.getVersion());
     }
 }
-

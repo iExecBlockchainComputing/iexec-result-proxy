@@ -1,18 +1,20 @@
 package com.iexec.resultproxy;
 
-import com.iexec.resultproxy.version.VersionService;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
 
-    private final VersionService versionService;
+    public static final String TITLE = "iExec Result Proxy";
 
-    public OpenApiConfig(VersionService versionService) {
-        this.versionService = versionService;
+    private final BuildProperties buildProperties;
+
+    public OpenApiConfig(BuildProperties buildProperties) {
+        this.buildProperties = buildProperties;
     }
 
     /*
@@ -22,8 +24,8 @@ public class OpenApiConfig {
     public OpenAPI api() {
         return new OpenAPI().info(
                 new Info()
-                        .title("iExec Result Proxy")
-                        .version(versionService.getVersion())
+                        .title(TITLE)
+                        .version(buildProperties.getVersion())
         );
     }
 }

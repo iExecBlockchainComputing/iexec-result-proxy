@@ -61,7 +61,7 @@ dependencies {
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     // Spring Doc
-    implementation 'org.springdoc:springdoc-openapi-ui:1.6.3'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 
     // ipfs
     implementation 'com.github.ipfs:java-ipfs-http-client:1.4.0'

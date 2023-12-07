@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### New Features
 
-- Expose version through prometheus endpoint and through VersionController. (#111)
+- Expose version through prometheus endpoint and through VersionController. (#111 #112)
 
 ### Bug Fixes
 

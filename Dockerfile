@@ -1,15 +1,19 @@
-FROM eclipse-temurin:11.0.20_8-jre-focal
+FROM eclipse-temurin:11.0.21_9-jre-focal
 
 ARG jar
 
 RUN test -n "$jar"
 
 RUN apt-get update \
-    && apt-get install -y curl \
+    && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY $jar iexec-result-proxy.jar
+RUN groupadd --system appuser \
+    && useradd -g appuser -s /sbin/nologin -c "Docker image user" appuser
 
-# For Spring-Boot project, use the entrypoint
-# below to reduce Tomcat startup time.
+WORKDIR /app
+COPY $jar iexec-result-proxy.jar
+RUN chown -R appuser:appuser /app
+
+USER appuser
 ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "iexec-result-proxy.jar" ]

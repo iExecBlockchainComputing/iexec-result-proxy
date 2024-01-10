@@ -15,12 +15,14 @@ import java.io.File;
 import java.util.Base64;
 import java.util.Optional;
 
+import static com.iexec.commons.poco.chain.ChainContributionStatus.CONTRIBUTED;
 import static com.iexec.commons.poco.chain.ChainContributionStatus.REVEALED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class ProxyServiceTest {
     private static final String CHAIN_TASK_ID = "0x59d9b6c36d6db89bae058ff55de6e4d6a6f6e0da3f9ea02297fc8d6d5f5cedf1";
+    private static final String RESULT_HASH = "0x865e1ebff87de7928040a42383b46690a12a988b278eb880e0e641f5da3cc9d1";
     private static final String WALLET_ADDRESS = "0x123abc";
     /**
      * Contains a valid result zip, with the following files:
@@ -36,7 +38,8 @@ class ProxyServiceTest {
      * including a fixed ChainTask ID: {@literal 0x59d9b6c36d6db89bae058ff55de6e4d6a6f6e0da3f9ea02297fc8d6d5f5cedf1}.
      */
     private static final ChainContribution CHAIN_CONTRIBUTION = ChainContribution.builder()
-            .resultHash("0x865e1ebff87de7928040a42383b46690a12a988b278eb880e0e641f5da3cc9d1")
+            .status(REVEALED)
+            .resultHash(RESULT_HASH)
             .build();
 
     @TempDir
@@ -62,14 +65,12 @@ class ProxyServiceTest {
     void isNotAbleToUploadSinceNoChainContribution() {
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
-        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.empty());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
@@ -77,7 +78,6 @@ class ProxyServiceTest {
     void isNotAbleToUploadSinceCannotWriteZip() {
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
-        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn("/this/path/does/not/exist");
 
@@ -85,7 +85,6 @@ class ProxyServiceTest {
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
@@ -93,15 +92,13 @@ class ProxyServiceTest {
     void isNotAbleToUploadSinceWrongHash() {
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
-        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, new byte[] {})).isFalse();
+        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, new byte[]{})).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
@@ -116,23 +113,21 @@ class ProxyServiceTest {
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService, never()).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
     @Test
     void isNotAbleToUploadSinceChainStatusIsNotRevealedWithIpfs() {
+        ChainContribution chainContribution = ChainContribution.builder().status(CONTRIBUTED).resultHash(RESULT_HASH).build();
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(true);
-        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(false);
-        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
+        when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(chainContribution));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
         assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService, never()).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
         verify(iexecHubService, never()).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
     }
 
@@ -140,7 +135,6 @@ class ProxyServiceTest {
     void isAbleToUploadWithIpfs() {
         when(iexecHubService.isTeeTask(CHAIN_TASK_ID)).thenReturn(false);
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
-        when(iexecHubService.isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED)).thenReturn(true);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
@@ -149,6 +143,5 @@ class ProxyServiceTest {
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
-        verify(iexecHubService).isStatusTrueOnChain(CHAIN_TASK_ID, WALLET_ADDRESS, REVEALED);
     }
 }

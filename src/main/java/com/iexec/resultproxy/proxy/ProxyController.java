@@ -73,6 +73,18 @@ public class ProxyController {
         return ResponseEntity.ok(jwtString);
     }
 
+    /**
+     * Push result on IPFS through iExec Result Proxy.
+     *
+     * @param token JWT authorization
+     * @param model Result payload containing the bytes to push on IPFS
+     * @return A response entity indicating the status and details of the operation
+     * <ul>
+     * <li>HTTP 200 (OK) - If the result file was pushed on IPFS. The multihash will be included in the response body.
+     * <li>HTTP 400 (BAD REQUEST) - If the operation was authorized but the file could not be pushed.
+     * <li>HTTP 401 (UNAUTHORIZED) - If the operation was not authorized.
+     * </ul>
+     */
     @PostMapping("/")
     public ResponseEntity<String> addResult(@RequestHeader("Authorization") String token,
                                             @RequestBody ResultModel model) {
@@ -111,10 +123,21 @@ public class ProxyController {
         return ok(resultLink);
     }
 
+    /**
+     * Checks if a given task has been uploaded on IPFS through the current iExec Result Proxy instance.
+     *
+     * @param chainTaskId ID of the task
+     * @param token       JWT authorization
+     * @return A response entity indicating the status and details of the operation
+     * <ul>
+     * <li>HTTP 204 (NO CONTENT) - If the query was allowed and the given task result was uploaded through the current instance.
+     * <li>HTTP 401 (UNAUTHORIZED) - If the client is not authorized to query the information.
+     * <li>HTTP 404 (NOT FOUND) - If the query was allowed and no associated result was found.
+     * </ul>
+     */
     @RequestMapping(method = RequestMethod.HEAD, path = "/results/{chainTaskId}")
     public ResponseEntity<String> isResultUploaded(@PathVariable(name = "chainTaskId") String chainTaskId,
                                                    @RequestHeader("Authorization") String token) {
-
         if (!jwtService.isValidJwt(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

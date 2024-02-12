@@ -21,12 +21,12 @@ import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import feign.Response;
 
 /**
  * Interface allowing to instantiate a Feign client targeting Result Proxy REST endpoints.
  * <p>
  * To create the client, see the related builder.
+ *
  * @see ResultProxyClientBuilder
  */
 public interface ResultProxyClient {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 IEXEC BLOCKCHAIN TECH
+ * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,6 @@ public interface ResultProxyClient {
     String isResultUploaded(
             @Param("authorization") String authorization,
             @Param("chainTaskId") String chainTaskId
-    );
-
-    @RequestLine("GET /results/{chainTaskId}?chainId={chainId}")
-    @Headers({"Accept: application/zip", "Authorization: {authorization}"})
-    Response getResult(
-            @Param("chainTaskId") String chainTaskId,
-            @Param("authorization") String token,
-            @Param("chainId") int chainId
     );
 
     @RequestLine("GET /results/{chainTaskId}/ipfshash")

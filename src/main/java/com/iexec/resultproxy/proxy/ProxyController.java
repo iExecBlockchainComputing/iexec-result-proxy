@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iexec.resultproxy.proxy;
 
 import com.iexec.common.result.ResultModel;
@@ -115,44 +131,12 @@ public class ProxyController {
         return ResponseEntity.status(status).build();
     }
 
-    @GetMapping(value = "/results/{chainTaskId}", produces = "application/zip")
-    public ResponseEntity<byte[]> getResult(@PathVariable("chainTaskId") String chainTaskId,
-                                            @RequestHeader(name = "Authorization") String token,
-                                            @RequestParam(name = "chainId") Integer chainId) {
-
-        if (!jwtService.isValidJwt(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
-        }
-
-        Optional<byte[]> zip = proxyService.getResult(chainTaskId);
-        if (zip.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
-        }
-
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename="
-                        + AbstractResultStorage.getResultFilename(chainTaskId) + ".zip")
-                .body(zip.get());
-    }
-
-    /*
-        IPFS Gateway endpoint
+    /**
+     * Retrieves ipfsHash for taskId if required
+     *
+     * @param chainTaskId ID of the task
+     * @return IPFS multihash if found
      */
-    @GetMapping(value = "/results/ipfs/{ipfsHash}", produces = "application/zip")
-    public ResponseEntity<byte[]> getResult(@PathVariable("ipfsHash") String ipfsHash) {
-        Optional<byte[]> zip = ipfsService.get(ipfsHash);
-        if (zip.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build();
-        }
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename="
-                        + AbstractResultStorage.getResultFilename(ipfsHash) + ".zip")
-                .body(zip.get());
-    }
-
-    /*
-     *   Retrieves ipfsHash for taskId if required
-     * */
     @GetMapping("/results/{chainTaskId}/ipfshash")
     public ResponseEntity<String> getIpfsHashForTask(@PathVariable("chainTaskId") String chainTaskId) {
         String ipfsHashForTask = ipfsNameService.getIpfsHashForTask(chainTaskId);

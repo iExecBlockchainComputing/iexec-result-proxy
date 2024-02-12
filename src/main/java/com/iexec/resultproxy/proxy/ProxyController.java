@@ -50,12 +50,20 @@ public class ProxyController {
         this.ipfsNameService = ipfsNameService;
     }
 
+    /**
+     * @deprecated Use new endpoint with valid {@code WorkerpoolAuthorization}
+     */
+    @Deprecated(forRemoval = true)
     @GetMapping(value = "/results/challenge")
     public ResponseEntity<EIP712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
         EIP712Challenge eip712Challenge = challengeService.createChallenge(chainId); // TODO generate challenge from walletAddress
         return ResponseEntity.ok(eip712Challenge);
     }
 
+    /**
+     * @deprecated Use new endpoint with valid {@code WorkerpoolAuthorization}
+     */
+    @Deprecated(forRemoval = true)
     @PostMapping(value = "/results/login")
     public ResponseEntity<String> login(@RequestParam(name = "chainId") Integer chainId,
                                         @RequestBody String token) {
@@ -74,6 +82,16 @@ public class ProxyController {
     }
 
     /**
+     * @deprecated use {@code /results} endpoint, will be removed in v10
+     */
+    @Deprecated(forRemoval = true)
+    @PostMapping("/")
+    public ResponseEntity<String> addResultDeprecated(@RequestHeader("Authorization") String token,
+                                                      @RequestBody ResultModel model) {
+        return addResult(token, model);
+    }
+
+    /**
      * Push result on IPFS through iExec Result Proxy.
      *
      * @param token JWT authorization
@@ -85,7 +103,7 @@ public class ProxyController {
      * <li>HTTP 401 (UNAUTHORIZED) - If the operation was not authorized.
      * </ul>
      */
-    @PostMapping("/")
+    @PostMapping("/results")
     public ResponseEntity<String> addResult(@RequestHeader("Authorization") String token,
                                             @RequestBody ResultModel model) {
 

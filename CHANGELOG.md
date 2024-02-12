@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Add `AuthorizationService` to enable `WorkerpoolAuthorization` validation. (#116)
 
-### Bug Fixes
+### Quality
 
 - Remove results download endpoints which are never used. (#117)
 

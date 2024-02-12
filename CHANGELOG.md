@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Add `AuthorizationService` to enable `WorkerpoolAuthorization` validation. (#116)
 
+### Quality
+
+- Remove results download endpoints which are never used. (#117)
+
 ## [[8.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.3.0) 2024-01-10
 
 ### New Features

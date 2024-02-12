@@ -20,17 +20,13 @@ import com.iexec.common.result.ResultModel;
 import com.iexec.common.security.SignedChallenge;
 import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import com.iexec.resultproxy.challenge.ChallengeService;
-import com.iexec.resultproxy.ipfs.IpfsService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
-import com.iexec.resultproxy.result.AbstractResultStorage;
 import com.iexec.resultproxy.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -42,18 +38,15 @@ public class ProxyController {
     private final ChallengeService challengeService;
     private final JwtService jwtService;
     private final ProxyService proxyService;
-    private final IpfsService ipfsService;
     private final IpfsNameService ipfsNameService;
 
     public ProxyController(ChallengeService challengeService,
                            JwtService jwtService,
                            ProxyService proxyService,
-                           IpfsService ipfsService,
                            IpfsNameService ipfsNameService) {
         this.challengeService = challengeService;
         this.jwtService = jwtService;
         this.proxyService = proxyService;
-        this.ipfsService = ipfsService;
         this.ipfsNameService = ipfsNameService;
     }
 

@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Deprecation Notices
 
-- Deprecate `/results/challenge` and `/results/login` endpoints. (#119)
-- Deprecate `/` endpoint. Use `/results` instead. (#119)
+- Deprecate `/results/challenge` and `/results/login` endpoints. They will be removed in **v10**. (#119)
+- Deprecate `/` endpoint. Use `/results` instead. The `/` endpoint will be removed in **v10**. (#119)
 
 ### New Features
 

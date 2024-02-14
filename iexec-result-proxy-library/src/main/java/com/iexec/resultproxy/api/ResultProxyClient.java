@@ -31,27 +31,29 @@ import feign.RequestLine;
  */
 public interface ResultProxyClient {
 
+    @Deprecated(forRemoval = true)
     @RequestLine("GET /results/challenge?chainId={chainId}")
     EIP712Challenge getChallenge(@Param("chainId") int chainId);
 
+    @Deprecated(forRemoval = true)
     @RequestLine("POST /results/login?chainId={chainId}")
     String login(@Param("chainId") int chainId, String token);
 
-    @RequestLine("POST /")
+    @RequestLine("POST /v1/results")
     @Headers("Authorization: {authorization}")
     String addResult(
             @Param("authorization") String authorization,
             ResultModel model
     );
 
-    @RequestLine("HEAD /results/{chainTaskId}")
+    @RequestLine("HEAD /v1/results/{chainTaskId}")
     @Headers("Authorization: {authorization}")
     String isResultUploaded(
             @Param("authorization") String authorization,
             @Param("chainTaskId") String chainTaskId
     );
 
-    @RequestLine("GET /results/{chainTaskId}/ipfshash")
+    @RequestLine("GET /v1/results/{chainTaskId}/ipfshash")
     String getIpfsHashForTask(@Param("chainTaskId") String chainTaskId);
 
 }

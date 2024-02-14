@@ -7,11 +7,12 @@ All notable changes to this project will be documented in this file.
 ### Deprecation Notices
 
 - Deprecate `/results/challenge` and `/results/login` endpoints. They will be removed in **v10**. (#119)
-- Deprecate `/` endpoint. Use `/results` instead. The `/` endpoint will be removed in **v10**. (#119)
+- Deprecate `/` endpoint. Use `/v1/results` instead. The `/` endpoint will be removed in **v10**. (#119 #120)
 
 ### New Features
 
 - Add `AuthorizationService` to enable `WorkerpoolAuthorization` validation. (#116)
+- Label REST API with `v1` version. (#120)
 
 ### Quality
 

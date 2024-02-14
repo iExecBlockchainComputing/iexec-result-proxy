@@ -82,7 +82,7 @@ public class ProxyController {
     }
 
     /**
-     * @deprecated use {@code /results} endpoint, will be removed in v10
+     * @deprecated Use {@code /v1/results} endpoint, will be removed in v10
      */
     @Deprecated(forRemoval = true)
     @PostMapping("/")
@@ -103,10 +103,9 @@ public class ProxyController {
      * <li>HTTP 401 (UNAUTHORIZED) - If the operation was not authorized.
      * </ul>
      */
-    @PostMapping("/results")
+    @PostMapping("/v1/results")
     public ResponseEntity<String> addResult(@RequestHeader("Authorization") String token,
                                             @RequestBody ResultModel model) {
-
         if (!jwtService.isValidJwt(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
@@ -142,6 +141,16 @@ public class ProxyController {
     }
 
     /**
+     * @deprecated Use {@code /v1/results/{chainTaskId}} endpoint, will be removed in v10
+     */
+    @Deprecated(forRemoval = true)
+    @RequestMapping(method = RequestMethod.HEAD, path = "/results/{chainTaskId}")
+    public ResponseEntity<String> isResultUploadedDeprecated(@PathVariable(name = "chainTaskId") String chainTaskId,
+                                                             @RequestHeader("Authorization") String token) {
+        return isResultUploaded(chainTaskId, token);
+    }
+
+    /**
      * Checks if a given task has been uploaded on IPFS through the current iExec Result Proxy instance.
      *
      * @param chainTaskId ID of the task
@@ -153,7 +162,7 @@ public class ProxyController {
      * <li>HTTP 404 (NOT FOUND) - If the query was allowed and no associated result was found.
      * </ul>
      */
-    @RequestMapping(method = RequestMethod.HEAD, path = "/results/{chainTaskId}")
+    @RequestMapping(method = RequestMethod.HEAD, path = "/v1/results/{chainTaskId}")
     public ResponseEntity<String> isResultUploaded(@PathVariable(name = "chainTaskId") String chainTaskId,
                                                    @RequestHeader("Authorization") String token) {
         if (!jwtService.isValidJwt(token)) {
@@ -166,12 +175,21 @@ public class ProxyController {
     }
 
     /**
+     * @deprecated Use {@code /v1/results/{chainTaskId}/ipfshash} endpoint, will be removed in v10
+     */
+    @Deprecated(forRemoval = true)
+    @GetMapping("/results/{chainTaskId}/ipfshash")
+    public ResponseEntity<String> getIpfsHashForTaskDeprecated(@PathVariable("chainTaskId") String chainTaskId) {
+        return getIpfsHashForTask(chainTaskId);
+    }
+
+    /**
      * Retrieves ipfsHash for taskId if required
      *
      * @param chainTaskId ID of the task
      * @return IPFS multihash if found
      */
-    @GetMapping("/results/{chainTaskId}/ipfshash")
+    @GetMapping("/v1/results/{chainTaskId}/ipfshash")
     public ResponseEntity<String> getIpfsHashForTask(@PathVariable("chainTaskId") String chainTaskId) {
         String ipfsHashForTask = ipfsNameService.getIpfsHashForTask(chainTaskId);
         if (ipfsHashForTask.isEmpty()) {

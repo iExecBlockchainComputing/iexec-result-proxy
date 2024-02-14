@@ -121,14 +121,14 @@ class ProxyControllerTests {
 
     // region isResultUploaded
     @Test
-    void shouldNotAnswerWhenJwtNotValid() {
+    void shouldAnswerUnauthorizedWhenJwtNotValid() {
         when(jwtService.isValidJwt("token")).thenReturn(false);
         assertThat(controller.isResultUploaded("chainTaskId", "token"))
                 .isEqualTo(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @Test
-    void shouldAnswerNotFound() {
+    void shouldAnswerNotFoundWhenResultNotFound() {
         when(jwtService.isValidJwt("token")).thenReturn(true);
         when(proxyService.isResultFound("chainTaskId")).thenReturn(false);
         assertThat(controller.isResultUploaded("chainTaskId", "token"))
@@ -136,7 +136,7 @@ class ProxyControllerTests {
     }
 
     @Test
-    void shouldAnswerNoContent() {
+    void shouldAnswerNoContentWhenResultFound() {
         when(jwtService.isValidJwt("token")).thenReturn(true);
         when(proxyService.isResultFound("chainTaskId")).thenReturn(true);
         assertThat(controller.isResultUploaded("chainTaskId", "token"))
@@ -146,7 +146,7 @@ class ProxyControllerTests {
 
     // region getIpfsHashForTask
     @Test
-    void whouldAnswerNotFound() {
+    void shouldAnswerNotFoundWhenIpfsHashNotFound() {
         when(ipfsNameService.getIpfsHashForTask(CHAIN_TASK_ID)).thenReturn("");
         assertThat(controller.getIpfsHashForTask(CHAIN_TASK_ID))
                 .isEqualTo(ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build());

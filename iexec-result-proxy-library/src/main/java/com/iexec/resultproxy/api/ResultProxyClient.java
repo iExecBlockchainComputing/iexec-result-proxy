@@ -31,10 +31,16 @@ import feign.RequestLine;
  */
 public interface ResultProxyClient {
 
+    /**
+     * @deprecated Will be replaced with new flow
+     */
     @Deprecated(forRemoval = true)
     @RequestLine("GET /results/challenge?chainId={chainId}")
     EIP712Challenge getChallenge(@Param("chainId") int chainId);
 
+    /**
+     * @deprecated Will be replaced with new flow
+     */
     @Deprecated(forRemoval = true)
     @RequestLine("POST /results/login?chainId={chainId}")
     String login(@Param("chainId") int chainId, String token);

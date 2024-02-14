@@ -25,11 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ProxyControllerTests {
@@ -42,6 +44,7 @@ class ProxyControllerTests {
     @Mock
     private ProxyService proxyService;
 
+    @Spy
     @InjectMocks
     private ProxyController controller;
 
@@ -49,6 +52,15 @@ class ProxyControllerTests {
     void init() {
         MockitoAnnotations.openMocks(this);
     }
+
+    // region deprecated methods
+    @Test
+    void shouldCallAddResult() {
+        final ResultModel model = ResultModel.builder().build();
+        controller.addResultDeprecated("token", model);
+        verify(controller).addResult("token", model);
+    }
+    // endregion
 
     // region addResult
     @Test

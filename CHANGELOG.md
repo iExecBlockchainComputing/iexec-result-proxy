@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2024
 
+### Deprecation Notices
+
+- Deprecate `/results/challenge` and `/results/login` endpoints. They will be removed in **v10**. (#119)
+- Deprecate `/` endpoint. Use `/results` instead. The `/` endpoint will be removed in **v10**. (#119)
+
 ### New Features
 
 - Add `AuthorizationService` to enable `WorkerpoolAuthorization` validation. (#116)

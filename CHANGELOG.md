@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 
 - Remove results download endpoints which are never used. (#117)
 - Add tests and javadoc on `ProxyController` class. (#118)
+- Remove `AbstractResultStorage` class. (#121)
 
 ## [[8.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.3.0) 2024-01-10
 

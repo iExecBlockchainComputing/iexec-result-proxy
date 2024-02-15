@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 IEXEC BLOCKCHAIN TECH
+ * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.iexec.resultproxy.proxy;
 
-
 import com.iexec.common.result.ComputedFile;
+import com.iexec.common.result.ResultModel;
 import com.iexec.common.utils.FileHelper;
 import com.iexec.common.worker.result.ResultUtils;
 import com.iexec.commons.poco.chain.ChainContribution;
@@ -26,7 +26,6 @@ import com.iexec.commons.poco.chain.ChainTaskStatus;
 import com.iexec.commons.poco.task.TaskDescription;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
-import com.iexec.resultproxy.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +57,9 @@ public class ProxyService {
     }
 
 
-    boolean canUploadResult(String chainTaskId, String walletAddress, byte[] zip) {
+    boolean canUploadResult(ResultModel model, String walletAddress) {
+        final String chainTaskId = model.getChainTaskId();
+        final byte[] zip = model.getZip();
         if (iexecHubService.isTeeTask(chainTaskId)) {
             //TODO Add requester field to getChainTask
             Optional<ChainTask> chainTask = iexecHubService.getChainTask(chainTaskId);
@@ -154,14 +155,7 @@ public class ProxyService {
         return ipfsResultService.doesResultExist(chainTaskId);
     }
 
-    String addResult(Result result, byte[] data) {
-        if (result == null || result.getChainTaskId() == null) {
-            return "";
-        }
-        return ipfsResultService.addResult(result, data);
-    }
-
-    Optional<byte[]> getResult(String chainTaskId) {
-        return ipfsResultService.getResult(chainTaskId);
+    String addResult(ResultModel model) {
+        return ipfsResultService.addResult(model.getChainTaskId(), model.getZip());
     }
 }

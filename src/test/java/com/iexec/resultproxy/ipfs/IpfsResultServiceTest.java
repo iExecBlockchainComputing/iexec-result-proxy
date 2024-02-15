@@ -18,7 +18,6 @@ package com.iexec.resultproxy.ipfs;
 
 import com.iexec.commons.poco.utils.BytesUtils;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
-import com.iexec.resultproxy.result.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -62,14 +61,14 @@ class IpfsResultServiceTest {
     @Test
     void shouldNotAddResult() {
         when(ipfsNameService.getIpfsHashForTask(anyString())).thenReturn("QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA");
-        assertThat(ipfsResultService.addResult(Result.builder().chainTaskId(chainTaskId).build(), new byte[0])).isEmpty();
+        assertThat(ipfsResultService.addResult(chainTaskId, new byte[0])).isEmpty();
     }
 
     @Test
     void shouldAddResult() {
         when(ipfsNameService.getIpfsHashForTask(anyString())).thenReturn("");
         when(ipfsService.add(any(), any())).thenReturn("QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA");
-        assertThat(ipfsResultService.addResult(Result.builder().chainTaskId(chainTaskId).build(), new byte[0]))
+        assertThat(ipfsResultService.addResult(chainTaskId, new byte[0]))
                 .isEqualTo("/ipfs/QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA");
     }
     // endregion

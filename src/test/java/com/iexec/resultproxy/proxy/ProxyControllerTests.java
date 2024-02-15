@@ -93,7 +93,7 @@ class ProxyControllerTests {
     @Test
     void shouldNotAddResultOnChecksFailure() {
         when(jwtService.isValidJwt("token")).thenReturn(true);
-        when(proxyService.canUploadResult(any(), any(), any())).thenReturn(false);
+        when(proxyService.canUploadResult(any(), any())).thenReturn(false);
         assertThat(controller.addResult("token", ResultModel.builder().build()))
                 .isEqualTo(ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build());
     }
@@ -102,8 +102,8 @@ class ProxyControllerTests {
     void shouldNotAddResultOnEmptyResultLink() {
         final ResultModel model = ResultModel.builder().build();
         when(jwtService.isValidJwt("token")).thenReturn(true);
-        when(proxyService.canUploadResult(any(), any(), any())).thenReturn(true);
-        when(proxyService.addResult(any(), any())).thenReturn("");
+        when(proxyService.canUploadResult(any(), any())).thenReturn(true);
+        when(proxyService.addResult(any())).thenReturn("");
         assertThat(controller.addResult("token", model))
                 .isEqualTo(ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).build());
     }
@@ -112,8 +112,8 @@ class ProxyControllerTests {
     void shouldAddResult() {
         final ResultModel model = ResultModel.builder().build();
         when(jwtService.isValidJwt("token")).thenReturn(true);
-        when(proxyService.canUploadResult(any(), any(), any())).thenReturn(true);
-        when(proxyService.addResult(any(), any())).thenReturn("/ipfs");
+        when(proxyService.canUploadResult(any(), any())).thenReturn(true);
+        when(proxyService.addResult(any())).thenReturn("/ipfs");
         assertThat(controller.addResult("token", model))
                 .isEqualTo(ResponseEntity.ok("/ipfs"));
     }

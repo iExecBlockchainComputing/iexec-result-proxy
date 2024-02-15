@@ -19,6 +19,7 @@ package com.iexec.resultproxy.proxy;
 import com.iexec.common.result.ResultModel;
 import com.iexec.resultproxy.authorization.AuthorizationService;
 import com.iexec.resultproxy.challenge.EIP712ChallengeService;
+import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +36,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ProxyControllerTests {
+
+    private static final String CHAIN_TASK_ID = "0x0";
+    private static final String TOKEN = "TOKEN";
+
     @Mock
     private AuthorizationService authorizationService;
     @Mock
     private EIP712ChallengeService challengeService;
+    @Mock
+    private IpfsNameService ipfsNameService;
     @Mock
     private JwtService jwtService;
     @Mock
@@ -53,12 +60,25 @@ class ProxyControllerTests {
         MockitoAnnotations.openMocks(this);
     }
 
-    // region deprecated methods
+    // region deprecated methods, to remove in v10
     @Test
     void shouldCallAddResult() {
         final ResultModel model = ResultModel.builder().build();
-        controller.addResultDeprecated("token", model);
-        verify(controller).addResult("token", model);
+        controller.addResultDeprecated(TOKEN, model);
+        verify(controller).addResult(TOKEN, model);
+    }
+
+    @Test
+    void shouldCallIsResultUploaded() {
+        controller.isResultUploadedDeprecated(CHAIN_TASK_ID, TOKEN);
+        verify(controller).isResultUploaded(CHAIN_TASK_ID, TOKEN);
+    }
+
+    @Test
+    void shouldCallGetIpfsHashForTask() {
+        when(ipfsNameService.getIpfsHashForTask(CHAIN_TASK_ID)).thenReturn("");
+        controller.getIpfsHashForTaskDeprecated(CHAIN_TASK_ID);
+        verify(controller).getIpfsHashForTask(CHAIN_TASK_ID);
     }
     // endregion
 
@@ -101,14 +121,14 @@ class ProxyControllerTests {
 
     // region isResultUploaded
     @Test
-    void shouldNotAnswerWhenJwtNotValid() {
+    void shouldAnswerUnauthorizedWhenJwtNotValid() {
         when(jwtService.isValidJwt("token")).thenReturn(false);
         assertThat(controller.isResultUploaded("chainTaskId", "token"))
                 .isEqualTo(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @Test
-    void shouldAnswerNotFound() {
+    void shouldAnswerNotFoundWhenResultNotFound() {
         when(jwtService.isValidJwt("token")).thenReturn(true);
         when(proxyService.isResultFound("chainTaskId")).thenReturn(false);
         assertThat(controller.isResultUploaded("chainTaskId", "token"))
@@ -116,11 +136,20 @@ class ProxyControllerTests {
     }
 
     @Test
-    void shouldAnswerNoContent() {
+    void shouldAnswerNoContentWhenResultFound() {
         when(jwtService.isValidJwt("token")).thenReturn(true);
         when(proxyService.isResultFound("chainTaskId")).thenReturn(true);
         assertThat(controller.isResultUploaded("chainTaskId", "token"))
                 .isEqualTo(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+    }
+    // endregion
+
+    // region getIpfsHashForTask
+    @Test
+    void shouldAnswerNotFoundWhenIpfsHashNotFound() {
+        when(ipfsNameService.getIpfsHashForTask(CHAIN_TASK_ID)).thenReturn("");
+        assertThat(controller.getIpfsHashForTask(CHAIN_TASK_ID))
+                .isEqualTo(ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build());
     }
     // endregion
 }

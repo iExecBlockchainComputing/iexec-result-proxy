@@ -18,7 +18,9 @@ package com.iexec.resultproxy.proxy;
 
 import com.iexec.common.result.ResultModel;
 import com.iexec.common.security.SignedChallenge;
+import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
 import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
+import com.iexec.resultproxy.authorization.AuthorizationService;
 import com.iexec.resultproxy.challenge.ChallengeService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
@@ -34,15 +36,18 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 public class ProxyController {
 
+    private final AuthorizationService authorizationService;
     private final ChallengeService challengeService;
     private final JwtService jwtService;
     private final ProxyService proxyService;
     private final IpfsNameService ipfsNameService;
 
-    public ProxyController(ChallengeService challengeService,
+    public ProxyController(AuthorizationService authorizationService,
+                           ChallengeService challengeService,
                            JwtService jwtService,
                            ProxyService proxyService,
                            IpfsNameService ipfsNameService) {
+        this.authorizationService = authorizationService;
         this.challengeService = challengeService;
         this.jwtService = jwtService;
         this.proxyService = proxyService;
@@ -55,7 +60,7 @@ public class ProxyController {
     @Deprecated(forRemoval = true)
     @GetMapping(value = "/results/challenge")
     public ResponseEntity<EIP712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
-        EIP712Challenge eip712Challenge = challengeService.createChallenge(chainId); // TODO generate challenge from walletAddress
+        EIP712Challenge eip712Challenge = challengeService.createChallenge(chainId);
         return ResponseEntity.ok(eip712Challenge);
     }
 
@@ -71,12 +76,30 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String jwtString = jwtService.getOrCreateJwt(signedChallenge);
+        String jwtString = jwtService.getOrCreateJwt(signedChallenge.getWalletAddress());
         if (jwtString == null || jwtString.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
         challengeService.invalidateChallenge(signedChallenge.getChallengeHash());
+        return ResponseEntity.ok(jwtString);
+    }
+
+    /**
+     * Logs against Result Proxy with valid {@code WorkerpoolAuthorization}.
+     */
+    @PostMapping("/v1/results/token")
+    public ResponseEntity<String> getJwt(@RequestHeader("Authorization") String authorization,
+                                         @RequestBody WorkerpoolAuthorization workerpoolAuthorization) {
+        final String workerAddress = workerpoolAuthorization.getWorkerWallet();
+        final String challenge = authorizationService.getChallengeForWorker(workerpoolAuthorization);
+        if (!authorizationService.isSignedByHimself(challenge, authorization, workerAddress)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (authorizationService.isAuthorizedOnExecutionWithDetailedIssue(workerpoolAuthorization).isPresent()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        final String jwtString = jwtService.getOrCreateJwt(workerpoolAuthorization.getWorkerWallet());
         return ResponseEntity.ok(jwtString);
     }
 

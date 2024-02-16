@@ -96,6 +96,9 @@ public class ProxyController {
         if (!authorizationService.isSignedByHimself(challenge, authorization, workerAddress)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        if (authorizationService.isAuthorizedOnExecutionWithDetailedIssue(workerpoolAuthorization).isPresent()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         final String jwtString = jwtService.getOrCreateJwt(workerpoolAuthorization.getWorkerWallet());
         return ResponseEntity.ok(jwtString);
     }

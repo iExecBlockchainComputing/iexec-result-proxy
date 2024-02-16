@@ -49,7 +49,7 @@ public class AuthorizationService {
      * If not authorized, return the reason.
      * Otherwise, returns an empty {@link Optional}.
      */
-    public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization workerpoolAuthorization, boolean isTeeTask) {
+    public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization workerpoolAuthorization) {
         if (workerpoolAuthorization == null || StringUtils.isEmpty(workerpoolAuthorization.getChainTaskId())) {
             log.error("Not authorized with empty params");
             return Optional.of(EMPTY_PARAMS_UNAUTHORIZED);
@@ -78,7 +78,8 @@ public class AuthorizationService {
         }
         ChainDeal chainDeal = optionalChainDeal.get();
 
-        boolean isTeeTaskOnchain = TeeUtils.isTeeTag(chainDeal.getTag());
+        final boolean isTeeTask = !workerpoolAuthorization.getEnclaveChallenge().equals(BytesUtils.EMPTY_HEX_STRING_32);
+        final boolean isTeeTaskOnchain = TeeUtils.isTeeTag(chainDeal.getTag());
         if (isTeeTask != isTeeTaskOnchain) {
             log.error("Could not match onchain task type [isTeeTask:{}, isTeeTaskOnchain:{}, chainTaskId:{}, walletAddress:{}]",
                     isTeeTask, isTeeTaskOnchain, chainTaskId, workerpoolAuthorization.getWorkerWallet());

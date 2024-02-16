@@ -31,6 +31,9 @@ import org.mockito.Spy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
+
+import static com.iexec.resultproxy.authorization.AuthorizationError.EMPTY_PARAMS_UNAUTHORIZED;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -107,9 +110,19 @@ class ProxyControllerTests {
     }
 
     @Test
+    void shouldNotGetJwtWhenWorkerpoolAuthorizationIsNotValid() {
+        when(authorizationService.getChallengeForWorker(AUTHORIZATION)).thenReturn(WORKER_CHALLENGE);
+        when(authorizationService.isSignedByHimself(WORKER_CHALLENGE, WORKER_AUTH, WORKER_WALLET)).thenReturn(true);
+        when(authorizationService.isAuthorizedOnExecutionWithDetailedIssue(AUTHORIZATION)).thenReturn(Optional.of(EMPTY_PARAMS_UNAUTHORIZED));
+        assertThat(controller.getJwt(WORKER_AUTH, AUTHORIZATION))
+                .isEqualTo(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @Test
     void shouldGetJwtWhenAuthorizationIsValid() {
         when(authorizationService.getChallengeForWorker(AUTHORIZATION)).thenReturn(WORKER_CHALLENGE);
         when(authorizationService.isSignedByHimself(WORKER_CHALLENGE, WORKER_AUTH, WORKER_WALLET)).thenReturn(true);
+        when(authorizationService.isAuthorizedOnExecutionWithDetailedIssue(AUTHORIZATION)).thenReturn(Optional.empty());
         when(jwtService.getOrCreateJwt(WORKER_WALLET)).thenReturn(TOKEN);
         assertThat(controller.getJwt(WORKER_AUTH, AUTHORIZATION))
                 .isEqualTo(ResponseEntity.ok(TOKEN));

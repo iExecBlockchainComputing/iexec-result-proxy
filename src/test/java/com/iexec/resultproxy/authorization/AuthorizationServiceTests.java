@@ -21,6 +21,7 @@ import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
 import com.iexec.commons.poco.security.Signature;
 import com.iexec.commons.poco.tee.TeeUtils;
+import com.iexec.commons.poco.utils.BytesUtils;
 import com.iexec.commons.poco.utils.TestUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,13 +68,13 @@ class AuthorizationServiceTests {
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth, true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEmpty();
     }
 
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWithNullAuthorizationWithDetails() {
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(null, true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(null);
         assertThat(isAuth)
                 .isNotEmpty()
                 .contains(EMPTY_PARAMS_UNAUTHORIZED);
@@ -81,7 +82,7 @@ class AuthorizationServiceTests {
 
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWithEmptyAuthorizationWithDetails() {
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization.builder().build(), true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization.builder().build());
         assertThat(isAuth).isNotEmpty()
                 .contains(EMPTY_PARAMS_UNAUTHORIZED);
     }
@@ -90,11 +91,15 @@ class AuthorizationServiceTests {
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenTaskTypeNotMatchedOnchainWithDetails() {
         ChainDeal chainDeal = getChainDeal();
         ChainTask chainTask = TestUtils.getChainTask(ACTIVE);
-        WorkerpoolAuthorization auth = TestUtils.getTeeWorkerpoolAuth();
+        WorkerpoolAuthorization auth = WorkerpoolAuthorization.builder()
+                .chainTaskId("0x1111111111111111111111111111111111111111111111111111111111111111")
+                .workerWallet("0x87ae2b87b5db23830572988fb1f51242fbc471ce")
+                .enclaveChallenge(BytesUtils.EMPTY_HEX_STRING_32)
+                .build();
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth, false);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth)
                 .isNotEmpty()
                 .contains(NO_MATCH_ONCHAIN_TYPE);
@@ -106,7 +111,7 @@ class AuthorizationServiceTests {
         when(iexecHubService.isTeeTask(auth.getChainTaskId())).thenReturn(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.empty());
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth, true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth)
                 .isNotEmpty()
                 .contains(GET_CHAIN_TASK_FAILED);
@@ -119,7 +124,7 @@ class AuthorizationServiceTests {
         when(iexecHubService.isTeeTask(auth.getChainTaskId())).thenReturn(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth, true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth)
                 .isNotEmpty()
                 .contains(TASK_NOT_ACTIVE);
@@ -135,7 +140,7 @@ class AuthorizationServiceTests {
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.empty());
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth, true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth)
                 .isNotEmpty()
                 .contains(GET_CHAIN_DEAL_FAILED);
@@ -151,7 +156,7 @@ class AuthorizationServiceTests {
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth, true);
+        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth)
                 .isNotEmpty()
                 .contains(INVALID_SIGNATURE);

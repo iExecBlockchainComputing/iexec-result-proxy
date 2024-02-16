@@ -22,7 +22,6 @@ import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import com.iexec.resultproxy.challenge.ChallengeService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
-import com.iexec.resultproxy.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -110,25 +109,14 @@ public class ProxyController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        String walletAddress = jwtService.getWalletAddressFromJwtString(token);
-        boolean canUploadResult = proxyService.canUploadResult(
-                model.getChainTaskId(),
-                walletAddress,
-                model.getZip()
-        );
+        final String walletAddress = jwtService.getWalletAddressFromJwtString(token);
+        final boolean canUploadResult = proxyService.canUploadResult(model, walletAddress);
 
         if (!canUploadResult) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).build();
         }
 
-        String resultLink = proxyService.addResult(
-                Result.builder()
-                        .chainTaskId(model.getChainTaskId())
-                        .image(model.getImage())
-                        .cmd(model.getCmd())
-                        .deterministHash(model.getDeterministHash())
-                        .build(),
-                model.getZip());
+        final String resultLink = proxyService.addResult(model);
 
         if (resultLink.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).build();

@@ -1,5 +1,22 @@
+/*
+ * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iexec.resultproxy.proxy;
 
+import com.iexec.common.result.ResultModel;
 import com.iexec.commons.poco.chain.ChainContribution;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
@@ -42,6 +59,11 @@ class ProxyServiceTest {
             .resultHash(RESULT_HASH)
             .build();
 
+    private static final ResultModel RESULT_MODEL = ResultModel.builder()
+            .chainTaskId(CHAIN_TASK_ID)
+            .zip(RESULT_ZIP)
+            .build();
+
     @TempDir
     File tmpFolder;
 
@@ -67,7 +89,7 @@ class ProxyServiceTest {
         when(ipfsResultService.doesResultExist(CHAIN_TASK_ID)).thenReturn(false);
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.empty());
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
@@ -81,7 +103,7 @@ class ProxyServiceTest {
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn("/this/path/does/not/exist");
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
@@ -95,7 +117,8 @@ class ProxyServiceTest {
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, new byte[]{})).isFalse();
+        final ResultModel model = ResultModel.builder().chainTaskId(CHAIN_TASK_ID).zip(new byte[0]).build();
+        assertThat(proxyService.canUploadResult(model, WALLET_ADDRESS)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
@@ -109,7 +132,7 @@ class ProxyServiceTest {
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
@@ -124,7 +147,7 @@ class ProxyServiceTest {
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(chainContribution));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isFalse();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isFalse();
 
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);
         verify(proxyService).isResultFound(CHAIN_TASK_ID);
@@ -138,7 +161,7 @@ class ProxyServiceTest {
         when(iexecHubService.getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS)).thenReturn(Optional.of(CHAIN_CONTRIBUTION));
         when(proxyService.getResultFolderPath(CHAIN_TASK_ID)).thenReturn(tmpFolder.getAbsolutePath());
 
-        assertThat(proxyService.canUploadResult(CHAIN_TASK_ID, WALLET_ADDRESS, RESULT_ZIP)).isTrue();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isTrue();
 
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
         verify(iexecHubService).isTeeTask(CHAIN_TASK_ID);

@@ -17,7 +17,6 @@
 package com.iexec.resultproxy.ipfs;
 
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
-import com.iexec.resultproxy.result.Result;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -38,8 +37,7 @@ public class IpfsResultService {
         this.ipfsNameService = ipfsNameService;
     }
 
-    public String addResult(Result result, byte[] data) {
-        String taskId = result.getChainTaskId();
+    public String addResult(String taskId, byte[] data) {
         String existingIpfsHash = ipfsNameService.getIpfsHashForTask(taskId);
         if (!existingIpfsHash.isEmpty()) {
             return "";

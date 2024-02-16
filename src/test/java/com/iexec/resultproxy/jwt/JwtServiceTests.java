@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 IEXEC BLOCKCHAIN TECH
+ * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.iexec.resultproxy.jwt;
 
-import com.iexec.common.security.SignedChallenge;
 import com.iexec.common.utils.FileHelper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -150,9 +149,8 @@ class JwtServiceTests {
     //region getOrCreateJwt
     @Test
     void createJwtIfNotPresentInRepository() {
-        SignedChallenge signedChallenge = SignedChallenge.builder().walletAddress(walletAddress).build();
         when(jwtRepository.findByWalletAddress(walletAddress)).thenReturn(Optional.empty());
-        String jwtToken = jwtService.getOrCreateJwt(signedChallenge);
+        String jwtToken = jwtService.getOrCreateJwt(walletAddress);
         assertAll(
                 () -> verify(jwtRepository).findByWalletAddress(walletAddress),
                 () -> verify(jwtRepository).save(any()),
@@ -167,10 +165,9 @@ class JwtServiceTests {
                 .setIssuedAt(new Date())
                 .setSubject(UUID.randomUUID().toString())
                 .compact();
-        SignedChallenge signedChallenge = SignedChallenge.builder().walletAddress(walletAddress).build();
         Jwt expectedJwt = new Jwt(walletAddress, unsignedToken);
         when(jwtRepository.findByWalletAddress(walletAddress)).thenReturn(Optional.of(expectedJwt));
-        String resultToken = jwtService.getOrCreateJwt(signedChallenge);
+        String resultToken = jwtService.getOrCreateJwt(walletAddress);
         assertAll(
                 () -> verify(jwtRepository).findByWalletAddress(walletAddress),
                 () -> assertNotEquals(unsignedToken, resultToken),
@@ -181,10 +178,9 @@ class JwtServiceTests {
     @Test
     void getJwtIfPresentInRepository() {
         String token = jwtService.createJwt(walletAddress);
-        SignedChallenge signedChallenge = SignedChallenge.builder().walletAddress(walletAddress).build();
         Jwt expectedJwt = new Jwt(walletAddress, token);
         when(jwtRepository.findByWalletAddress(walletAddress)).thenReturn(Optional.of(expectedJwt));
-        String resultToken = jwtService.getOrCreateJwt(signedChallenge);
+        String resultToken = jwtService.getOrCreateJwt(walletAddress);
         assertAll(
                 () -> verify(jwtRepository).findByWalletAddress(walletAddress),
                 () -> assertEquals(token, resultToken)
@@ -227,7 +223,7 @@ class JwtServiceTests {
                 .signWith(hmacShaKeyFor(badJwtKey), SignatureAlgorithm.HS256)
                 .compact();
         boolean isValid = jwtService.isValidJwt(badToken);
-        assertAll (
+        assertAll(
                 () -> verifyNoInteractions(jwtRepository),
                 () -> assertFalse(isValid)
         );

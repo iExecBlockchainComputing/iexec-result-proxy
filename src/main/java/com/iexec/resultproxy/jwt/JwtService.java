@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 IEXEC BLOCKCHAIN TECH
+ * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package com.iexec.resultproxy.jwt;
 
-import com.iexec.common.security.SignedChallenge;
-import com.iexec.common.utils.ContextualLockRunner;
 import com.iexec.common.utils.FileHelper;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -37,20 +35,11 @@ import java.util.*;
 public class JwtService {
     static final int KEY_SIZE = 128;
     private final byte[] jwtKey;
-    private final ContextualLockRunner<String> contextualLockRunner = new ContextualLockRunner<>();
     private final JwtRepository jwtRepository;
 
     public JwtService(JwtConfig jwtConfig, JwtRepository jwtRepository) throws IOException {
         this.jwtRepository = jwtRepository;
         this.jwtKey = initKey(jwtConfig.getKeyPath());
-    }
-
-    public String getOrCreateJwt(SignedChallenge signedChallenge) {
-        final String walletAddress = signedChallenge.getWalletAddress();
-        // Synchronizing the following is mandatory:
-        // we need to ensure there won't be 2 different JWT issued for the same wallet.
-        // This is ensured by making synchronous the get-and-save operation.
-        return contextualLockRunner.applyWithLock(walletAddress, this::getOrCreateJwt);
     }
 
     /**
@@ -86,10 +75,12 @@ public class JwtService {
      * <ul>
      * <li> If a JWT is not found in storage for the given wallet address.
      * <li> If a JWT is found but was not signed with the correct key.
+     * </ul>
+     *
      * @param walletAddress Ethereum address for which
      * @return A valid JWT token signed with this instance key.
      */
-    private String getOrCreateJwt(String walletAddress) {
+    public synchronized String getOrCreateJwt(String walletAddress) {
         Jwt jwt = findByWalletAddress(walletAddress)
                 .orElseGet(() -> {
                     log.info("JWT token does not exist for {}, generating a new one", walletAddress);

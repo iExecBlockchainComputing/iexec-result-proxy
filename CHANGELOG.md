@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 - Add `AuthorizationService` to enable `WorkerpoolAuthorization` validation. (#116)
 - Label REST API with `v1` version. (#120)
+- Add an endpoint to retrieve a JWT against a valid `WorkerpoolAuthorization`. (#123 #124)
 
 ### Quality
 

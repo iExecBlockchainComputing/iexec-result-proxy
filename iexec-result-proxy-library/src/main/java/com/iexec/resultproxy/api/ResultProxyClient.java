@@ -17,6 +17,7 @@
 package com.iexec.resultproxy.api;
 
 import com.iexec.common.result.ResultModel;
+import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
 import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import feign.Headers;
 import feign.Param;
@@ -44,6 +45,10 @@ public interface ResultProxyClient {
     @Deprecated(forRemoval = true)
     @RequestLine("POST /results/login?chainId={chainId}")
     String login(@Param("chainId") int chainId, String token);
+
+    @RequestLine("POST /v1/results/token")
+    @Headers("Authorization: {authorization}")
+    String getJwt(@Param("authorization") String authorization, WorkerpoolAuthorization workerpoolAuthorization);
 
     @RequestLine("POST /v1/results")
     @Headers("Authorization: {authorization}")

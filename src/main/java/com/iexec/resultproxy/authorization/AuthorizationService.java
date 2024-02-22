@@ -123,6 +123,11 @@ public class AuthorizationService {
         String resultSeal = HashUtils.concatenateAndHash(walletAddress, chainTaskId, model.getDeterministHash());
         String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
         final WorkerpoolAuthorization workerpoolAuthorization = workerpoolAuthorizations.get(wpAuthKey);
+        if (workerpoolAuthorization == null) {
+            log.warn("No workerpool authorization was found [chainTaskId:{}, walletAddress:{}]",
+                    chainTaskId, walletAddress);
+            return false;
+        }
         final String enclaveChallenge = workerpoolAuthorization.getEnclaveChallenge();
         boolean isSignedByEnclave = isSignedByHimself(messageHash, model.getEnclaveSignature(), enclaveChallenge);
         if (isSignedByEnclave) {

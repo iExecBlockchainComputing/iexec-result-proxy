@@ -216,6 +216,16 @@ class AuthorizationServiceTests {
     }
 
     @Test
+    void shouldNotBeSignedByEnclaveWhenWorkerpoolAuthorizationNotExist() {
+        final ResultModel model = ResultModel.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveSignature(Numeric.toHexString(new byte[65]))
+                .deterministHash(RESULT_DIGEST)
+                .build();
+        assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isFalse();
+    }
+
+    @Test
     void shouldBeSignedByEnclave() {
         final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
         authorizationService.putIfAbsent(authorization);

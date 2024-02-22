@@ -99,6 +99,7 @@ public class ProxyController {
         if (authorizationService.isAuthorizedOnExecutionWithDetailedIssue(workerpoolAuthorization).isPresent()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        authorizationService.putIfAbsent(workerpoolAuthorization);
         final String jwtString = jwtService.getOrCreateJwt(workerpoolAuthorization.getWorkerWallet());
         return ResponseEntity.ok(jwtString);
     }

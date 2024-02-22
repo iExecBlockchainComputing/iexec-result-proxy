@@ -140,7 +140,7 @@ public class AuthorizationService {
     }
 
     public void putIfAbsent(WorkerpoolAuthorization workerpoolAuthorization) {
-        String key = String.join("-", workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
+        final String key = String.join("-", workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
         workerpoolAuthorizations.putIfAbsent(key, workerpoolAuthorization);
     }
     // endregion

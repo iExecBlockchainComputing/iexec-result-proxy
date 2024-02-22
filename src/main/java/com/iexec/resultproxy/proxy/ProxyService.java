@@ -73,14 +73,14 @@ public class ProxyService {
         }
 
         // TODO [PoCo Boost] on-chain deal id available in result model to avoid fetching task
-        ChainTask chainTask = iexecHubService.getChainTask(chainTaskId).orElse(null);
+        final ChainTask chainTask = iexecHubService.getChainTask(chainTaskId).orElse(null);
         if (chainTask == null) {
             log.error("Trying to upload result for TEE but getChainTask failed [chainTaskId:{}, uploader:{}]",
                     chainTaskId, walletAddress);
             return false;
         }
 
-        ChainDeal chainDeal = iexecHubService.getChainDeal(chainTask.getDealid()).orElse(null);
+        final ChainDeal chainDeal = iexecHubService.getChainDeal(chainTask.getDealid()).orElse(null);
         if (chainDeal == null) {
             log.error("Trying to upload result for TEE but getChainDeal failed [chainTaskId:{}, uploader:{}]",
                     chainTaskId, walletAddress);
@@ -101,8 +101,8 @@ public class ProxyService {
 
         // TODO remove this case in the future. As we support 2 stack versions, it will be a major after deprecated proxy controller endpoints removal
         // TEE tasks with ResultModel without the enclave signature
-        boolean isActive = chainTask.getStatus() == ChainTaskStatus.ACTIVE;
-        boolean isRequesterCredentials = chainDeal.getRequester().equalsIgnoreCase(walletAddress);
+        final boolean isActive = chainTask.getStatus() == ChainTaskStatus.ACTIVE;
+        final boolean isRequesterCredentials = chainDeal.getRequester().equalsIgnoreCase(walletAddress);
         return isActive && isRequesterCredentials;
     }
 

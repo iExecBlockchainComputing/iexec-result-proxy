@@ -16,6 +16,8 @@
 
 package com.iexec.resultproxy.authorization;
 
+import com.iexec.common.lifecycle.purge.ExpiringTaskMapFactory;
+import com.iexec.common.result.ResultModel;
 import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
@@ -30,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static com.iexec.resultproxy.authorization.AuthorizationError.*;
@@ -39,9 +42,11 @@ import static com.iexec.resultproxy.authorization.AuthorizationError.*;
 public class AuthorizationService {
 
     private final IexecHubService iexecHubService;
+    private final Map<String, WorkerpoolAuthorization> workerpoolAuthorizations;
 
     public AuthorizationService(IexecHubService iexecHubService) {
         this.iexecHubService = iexecHubService;
+        this.workerpoolAuthorizations = ExpiringTaskMapFactory.getExpiringTaskMap();
     }
 
     /**
@@ -109,4 +114,35 @@ public class AuthorizationService {
                 workerpoolAuthorization.getChainTaskId(),
                 workerpoolAuthorization.getEnclaveChallenge());
     }
+
+    // region workerpool authorization cache
+    public boolean checkEnclaveSignature(ResultModel model, String walletAddress) {
+        final String chainTaskId = model.getChainTaskId();
+        final String wpAuthKey = String.join("-", chainTaskId, walletAddress);
+        final String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());
+        final String resultSeal = HashUtils.concatenateAndHash(walletAddress, chainTaskId, model.getDeterministHash());
+        final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
+        final WorkerpoolAuthorization workerpoolAuthorization = workerpoolAuthorizations.get(wpAuthKey);
+        if (workerpoolAuthorization == null) {
+            log.warn("No workerpool authorization was found [chainTaskId:{}, walletAddress:{}]",
+                    chainTaskId, walletAddress);
+            return false;
+        }
+        final String enclaveChallenge = workerpoolAuthorization.getEnclaveChallenge();
+        boolean isSignedByEnclave = isSignedByHimself(messageHash, model.getEnclaveSignature(), enclaveChallenge);
+        if (isSignedByEnclave) {
+            log.info("Valid enclave signature received, allowed to push result");
+            workerpoolAuthorizations.remove(wpAuthKey);
+        } else {
+            log.warn("Invalid enclave signature [chainTaskId:{}, walletAddress:{}]", chainTaskId, walletAddress);
+        }
+        return isSignedByEnclave;
+    }
+
+    public void putIfAbsent(WorkerpoolAuthorization workerpoolAuthorization) {
+        final String key = String.join("-", workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
+        workerpoolAuthorizations.putIfAbsent(key, workerpoolAuthorization);
+    }
+    // endregion
+
 }

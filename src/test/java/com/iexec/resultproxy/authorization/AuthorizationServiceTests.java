@@ -16,14 +16,18 @@
 
 package com.iexec.resultproxy.authorization;
 
+import com.iexec.common.result.ResultModel;
 import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
 import com.iexec.commons.poco.security.Signature;
 import com.iexec.commons.poco.tee.TeeUtils;
 import com.iexec.commons.poco.utils.BytesUtils;
+import com.iexec.commons.poco.utils.HashUtils;
+import com.iexec.commons.poco.utils.SignatureUtils;
 import com.iexec.commons.poco.utils.TestUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -48,15 +52,23 @@ import static org.mockito.Mockito.when;
 
 class AuthorizationServiceTests {
 
+    private static final String CHAIN_TASK_ID = "0x0123";
+    private static final String RESULT_DIGEST = "0x3210";
+    private static final String WALLET_ADDRESS = "0xabcd";
+
     @Mock
     IexecHubService iexecHubService;
 
     @InjectMocks
     private AuthorizationService authorizationService;
 
+    private Credentials enclaveCreds;
+
     @BeforeEach
+    @SneakyThrows
     void beforeEach() {
         MockitoAnnotations.openMocks(this);
+        enclaveCreds = Credentials.create(Keys.createEcKeyPair());
     }
 
     // region isAuthorizedOnExecutionWithDetailedIssue
@@ -190,11 +202,60 @@ class AuthorizationServiceTests {
         assertThat(challenge).isEqualTo("0x0a17b60a69e733c4199912dc3c5bfd4b17aa6bcfbf3cfbfe6230f00e21f96b85");
     }
 
+    // region workerpool authorization cache
+    @Test
+    void shouldNotBeSignedByEnclave() {
+        final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
+        authorizationService.putIfAbsent(authorization);
+        final ResultModel model = ResultModel.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveSignature(Numeric.toHexString(new byte[65]))
+                .deterministHash(RESULT_DIGEST)
+                .build();
+        assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isFalse();
+    }
+
+    @Test
+    void shouldNotBeSignedByEnclaveWhenWorkerpoolAuthorizationNotExist() {
+        final ResultModel model = ResultModel.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveSignature(Numeric.toHexString(new byte[65]))
+                .deterministHash(RESULT_DIGEST)
+                .build();
+        assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isFalse();
+    }
+
+    @Test
+    void shouldBeSignedByEnclave() {
+        final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
+        authorizationService.putIfAbsent(authorization);
+        final String resultHash = HashUtils.concatenateAndHash(CHAIN_TASK_ID, RESULT_DIGEST);
+        final String resultSeal = HashUtils.concatenateAndHash(WALLET_ADDRESS, CHAIN_TASK_ID, RESULT_DIGEST);
+        final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
+        final String enclaveSignature = SignatureUtils.signMessageHashAndGetSignature(messageHash,
+                Numeric.toHexStringWithPrefix(enclaveCreds.getEcKeyPair().getPrivateKey())).getValue();
+        final ResultModel model = ResultModel.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveSignature(enclaveSignature)
+                .deterministHash(RESULT_DIGEST)
+                .build();
+        assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isTrue();
+    }
+    // endregion
+
     // region utils
     ChainDeal getChainDeal() {
         return ChainDeal.builder()
                 .poolOwner("0xc911f9345717ba7c8ec862ce002af3e058df84e4")
                 .tag(TeeUtils.TEE_SCONE_ONLY_TAG)
+                .build();
+    }
+
+    WorkerpoolAuthorization getWorkerpoolAuthorization() {
+        return WorkerpoolAuthorization.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveChallenge(enclaveCreds.getAddress())
+                .workerWallet(WALLET_ADDRESS)
                 .build();
     }
     // endregion

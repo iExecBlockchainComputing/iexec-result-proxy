@@ -21,9 +21,12 @@ import com.iexec.common.result.ResultModel;
 import com.iexec.common.utils.FileHelper;
 import com.iexec.common.worker.result.ResultUtils;
 import com.iexec.commons.poco.chain.ChainContribution;
+import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
-import com.iexec.commons.poco.task.TaskDescription;
+import com.iexec.commons.poco.tee.TeeUtils;
+import com.iexec.commons.poco.utils.BytesUtils;
+import com.iexec.resultproxy.authorization.AuthorizationService;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +36,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 
 import static com.iexec.common.utils.IexecFileHelper.SLASH_IEXEC_OUT;
 import static com.iexec.common.utils.IexecFileHelper.readComputedFile;
@@ -47,48 +49,61 @@ import static com.iexec.commons.poco.chain.ChainContributionStatus.REVEALED;
 @Slf4j
 public class ProxyService {
 
+    private final AuthorizationService authorizationService;
     private final IexecHubService iexecHubService;
     private final IpfsResultService ipfsResultService;
 
-    public ProxyService(IexecHubService iexecHubService,
+    public ProxyService(AuthorizationService authorizationService,
+                        IexecHubService iexecHubService,
                         IpfsResultService ipfsResultService) {
+        this.authorizationService = authorizationService;
         this.iexecHubService = iexecHubService;
         this.ipfsResultService = ipfsResultService;
     }
 
-
     boolean canUploadResult(ResultModel model, String walletAddress) {
         final String chainTaskId = model.getChainTaskId();
         final byte[] zip = model.getZip();
-        if (iexecHubService.isTeeTask(chainTaskId)) {
-            //TODO Add requester field to getChainTask
-            Optional<ChainTask> chainTask = iexecHubService.getChainTask(chainTaskId);
-            if (chainTask.isEmpty()) {
-                log.error("Trying to upload result for TEE but getChainTask failed [chainTaskId:{}, uploader:{}]",
-                        chainTaskId, walletAddress);
-                return false;
-            }
-            boolean isActive = chainTask.get().getStatus() == ChainTaskStatus.ACTIVE;
 
-            Optional<TaskDescription> taskDescription = iexecHubService.getTaskDescriptionFromChain(chainTaskId);
-            if (taskDescription.isEmpty()) {
-                log.error("Trying to upload result for TEE but getTaskDescription failed [chainTaskId:{}, uploader:{}]",
-                        chainTaskId, walletAddress);
-                return false;
-            }
-            boolean isRequesterCredentials = taskDescription.get().getRequester().equalsIgnoreCase(walletAddress);
+        // check if result has been already uploaded
+        if (isResultFound(chainTaskId)) {
+            log.error("Trying to upload result that has been already uploaded [chainTaskId:{}, uploadRequester:{}]",
+                    chainTaskId, walletAddress);
+            return false;
+        }
 
-            return isActive && isRequesterCredentials;
-        } else {
-            // check if result has been already uploaded
-            if (isResultFound(chainTaskId)) {
-                log.error("Trying to upload result that has been already uploaded [chainTaskId:{}, uploadRequester:{}]",
-                        chainTaskId, walletAddress);
-                return false;
-            }
+        // TODO [PoCo Boost] on-chain deal id available in result model to avoid fetching task
+        final ChainTask chainTask = iexecHubService.getChainTask(chainTaskId).orElse(null);
+        if (chainTask == null) {
+            log.error("Trying to upload result for TEE but getChainTask failed [chainTaskId:{}, uploader:{}]",
+                    chainTaskId, walletAddress);
+            return false;
+        }
 
+        final ChainDeal chainDeal = iexecHubService.getChainDeal(chainTask.getDealid()).orElse(null);
+        if (chainDeal == null) {
+            log.error("Trying to upload result for TEE but getChainDeal failed [chainTaskId:{}, uploader:{}]",
+                    chainTaskId, walletAddress);
+            return false;
+        }
+
+        final boolean isTeeTask = TeeUtils.isTeeTag(chainDeal.getTag());
+
+        // Standard tasks
+        if (!isTeeTask) {
             return isResultValid(chainTaskId, walletAddress, zip);
         }
+
+        // TEE tasks with ResultModel containing the enclave signature
+        if (!BytesUtils.EMPTY_ADDRESS.equals(model.getEnclaveSignature())) {
+            return authorizationService.checkEnclaveSignature(model, walletAddress);
+        }
+
+        // TODO remove this case in the future. As we support 2 stack versions, it will be a major after deprecated proxy controller endpoints removal
+        // TEE tasks with ResultModel without the enclave signature
+        final boolean isActive = chainTask.getStatus() == ChainTaskStatus.ACTIVE;
+        final boolean isRequesterCredentials = chainDeal.getRequester().equalsIgnoreCase(walletAddress);
+        return isActive && isRequesterCredentials;
     }
 
     /**
@@ -109,19 +124,17 @@ public class ProxyService {
         final String resultZipPath = resultFolderPath + ".zip";
         final String zipDestinationPath = resultFolderPath + SLASH_IEXEC_OUT;
         try {
-            final Optional<ChainContribution> oChainContribution = iexecHubService.getChainContribution(chainTaskId, walletAddress);
+            final ChainContribution chainContribution = iexecHubService.getChainContribution(chainTaskId, walletAddress)
+                    .orElse(ChainContribution.builder().build());
             // ContributionStatus of chainTask should be REVEALED
-            boolean isChainContributionStatusSetToRevealed = oChainContribution
-                    .map(ChainContribution::getStatus)
-                    .filter(chainStatus -> chainStatus == REVEALED)
-                    .isPresent();
-            if (!isChainContributionStatusSetToRevealed) {
-                log.error("Trying to upload result even though ChainContributionStatus is not REVEALED [chainTaskId:{}, uploadRequester:{}]",
-                        chainTaskId, walletAddress);
+            if (chainContribution.getStatus() != REVEALED) {
+                log.error("Trying to upload result even though ChainContributionStatus is not REVEALED" +
+                                " [chainTaskId:{}, uploadRequester:{}, status:{}]",
+                        chainTaskId, walletAddress, chainContribution.getStatus());
                 return false;
             }
 
-            final String onChainHash = oChainContribution.get().getResultHash();
+            final String onChainHash = chainContribution.getResultHash();
             try {
                 Files.write(Path.of(resultZipPath), zip);
             } catch (IOException e) {

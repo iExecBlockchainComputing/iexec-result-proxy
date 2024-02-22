@@ -119,9 +119,9 @@ public class AuthorizationService {
     public boolean checkEnclaveSignature(ResultModel model, String walletAddress) {
         final String chainTaskId = model.getChainTaskId();
         final String wpAuthKey = String.join("-", chainTaskId, walletAddress);
-        String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());
-        String resultSeal = HashUtils.concatenateAndHash(walletAddress, chainTaskId, model.getDeterministHash());
-        String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
+        final String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());
+        final String resultSeal = HashUtils.concatenateAndHash(walletAddress, chainTaskId, model.getDeterministHash());
+        final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
         final WorkerpoolAuthorization workerpoolAuthorization = workerpoolAuthorizations.get(wpAuthKey);
         if (workerpoolAuthorization == null) {
             log.warn("No workerpool authorization was found [chainTaskId:{}, walletAddress:{}]",

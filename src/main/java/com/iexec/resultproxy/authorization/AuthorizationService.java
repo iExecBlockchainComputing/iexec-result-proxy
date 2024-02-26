@@ -117,6 +117,10 @@ public class AuthorizationService {
 
     // region workerpool authorization cache
     public boolean checkEnclaveSignature(ResultModel model, String walletAddress) {
+        if (ResultModel.EMPTY_WEB3_SIG.equals(model.getEnclaveSignature())) {
+            log.warn("Empty enclave signature {}", walletAddress);
+            return false;
+        }
         final String chainTaskId = model.getChainTaskId();
         final String wpAuthKey = String.join("-", chainTaskId, walletAddress);
         final String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());

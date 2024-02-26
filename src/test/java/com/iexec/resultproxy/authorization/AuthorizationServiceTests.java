@@ -27,7 +27,6 @@ import com.iexec.commons.poco.utils.HashUtils;
 import com.iexec.commons.poco.utils.SignatureUtils;
 import com.iexec.commons.poco.utils.TestUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -38,6 +37,7 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.utils.Numeric;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -65,8 +65,7 @@ class AuthorizationServiceTests {
     private Credentials enclaveCreds;
 
     @BeforeEach
-    @SneakyThrows
-    void beforeEach() {
+    void beforeEach() throws GeneralSecurityException {
         MockitoAnnotations.openMocks(this);
         enclaveCreds = Credentials.create(Keys.createEcKeyPair());
     }
@@ -204,12 +203,12 @@ class AuthorizationServiceTests {
 
     // region workerpool authorization cache
     @Test
-    void shouldNotBeSignedByEnclave() {
+    void shouldNotBeSignedByEnclaveWhenEnclaveSignatureIsEmpty() {
         final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
         authorizationService.putIfAbsent(authorization);
         final ResultModel model = ResultModel.builder()
                 .chainTaskId(CHAIN_TASK_ID)
-                .enclaveSignature(Numeric.toHexString(new byte[65]))
+                .enclaveSignature(ResultModel.EMPTY_WEB3_SIG)
                 .deterministHash(RESULT_DIGEST)
                 .build();
         assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isFalse();
@@ -219,7 +218,19 @@ class AuthorizationServiceTests {
     void shouldNotBeSignedByEnclaveWhenWorkerpoolAuthorizationNotExist() {
         final ResultModel model = ResultModel.builder()
                 .chainTaskId(CHAIN_TASK_ID)
-                .enclaveSignature(Numeric.toHexString(new byte[65]))
+                .enclaveSignature(getEnclaveSignature(enclaveCreds.getEcKeyPair()))
+                .deterministHash(RESULT_DIGEST)
+                .build();
+        assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isFalse();
+    }
+
+    @Test
+    void shouldNotBeSignedByEnclaveWhenSignedByOther() throws GeneralSecurityException {
+        final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
+        authorizationService.putIfAbsent(authorization);
+        final ResultModel model = ResultModel.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveSignature(getEnclaveSignature(Keys.createEcKeyPair()))
                 .deterministHash(RESULT_DIGEST)
                 .build();
         assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isFalse();
@@ -229,14 +240,9 @@ class AuthorizationServiceTests {
     void shouldBeSignedByEnclave() {
         final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
         authorizationService.putIfAbsent(authorization);
-        final String resultHash = HashUtils.concatenateAndHash(CHAIN_TASK_ID, RESULT_DIGEST);
-        final String resultSeal = HashUtils.concatenateAndHash(WALLET_ADDRESS, CHAIN_TASK_ID, RESULT_DIGEST);
-        final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
-        final String enclaveSignature = SignatureUtils.signMessageHashAndGetSignature(messageHash,
-                Numeric.toHexStringWithPrefix(enclaveCreds.getEcKeyPair().getPrivateKey())).getValue();
         final ResultModel model = ResultModel.builder()
                 .chainTaskId(CHAIN_TASK_ID)
-                .enclaveSignature(enclaveSignature)
+                .enclaveSignature(getEnclaveSignature(enclaveCreds.getEcKeyPair()))
                 .deterministHash(RESULT_DIGEST)
                 .build();
         assertThat(authorizationService.checkEnclaveSignature(model, WALLET_ADDRESS)).isTrue();
@@ -249,6 +255,14 @@ class AuthorizationServiceTests {
                 .poolOwner("0xc911f9345717ba7c8ec862ce002af3e058df84e4")
                 .tag(TeeUtils.TEE_SCONE_ONLY_TAG)
                 .build();
+    }
+
+    String getEnclaveSignature(ECKeyPair ecKeyPair) {
+        final String resultHash = HashUtils.concatenateAndHash(CHAIN_TASK_ID, RESULT_DIGEST);
+        final String resultSeal = HashUtils.concatenateAndHash(WALLET_ADDRESS, CHAIN_TASK_ID, RESULT_DIGEST);
+        final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
+        return SignatureUtils.signMessageHashAndGetSignature(messageHash,
+                Numeric.toHexStringWithPrefix(ecKeyPair.getPrivateKey())).getValue();
     }
 
     WorkerpoolAuthorization getWorkerpoolAuthorization() {

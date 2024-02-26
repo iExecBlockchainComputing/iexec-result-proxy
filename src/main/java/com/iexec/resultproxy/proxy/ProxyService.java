@@ -25,7 +25,6 @@ import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
 import com.iexec.commons.poco.tee.TeeUtils;
-import com.iexec.commons.poco.utils.BytesUtils;
 import com.iexec.resultproxy.authorization.AuthorizationService;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
@@ -94,16 +93,14 @@ public class ProxyService {
             return isResultValid(chainTaskId, walletAddress, zip);
         }
 
-        // TEE tasks with ResultModel containing the enclave signature
-        if (!BytesUtils.EMPTY_ADDRESS.equals(model.getEnclaveSignature())) {
-            return authorizationService.checkEnclaveSignature(model, walletAddress);
+        // TODO remove this case in the future. As we support 2 stack versions, it will be a major after deprecated proxy controller endpoints removal
+        // TEE tasks with token containing the requester address
+        if (chainDeal.getRequester().equalsIgnoreCase(walletAddress)) {
+            return chainTask.getStatus() == ChainTaskStatus.ACTIVE;
         }
 
-        // TODO remove this case in the future. As we support 2 stack versions, it will be a major after deprecated proxy controller endpoints removal
-        // TEE tasks with ResultModel without the enclave signature
-        final boolean isActive = chainTask.getStatus() == ChainTaskStatus.ACTIVE;
-        final boolean isRequesterCredentials = chainDeal.getRequester().equalsIgnoreCase(walletAddress);
-        return isActive && isRequesterCredentials;
+        // TEE tasks with ResultModel containing the enclave signature
+        return authorizationService.checkEnclaveSignature(model, walletAddress);
     }
 
     /**

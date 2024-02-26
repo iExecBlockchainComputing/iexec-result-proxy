@@ -48,6 +48,7 @@ class ProxyServiceTest {
     private static final String CHAIN_TASK_ID = "0x59d9b6c36d6db89bae058ff55de6e4d6a6f6e0da3f9ea02297fc8d6d5f5cedf1";
     private static final String RESULT_HASH = "0x865e1ebff87de7928040a42383b46690a12a988b278eb880e0e641f5da3cc9d1";
     private static final String WALLET_ADDRESS = "0x123abc";
+    private static final String OTHER_ADDRESS = "0xabc123";
     /**
      * Contains a valid result zip, with the following files:
      * <ul>
@@ -221,7 +222,7 @@ class ProxyServiceTest {
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(TEE_DEAL));
         when(authorizationService.checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WALLET_ADDRESS)).thenReturn(false);
 
-        assertThat(proxyService.canUploadResult(RESULT_MODEL_WITH_SIGN, WALLET_ADDRESS)).isFalse();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL_WITH_SIGN, OTHER_ADDRESS)).isFalse();
     }
 
     @Test
@@ -251,7 +252,7 @@ class ProxyServiceTest {
     @Test
     void isNotAbleToUploadSinceNotRequester() {
         final ChainDeal chainDeal = ChainDeal.builder()
-                .chainDealId(CHAIN_DEAL_ID).requester("0xabc123").tag(TeeUtils.TEE_SCONE_ONLY_TAG).build();
+                .chainDealId(CHAIN_DEAL_ID).requester(OTHER_ADDRESS).tag(TeeUtils.TEE_SCONE_ONLY_TAG).build();
 
         when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(CHAIN_TASK));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(chainDeal));

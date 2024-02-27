@@ -270,6 +270,17 @@ class AuthorizationServiceTests {
     }
     // endregion
 
+    // region
+    @Test
+    void shouldNotAddAuthorizationTwiceInCollection() {
+        final WorkerpoolAuthorization authorization = getWorkerpoolAuthorization();
+        authorizationService.putIfAbsent(authorization);
+        assertThat(authorizationRepository.count()).isOne();
+        authorizationService.putIfAbsent(authorization);
+        assertThat(authorizationRepository.count()).isOne();
+    }
+    // endregion
+
     // region utils
     ChainDeal getChainDeal() {
         return ChainDeal.builder()

@@ -137,6 +137,8 @@ public class AuthorizationService {
         if (isSignedByEnclave) {
             log.info("Valid enclave signature received, allowed to push result");
             workerpoolAuthorizations.remove(wpAuthKey);
+            log.debug("Workerpool authorization entry removed [chainTaskId:{}, workerWallet:{}]",
+                    workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
         } else {
             log.warn("Invalid enclave signature [chainTaskId:{}, walletAddress:{}]", chainTaskId, walletAddress);
         }
@@ -146,6 +148,8 @@ public class AuthorizationService {
     public void putIfAbsent(WorkerpoolAuthorization workerpoolAuthorization) {
         final String key = String.join("-", workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
         workerpoolAuthorizations.putIfAbsent(key, workerpoolAuthorization);
+        log.debug("Workerpool authorization entry added [chainTaskId:{}, workerWallet:{}]",
+                workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
     }
     // endregion
 

@@ -28,6 +28,10 @@ All notable changes to this project will be documented in this file.
 - Remove `AbstractResultStorage` class. (#121)
 - Rework `ProxyService` class methods to use `ResultModel` as a parameter. (#122)
 
+### Dependency Upgrades
+
+- Upgrade to `iexec-common` 8.4.0. (#129)
+
 ## [[8.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.3.0) 2024-01-10
 
 ### New Features

@@ -16,7 +16,6 @@
 
 package com.iexec.resultproxy.authorization;
 
-import com.iexec.common.lifecycle.purge.ExpiringTaskMapFactory;
 import com.iexec.common.result.ResultModel;
 import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
@@ -32,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static com.iexec.resultproxy.authorization.AuthorizationError.*;
@@ -41,12 +39,12 @@ import static com.iexec.resultproxy.authorization.AuthorizationError.*;
 @Service
 public class AuthorizationService {
 
+    private final AuthorizationRepository authorizationRepository;
     private final IexecHubService iexecHubService;
-    private final Map<String, WorkerpoolAuthorization> workerpoolAuthorizations;
 
-    public AuthorizationService(IexecHubService iexecHubService) {
+    public AuthorizationService(AuthorizationRepository authorizationRepository, IexecHubService iexecHubService) {
+        this.authorizationRepository = authorizationRepository;
         this.iexecHubService = iexecHubService;
-        this.workerpoolAuthorizations = ExpiringTaskMapFactory.getExpiringTaskMap();
     }
 
     /**
@@ -122,11 +120,11 @@ public class AuthorizationService {
             return false;
         }
         final String chainTaskId = model.getChainTaskId();
-        final String wpAuthKey = String.join("-", chainTaskId, walletAddress);
         final String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());
         final String resultSeal = HashUtils.concatenateAndHash(walletAddress, chainTaskId, model.getDeterministHash());
         final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
-        final WorkerpoolAuthorization workerpoolAuthorization = workerpoolAuthorizations.get(wpAuthKey);
+        final Authorization workerpoolAuthorization = authorizationRepository.findByChainTaskIdAndWorkerWallet(
+                chainTaskId, walletAddress).orElse(null);
         if (workerpoolAuthorization == null) {
             log.warn("No workerpool authorization was found [chainTaskId:{}, walletAddress:{}]",
                     chainTaskId, walletAddress);
@@ -136,7 +134,7 @@ public class AuthorizationService {
         boolean isSignedByEnclave = isSignedByHimself(messageHash, model.getEnclaveSignature(), enclaveChallenge);
         if (isSignedByEnclave) {
             log.info("Valid enclave signature received, allowed to push result");
-            workerpoolAuthorizations.remove(wpAuthKey);
+            authorizationRepository.delete(workerpoolAuthorization);
             log.debug("Workerpool authorization entry removed [chainTaskId:{}, workerWallet:{}]",
                     workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
         } else {
@@ -146,8 +144,7 @@ public class AuthorizationService {
     }
 
     public void putIfAbsent(WorkerpoolAuthorization workerpoolAuthorization) {
-        final String key = String.join("-", workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
-        workerpoolAuthorizations.putIfAbsent(key, workerpoolAuthorization);
+        authorizationRepository.save(new Authorization(workerpoolAuthorization));
         log.debug("Workerpool authorization entry added [chainTaskId:{}, workerWallet:{}]",
                 workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
     }

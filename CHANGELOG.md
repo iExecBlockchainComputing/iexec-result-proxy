@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - Label REST API with `v1` version. (#120)
 - Add an endpoint to retrieve a JWT against a valid `WorkerpoolAuthorization`. (#123 #124)
 - Verify TEE tasks `enclaveSignature` before accepting IPFS upload. (#125 #126)
+- Persist `WorkerpoolAuthorization` instances to MongoDB. (#127)
 
 ### Quality
 

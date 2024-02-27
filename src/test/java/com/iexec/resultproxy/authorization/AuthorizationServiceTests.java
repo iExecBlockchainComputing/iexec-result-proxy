@@ -29,9 +29,16 @@ import com.iexec.commons.poco.utils.TestUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -50,16 +57,28 @@ import static com.iexec.resultproxy.authorization.AuthorizationError.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+@DataMongoTest
+@Testcontainers
 class AuthorizationServiceTests {
 
     private static final String CHAIN_TASK_ID = "0x0123";
     private static final String RESULT_DIGEST = "0x3210";
     private static final String WALLET_ADDRESS = "0xabcd";
 
-    @Mock
-    IexecHubService iexecHubService;
+    @Container
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse(System.getProperty("mongo.image")));
 
-    @InjectMocks
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.host", mongoDBContainer::getHost);
+        registry.add("spring.data.mongodb.port", () -> mongoDBContainer.getMappedPort(27017));
+    }
+
+    @Autowired
+    private AuthorizationRepository authorizationRepository;
+    @Mock
+    private IexecHubService iexecHubService;
+
     private AuthorizationService authorizationService;
 
     private Credentials enclaveCreds;
@@ -68,6 +87,8 @@ class AuthorizationServiceTests {
     void beforeEach() throws GeneralSecurityException {
         MockitoAnnotations.openMocks(this);
         enclaveCreds = Credentials.create(Keys.createEcKeyPair());
+        authorizationRepository.deleteAll();
+        authorizationService = new AuthorizationService(authorizationRepository, iexecHubService);
     }
 
     // region isAuthorizedOnExecutionWithDetailedIssue

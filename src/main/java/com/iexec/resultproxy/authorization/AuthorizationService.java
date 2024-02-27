@@ -124,8 +124,9 @@ public class AuthorizationService {
         final String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());
         final String resultSeal = HashUtils.concatenateAndHash(walletAddress, chainTaskId, model.getDeterministHash());
         final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
-        final Authorization workerpoolAuthorization = authorizationRepository.findByChainTaskIdAndWorkerWallet(
-                chainTaskId, walletAddress).orElse(null);
+        final Authorization workerpoolAuthorization = authorizationRepository
+                .findByChainTaskIdAndWorkerWallet(chainTaskId, walletAddress)
+                .orElse(null);
         if (workerpoolAuthorization == null) {
             log.warn("No workerpool authorization was found [chainTaskId:{}, walletAddress:{}]",
                     chainTaskId, walletAddress);

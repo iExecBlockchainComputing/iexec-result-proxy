@@ -117,6 +117,10 @@ public class AuthorizationService {
 
     // region workerpool authorization cache
     public boolean checkEnclaveSignature(ResultModel model, String walletAddress) {
+        if (ResultModel.EMPTY_WEB3_SIG.equals(model.getEnclaveSignature())) {
+            log.warn("Empty enclave signature {}", walletAddress);
+            return false;
+        }
         final String chainTaskId = model.getChainTaskId();
         final String wpAuthKey = String.join("-", chainTaskId, walletAddress);
         final String resultHash = HashUtils.concatenateAndHash(chainTaskId, model.getDeterministHash());
@@ -133,6 +137,8 @@ public class AuthorizationService {
         if (isSignedByEnclave) {
             log.info("Valid enclave signature received, allowed to push result");
             workerpoolAuthorizations.remove(wpAuthKey);
+            log.debug("Workerpool authorization entry removed [chainTaskId:{}, workerWallet:{}]",
+                    workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
         } else {
             log.warn("Invalid enclave signature [chainTaskId:{}, walletAddress:{}]", chainTaskId, walletAddress);
         }
@@ -142,6 +148,8 @@ public class AuthorizationService {
     public void putIfAbsent(WorkerpoolAuthorization workerpoolAuthorization) {
         final String key = String.join("-", workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
         workerpoolAuthorizations.putIfAbsent(key, workerpoolAuthorization);
+        log.debug("Workerpool authorization entry added [chainTaskId:{}, workerWallet:{}]",
+                workerpoolAuthorization.getChainTaskId(), workerpoolAuthorization.getWorkerWallet());
     }
     // endregion
 

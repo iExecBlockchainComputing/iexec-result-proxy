@@ -17,6 +17,10 @@ All notable changes to this project will be documented in this file.
 - Verify TEE tasks `enclaveSignature` before accepting IPFS upload. (#125 #126)
 - Persist `WorkerpoolAuthorization` instances to MongoDB. (#127)
 
+### Bug Fixes
+
+- Persist JWT signing key in dedicated `/data` folder by default. (#128)
+
 ### Quality
 
 - Remove results download endpoints which are never used. (#117)

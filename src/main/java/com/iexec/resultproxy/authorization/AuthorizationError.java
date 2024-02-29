@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.iexec.resultproxy.api;
+package com.iexec.resultproxy.authorization;
 
-import feign.Logger;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-class ResultProxyClientTest {
-
-    @Test
-    void instantiationTest() {
-        Assertions.assertNotNull(ResultProxyClientBuilder.getInstance(Logger.Level.FULL, "localhost"));
-    }
-
+public enum AuthorizationError {
+    EMPTY_PARAMS_UNAUTHORIZED,
+    NO_MATCH_ONCHAIN_TYPE,
+    GET_CHAIN_TASK_FAILED,
+    TASK_NOT_ACTIVE,
+    GET_CHAIN_DEAL_FAILED,
+    INVALID_SIGNATURE;
 }

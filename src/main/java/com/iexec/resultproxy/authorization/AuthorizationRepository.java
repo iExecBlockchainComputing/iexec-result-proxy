@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.iexec.resultproxy.api;
+package com.iexec.resultproxy.authorization;
 
-import feign.Logger;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-class ResultProxyClientTest {
+import java.util.Optional;
 
-    @Test
-    void instantiationTest() {
-        Assertions.assertNotNull(ResultProxyClientBuilder.getInstance(Logger.Level.FULL, "localhost"));
-    }
-
+public interface AuthorizationRepository extends MongoRepository<Authorization, String> {
+    Optional<Authorization> findByChainTaskIdAndWorkerWallet(String chainTaskId, String workerWallet);
 }

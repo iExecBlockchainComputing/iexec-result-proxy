@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [[8.4.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.4.0) 2024-02-29
+
+### Deprecation Notices
+
+- Deprecate `/results/challenge` and `/results/login` endpoints. They will be removed in **v10**. (#119)
+- Deprecate `/` endpoint. Use `/v1/results` instead. The `/` endpoint will be removed in **v10**. (#119 #120)
+
+### New Features
+
+- Add `AuthorizationService` to enable `WorkerpoolAuthorization` validation. (#116)
+- Label REST API with `v1` version. (#120)
+- Add an endpoint to retrieve a JWT against a valid `WorkerpoolAuthorization`. (#123 #124)
+- Verify TEE tasks `enclaveSignature` before accepting IPFS upload. (#125 #126)
+- Persist `WorkerpoolAuthorization` instances to MongoDB. (#127)
+
+### Bug Fixes
+
+- Persist JWT signing key in dedicated `/data` folder by default. (#128)
+
+### Quality
+
+- Remove results download endpoints which are never used. (#117)
+- Add tests and javadoc on `ProxyController` class. (#118)
+- Remove `AbstractResultStorage` class. (#121)
+- Rework `ProxyService` class methods to use `ResultModel` as a parameter. (#122)
+
+### Dependency Upgrades
+
+- Upgrade to `iexec-common` 8.4.0. (#129)
+
 ## [[8.3.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.3.0) 2024-01-10
 
 ### New Features

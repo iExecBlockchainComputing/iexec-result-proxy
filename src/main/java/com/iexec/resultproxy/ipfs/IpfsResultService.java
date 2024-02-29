@@ -1,21 +1,34 @@
+/*
+ * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iexec.resultproxy.ipfs;
+
+import com.iexec.resultproxy.ipfs.task.IpfsNameService;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import com.iexec.resultproxy.ipfs.task.IpfsNameService;
-import com.iexec.resultproxy.result.AbstractResultStorage;
-import com.iexec.resultproxy.result.Result;
-
-import org.springframework.stereotype.Service;
-
 @Service
-public class IpfsResultService extends AbstractResultStorage {
-
+public class IpfsResultService {
 
     private static final String IPFS_ADDRESS_PREFIX = "/ipfs/";
+    private static final String IPFS_FILENAME_PREFIX = "iexec-result-";
 
-    private IpfsService ipfsService;
-    private IpfsNameService ipfsNameService;
+    private final IpfsService ipfsService;
+    private final IpfsNameService ipfsNameService;
 
 
     public IpfsResultService(IpfsService ipfsService,
@@ -24,10 +37,7 @@ public class IpfsResultService extends AbstractResultStorage {
         this.ipfsNameService = ipfsNameService;
     }
 
-
-    @Override
-    public String addResult(Result result, byte[] data) {
-        String taskId = result.getChainTaskId();
+    public String addResult(String taskId, byte[] data) {
         String existingIpfsHash = ipfsNameService.getIpfsHashForTask(taskId);
         if (!existingIpfsHash.isEmpty()) {
             return "";
@@ -38,13 +48,20 @@ public class IpfsResultService extends AbstractResultStorage {
         return IPFS_ADDRESS_PREFIX + ipfsHash;
     }
 
-    @Override
+    public boolean doesResultExist(String chainTaskId) {
+        return getResult(chainTaskId).isPresent();
+    }
+
     public Optional<byte[]> getResult(String chainTaskId) {
         String ipfsHash = ipfsNameService.getIpfsHashForTask(chainTaskId);
         if (!ipfsHash.isEmpty()) {
             return ipfsService.get(ipfsHash);
         }
         return Optional.empty();
+    }
+
+    private String getResultFilename(String hash) {
+        return IPFS_FILENAME_PREFIX + hash;
     }
 
 }

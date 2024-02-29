@@ -23,7 +23,7 @@ ipfs:
   port: ${IEXEC_IPFS_PORT:5001}
 
 jwt:
-  key-path: /app/jwt-sign.key
+  key-path: /data/jwt-sign.key
 
 springdoc:
   packagesToScan: com.iexec.resultproxy

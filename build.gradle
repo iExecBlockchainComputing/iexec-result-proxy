@@ -11,6 +11,7 @@ plugins {
 ext {
     springCloudVersion = '2021.0.8'
     jjwtVersion = '0.11.5'
+    testContainersVersion = '1.19.3'
 }
 
 if (!project.hasProperty('gitBranch')) {
@@ -77,6 +78,10 @@ dependencies {
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // mongo
+    testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    testImplementation "org.testcontainers:mongodb:$testContainersVersion"
 }
 
 dependencyManagement {
@@ -98,6 +103,7 @@ tasks.named("bootJar") {
 
 test {
     useJUnitPlatform()
+    systemProperty "mongo.image", "mongo:4.4.28-focal"
 }
 
 tasks.register('itest') {

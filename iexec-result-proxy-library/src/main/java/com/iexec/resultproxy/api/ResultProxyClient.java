@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 IEXEC BLOCKCHAIN TECH
+ * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,49 +17,54 @@
 package com.iexec.resultproxy.api;
 
 import com.iexec.common.result.ResultModel;
+import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
 import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
-import feign.Response;
 
 /**
  * Interface allowing to instantiate a Feign client targeting Result Proxy REST endpoints.
  * <p>
  * To create the client, see the related builder.
+ *
  * @see ResultProxyClientBuilder
  */
 public interface ResultProxyClient {
 
+    /**
+     * @deprecated Will be replaced with new flow and removed in v10
+     */
+    @Deprecated(forRemoval = true)
     @RequestLine("GET /results/challenge?chainId={chainId}")
     EIP712Challenge getChallenge(@Param("chainId") int chainId);
 
+    /**
+     * @deprecated Will be replaced with new flow and removed in v10
+     */
+    @Deprecated(forRemoval = true)
     @RequestLine("POST /results/login?chainId={chainId}")
     String login(@Param("chainId") int chainId, String token);
 
-    @RequestLine("POST /")
+    @RequestLine("POST /v1/results/token")
+    @Headers("Authorization: {authorization}")
+    String getJwt(@Param("authorization") String authorization, WorkerpoolAuthorization workerpoolAuthorization);
+
+    @RequestLine("POST /v1/results")
     @Headers("Authorization: {authorization}")
     String addResult(
             @Param("authorization") String authorization,
             ResultModel model
     );
 
-    @RequestLine("HEAD /results/{chainTaskId}")
+    @RequestLine("HEAD /v1/results/{chainTaskId}")
     @Headers("Authorization: {authorization}")
     String isResultUploaded(
             @Param("authorization") String authorization,
             @Param("chainTaskId") String chainTaskId
     );
 
-    @RequestLine("GET /results/{chainTaskId}?chainId={chainId}")
-    @Headers({"Accept: application/zip", "Authorization: {authorization}"})
-    Response getResult(
-            @Param("chainTaskId") String chainTaskId,
-            @Param("authorization") String token,
-            @Param("chainId") int chainId
-    );
-
-    @RequestLine("GET /results/{chainTaskId}/ipfshash")
+    @RequestLine("GET /v1/results/{chainTaskId}/ipfshash")
     String getIpfsHashForTask(@Param("chainTaskId") String chainTaskId);
 
 }

@@ -13,7 +13,8 @@ RUN groupadd --system appuser \
 
 WORKDIR /app
 COPY $jar iexec-result-proxy.jar
-RUN chown -R appuser:appuser /app
+RUN mkdir /data
+RUN chown -R appuser:appuser /app /data
 
 USER appuser
 ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "iexec-result-proxy.jar" ]

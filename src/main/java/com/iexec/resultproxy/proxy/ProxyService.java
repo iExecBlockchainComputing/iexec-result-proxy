@@ -60,6 +60,15 @@ public class ProxyService {
         this.ipfsResultService = ipfsResultService;
     }
 
+    /**
+     * Checks if result can be uploaded.
+     * <p>
+     * Task status: REVEALING for standard tasks, ACTIVE for TEE tasks with contributeAndFinalize workflow.
+     *
+     * @param model         Model containing data relevant to the requested result upload
+     * @param walletAddress Wallet address of the JWT requesting an upload
+     * @return {@literal true} if result can be contributed, {@literal false} otherwise.
+     */
     boolean canUploadResult(ResultModel model, String walletAddress) {
         final String chainTaskId = model.getChainTaskId();
         final byte[] zip = model.getZip();
@@ -74,14 +83,14 @@ public class ProxyService {
         // TODO [PoCo Boost] on-chain deal id available in result model to avoid fetching task
         final ChainTask chainTask = iexecHubService.getChainTask(chainTaskId).orElse(null);
         if (chainTask == null) {
-            log.error("Trying to upload result for TEE but getChainTask failed [chainTaskId:{}, uploader:{}]",
+            log.error("Trying to upload result but on-chain task retrieval failed [chainTaskId:{}, uploader:{}]",
                     chainTaskId, walletAddress);
             return false;
         }
 
         final ChainDeal chainDeal = iexecHubService.getChainDeal(chainTask.getDealid()).orElse(null);
         if (chainDeal == null) {
-            log.error("Trying to upload result for TEE but getChainDeal failed [chainTaskId:{}, uploader:{}]",
+            log.error("Trying to upload result but on-chain deal retrieval failed [chainTaskId:{}, uploader:{}]",
                     chainTaskId, walletAddress);
             return false;
         }
@@ -90,7 +99,7 @@ public class ProxyService {
 
         // Standard tasks
         if (!isTeeTask) {
-            return isResultValid(chainTaskId, walletAddress, zip);
+            return chainTask.getStatus() == ChainTaskStatus.REVEALING && isResultValid(chainTaskId, walletAddress, zip);
         }
 
         // TODO remove this case in the future. As we support 2 stack versions, it will be a major after deprecated proxy controller endpoints removal
@@ -100,7 +109,7 @@ public class ProxyService {
         }
 
         // TEE tasks with ResultModel containing the enclave signature
-        return authorizationService.checkEnclaveSignature(model, walletAddress);
+        return chainTask.getStatus() == ChainTaskStatus.ACTIVE && authorizationService.checkEnclaveSignature(model, walletAddress);
     }
 
     /**
@@ -116,7 +125,7 @@ public class ProxyService {
      * @param zip           Result as a zip
      * @return {@literal true} if the result is valid, {@literal false} otherwise.
      */
-    boolean isResultValid(String chainTaskId, String walletAddress, byte[] zip) {
+    private boolean isResultValid(String chainTaskId, String walletAddress, byte[] zip) {
         final String resultFolderPath = getResultFolderPath(chainTaskId);
         final String resultZipPath = resultFolderPath + ".zip";
         final String zipDestinationPath = resultFolderPath + SLASH_IEXEC_OUT;

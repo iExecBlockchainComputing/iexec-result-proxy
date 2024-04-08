@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2024
 
+### Bug Fixes
+
+- Fix conditions to retrieve a JWT or to allow a result upload. (#132)
+
 ## [[8.4.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.4.0) 2024-02-29
 
 ### Deprecation Notices

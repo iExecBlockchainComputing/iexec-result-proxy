@@ -19,7 +19,6 @@ package com.iexec.resultproxy.authorization;
 import com.iexec.common.result.ResultModel;
 import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
-import com.iexec.commons.poco.chain.ChainTaskStatus;
 import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
 import com.iexec.commons.poco.security.Signature;
 import com.iexec.commons.poco.tee.TeeUtils;
@@ -32,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static com.iexec.resultproxy.authorization.AuthorizationError.*;
@@ -50,8 +50,19 @@ public class AuthorizationService {
 
     /**
      * Checks whether this execution is authorized.
-     * If not authorized, return the reason.
-     * Otherwise, returns an empty {@link Optional}.
+     * <p>
+     * The following conditions have to be verified:
+     * <ul>
+     * <li>The {@code WorkerpoolAuthorization} must not be null and must contain a task ID
+     * <li>The task must be retrieved from the blockchain network
+     * <li>The current timestamp must be before the task final deadline
+     * <li>The deal must be retrieved from the blockchain network
+     * <li>If the {@code WorkerpoolAuthorization} contains an enclave challenge, the on-chain deal must have a correct tag
+     * <li>The {@code WorkerpoolAuthorization} has been signed with the private key of the workerpool owner found in the deal
+     * </ul>
+     *
+     * @param workerpoolAuthorization The authorization to check
+     * @return the reason if unauthorized, an empty {@code Optional} otherwise
      */
     public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization workerpoolAuthorization) {
         if (workerpoolAuthorization == null || StringUtils.isEmpty(workerpoolAuthorization.getChainTaskId())) {
@@ -60,38 +71,36 @@ public class AuthorizationService {
         }
 
         final String chainTaskId = workerpoolAuthorization.getChainTaskId();
-        Optional<ChainTask> optionalChainTask = iexecHubService.getChainTask(chainTaskId);
-        if (optionalChainTask.isEmpty()) {
+        final ChainTask chainTask = iexecHubService.getChainTask(chainTaskId).orElse(null);
+        if (chainTask == null) {
             log.error("Could not get chainTask [chainTaskId:{}]", chainTaskId);
             return Optional.of(GET_CHAIN_TASK_FAILED);
         }
-        final ChainTask chainTask = optionalChainTask.get();
 
-        final ChainTaskStatus taskStatus = chainTask.getStatus();
-        if (taskStatus != ChainTaskStatus.ACTIVE) {
-            log.error("Task not active onchain [chainTaskId:{}, status:{}]",
-                    chainTaskId, taskStatus);
-            return Optional.of(TASK_NOT_ACTIVE);
+        final long deadline = chainTask.getFinalDeadline();
+        if (Instant.now().isAfter(Instant.ofEpochMilli(deadline))) {
+            log.error("Task deadline reached [chainTaskId:{}, deadline:{}]",
+                    chainTaskId, Instant.ofEpochMilli(deadline));
+            return Optional.of(TASK_FINAL_DEADLINE_REACHED);
         }
 
         final String chainDealId = chainTask.getDealid();
-        Optional<ChainDeal> optionalChainDeal = iexecHubService.getChainDeal(chainDealId);
-        if (optionalChainDeal.isEmpty()) {
+        final ChainDeal chainDeal = iexecHubService.getChainDeal(chainDealId).orElse(null);
+        if (chainDeal == null) {
             log.error("isAuthorizedOnExecution failed (getChainDeal failed) [chainTaskId:{}]", chainTaskId);
             return Optional.of(GET_CHAIN_DEAL_FAILED);
         }
-        ChainDeal chainDeal = optionalChainDeal.get();
 
-        final boolean isTeeTask = !workerpoolAuthorization.getEnclaveChallenge().equals(BytesUtils.EMPTY_HEX_STRING_32);
+        final boolean isTeeTask = !workerpoolAuthorization.getEnclaveChallenge().equals(BytesUtils.EMPTY_ADDRESS);
         final boolean isTeeTaskOnchain = TeeUtils.isTeeTag(chainDeal.getTag());
         if (isTeeTask != isTeeTaskOnchain) {
-            log.error("Could not match onchain task type [isTeeTask:{}, isTeeTaskOnchain:{}, chainTaskId:{}, walletAddress:{}]",
+            log.error("Could not match on-chain task type [isTeeTask:{}, isTeeTaskOnchain:{}, chainTaskId:{}, walletAddress:{}]",
                     isTeeTask, isTeeTaskOnchain, chainTaskId, workerpoolAuthorization.getWorkerWallet());
             return Optional.of(NO_MATCH_ONCHAIN_TYPE);
         }
 
-        String workerpoolAddress = chainDeal.getPoolOwner();
-        boolean isSignedByWorkerpool = isSignedByHimself(workerpoolAuthorization.getHash(),
+        final String workerpoolAddress = chainDeal.getPoolOwner();
+        final boolean isSignedByWorkerpool = isSignedByHimself(workerpoolAuthorization.getHash(),
                 workerpoolAuthorization.getSignature().getValue(), workerpoolAddress);
 
         if (!isSignedByWorkerpool) {

@@ -63,6 +63,13 @@ public class ProxyService {
     /**
      * Checks if result can be uploaded.
      * <p>
+     * The following conditions have to be verified:
+     * <ul>
+     * <li>No result should have been uploaded for this task
+     * <li>Both task and deal data can be retrieved from the blockchain network
+     * <li>A standard task must be in {@code REVEALING} state and {@link #isResultValid(String, String, byte[])} must return {@literal true}
+     * <li>A TEE task must be in {@code ACTIVE} state and its enclave signature must be valid and verified against the enclave challenge
+     * </ul>
      * Task status: REVEALING for standard tasks, ACTIVE for TEE tasks with contributeAndFinalize workflow.
      *
      * @param model         Model containing data relevant to the requested result upload
@@ -113,6 +120,8 @@ public class ProxyService {
     }
 
     /**
+     * Checks a result is valid for a standard task and can safely be uploaded on IPFS.
+     * <p>
      * A result for a standard task is considered as valid if:
      * <ul>
      * <li>It has an associated on-chain contribution

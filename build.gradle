@@ -74,14 +74,6 @@ dependencies {
 
     // expiring map
     implementation 'net.jodah:expiringmap:0.5.10'
-
-    // test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // mongo
-    testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
-    testImplementation "org.testcontainers:mongodb:$testContainersVersion"
 }
 
 dependencyManagement {
@@ -101,12 +93,25 @@ tasks.named("bootJar") {
     }
 }
 
-test {
-    useJUnitPlatform()
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+            dependencies {
+                implementation 'org.springframework.boot:spring-boot-starter-test'
+                implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+                implementation "org.testcontainers:mongodb:$testContainersVersion"
+            }
+        }
+    }
+}
+
+tasks.withType(Test).configureEach {
+    finalizedBy jacocoTestReport
     systemProperty "mongo.image", "mongo:4.4.28-focal"
 }
 
-tasks.register('itest') {
+tasks.register('itest', Test) {
     group 'Verification'
     description 'Runs the integration tests.'
 }
@@ -117,7 +122,6 @@ jacocoTestReport {
         xml.required = true
     }
 }
-tasks.test.finalizedBy tasks.jacocoTestReport
 tasks.sonarqube.dependsOn tasks.jacocoTestReport
 
 publishing {

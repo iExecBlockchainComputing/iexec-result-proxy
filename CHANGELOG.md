@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file.
 
 - Fix conditions to retrieve a JWT or to allow a result upload. (#132)
 
+### Quality
+
+- Configure Gradle JVM Test Suite Plugin. (#133)
+
+### Dependency Upgrades
+
+- Upgrade to Gradle 8.7. (#134)
+
 ## [[8.4.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.4.0) 2024-02-29
 
 ### Deprecation Notices

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package com.iexec.resultproxy.chain;
 
-import com.iexec.commons.poco.chain.IexecHubAbstractService;
-
 import com.iexec.commons.poco.chain.SignerService;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Service
-public class IexecHubService extends IexecHubAbstractService {
-    public IexecHubService(SignerService signerService, Web3jService web3jService, ChainConfig chainConfig) {
-        super(signerService.getCredentials(), web3jService, chainConfig.getHubAddress());
+import java.security.GeneralSecurityException;
+
+@Configuration
+public class WalletConfiguration {
+    @Bean
+    SignerService signerService(Web3jService web3jService, ChainConfig chainConfig) throws GeneralSecurityException {
+        return new SignerService(web3jService.getWeb3j(), chainConfig.getId());
     }
 }

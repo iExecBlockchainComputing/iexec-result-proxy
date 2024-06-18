@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 IEXEC BLOCKCHAIN TECH
+ * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package com.iexec.resultproxy.chain;
 
 import com.iexec.commons.poco.chain.IexecHubAbstractService;
 
+import com.iexec.commons.poco.chain.SignerService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class IexecHubService extends IexecHubAbstractService {
-
-    public IexecHubService(CredentialsService credentialsService, Web3jService web3jService, ChainConfig chainConfig) {
-        super(credentialsService.getCredentials(), web3jService, chainConfig.getHubAddress());
+    public IexecHubService(SignerService signerService, Web3jService web3jService, ChainConfig chainConfig) {
+        super(signerService.getCredentials(), web3jService, chainConfig.getHubAddress());
     }
 }

@@ -40,15 +40,16 @@ import java.util.Optional;
 
 import static com.iexec.commons.poco.chain.ChainContributionStatus.CONTRIBUTED;
 import static com.iexec.commons.poco.chain.ChainContributionStatus.REVEALED;
+import static com.iexec.commons.poco.chain.ChainTaskStatus.ACTIVE;
+import static com.iexec.commons.poco.chain.ChainTaskStatus.UNSET;
+import static com.iexec.resultproxy.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class ProxyServiceTest {
-    private static final String CHAIN_DEAL_ID = "0x1";
-    private static final String CHAIN_TASK_ID = "0x59d9b6c36d6db89bae058ff55de6e4d6a6f6e0da3f9ea02297fc8d6d5f5cedf1";
-    private static final String RESULT_HASH = "0x865e1ebff87de7928040a42383b46690a12a988b278eb880e0e641f5da3cc9d1";
+    private static final String RESULT_HASH = "0x97f68778e2fa9d60e58ceb64de2c0e72e309400c3168c69499db2140fad28039";
     private static final String WALLET_ADDRESS = "0x123abc";
-    private static final String OTHER_ADDRESS = "0xabc123";
+    private static final String WORKER_ADDRESS = "0xabc123";
     /**
      * Contains a valid result zip, with the following files:
      * <ul>
@@ -71,7 +72,7 @@ class ProxyServiceTest {
     private static final ChainTask CHAIN_TASK = ChainTask.builder()
             .chainTaskId(CHAIN_TASK_ID)
             .dealid(CHAIN_DEAL_ID)
-            .status(ChainTaskStatus.ACTIVE)
+            .status(ChainTaskStatus.REVEALING)
             .build();
 
     /**
@@ -133,6 +134,7 @@ class ProxyServiceTest {
 
         verify(ipfsResultService).doesResultExist(CHAIN_TASK_ID);
         verify(iexecHubService).getChainTask(CHAIN_TASK_ID);
+        verifyNoInteractions(authorizationService);
     }
 
     @Test
@@ -145,6 +147,7 @@ class ProxyServiceTest {
         verify(ipfsResultService).doesResultExist(CHAIN_TASK_ID);
         verify(iexecHubService).getChainTask(CHAIN_TASK_ID);
         verify(iexecHubService).getChainDeal(CHAIN_DEAL_ID);
+        verifyNoInteractions(authorizationService);
     }
 
     // region STD task
@@ -212,34 +215,40 @@ class ProxyServiceTest {
 
         verify(ipfsResultService).doesResultExist(CHAIN_TASK_ID);
         verify(iexecHubService).getChainContribution(CHAIN_TASK_ID, WALLET_ADDRESS);
+        verifyNoInteractions(authorizationService);
     }
     // endregion
 
     // region TEE tasks with enclave signature
     @Test
     void isNotAbleToUploadSinceEnclaveSignatureIsNotValid() {
-        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(CHAIN_TASK));
+        final ChainTask activeTask = getChainTask(ACTIVE);
+        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(activeTask));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(TEE_DEAL));
-        when(authorizationService.checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WALLET_ADDRESS)).thenReturn(false);
+        when(authorizationService.checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WORKER_ADDRESS)).thenReturn(false);
 
-        assertThat(proxyService.canUploadResult(RESULT_MODEL_WITH_SIGN, OTHER_ADDRESS)).isFalse();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL_WITH_SIGN, WORKER_ADDRESS)).isFalse();
+
+        verify(authorizationService).checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WORKER_ADDRESS);
     }
 
     @Test
     void isAbleToUploadTeeTaskResultWithEnclaveSignature() {
-        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(CHAIN_TASK));
+        final ChainTask activeTask = getChainTask(ACTIVE);
+        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(activeTask));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(TEE_DEAL));
-        when(authorizationService.checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WALLET_ADDRESS)).thenReturn(true);
+        when(authorizationService.checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WORKER_ADDRESS)).thenReturn(true);
 
-        assertThat(proxyService.canUploadResult(RESULT_MODEL_WITH_SIGN, WALLET_ADDRESS)).isTrue();
+        assertThat(proxyService.canUploadResult(RESULT_MODEL_WITH_SIGN, WORKER_ADDRESS)).isTrue();
+
+        verify(authorizationService).checkEnclaveSignature(RESULT_MODEL_WITH_SIGN, WORKER_ADDRESS);
     }
     // endregion
 
     // region TEE tasks no enclave signature
     @Test
     void isNotAbleToUploadSinceTaskNotActive() {
-        final ChainTask chainTask = ChainTask.builder()
-                .chainTaskId(CHAIN_TASK_ID).dealid(CHAIN_DEAL_ID).status(ChainTaskStatus.UNSET).build();
+        final ChainTask chainTask = getChainTask(UNSET);
 
         when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(TEE_DEAL));
@@ -247,29 +256,19 @@ class ProxyServiceTest {
         assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isFalse();
 
         verify(ipfsResultService).doesResultExist(CHAIN_TASK_ID);
-    }
-
-    @Test
-    void isNotAbleToUploadSinceNotRequester() {
-        final ChainDeal chainDeal = ChainDeal.builder()
-                .chainDealId(CHAIN_DEAL_ID).requester(OTHER_ADDRESS).tag(TeeUtils.TEE_SCONE_ONLY_TAG).build();
-
-        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(CHAIN_TASK));
-        when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(chainDeal));
-
-        assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isFalse();
-
-        verify(ipfsResultService).doesResultExist(CHAIN_TASK_ID);
+        verifyNoInteractions(authorizationService);
     }
 
     @Test
     void isAbleToUploadTeeTaskResultWithoutEnclaveSignature() {
-        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(CHAIN_TASK));
+        final ChainTask chainTask = getChainTask(ACTIVE);
+        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.of(TEE_DEAL));
 
         assertThat(proxyService.canUploadResult(RESULT_MODEL, WALLET_ADDRESS)).isTrue();
 
         verify(ipfsResultService).doesResultExist(CHAIN_TASK_ID);
+        verifyNoInteractions(authorizationService);
     }
     // endregion
 }

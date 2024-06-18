@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package com.iexec.resultproxy.authorization;
+package com.iexec.resultproxy.chain;
 
-public enum AuthorizationError {
-    EMPTY_PARAMS_UNAUTHORIZED,
-    NO_MATCH_ONCHAIN_TYPE,
-    GET_CHAIN_TASK_FAILED,
-    TASK_FINAL_DEADLINE_REACHED,
-    GET_CHAIN_DEAL_FAILED,
-    INVALID_SIGNATURE;
+import com.iexec.commons.poco.chain.SignerService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.security.GeneralSecurityException;
+
+@Configuration
+public class WalletConfiguration {
+    @Bean
+    SignerService signerService(Web3jService web3jService, ChainConfig chainConfig) throws GeneralSecurityException {
+        return new SignerService(web3jService.getWeb3j(), chainConfig.getId());
+    }
 }

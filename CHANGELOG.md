@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Dependency Upgrades
 
 - Upgrade to `eclipse-temurin:11.0.24_8-jre-focal`. (#141)
+- Upgrade to Gradle 8.10.2. (#142)
 
 ## [[8.5.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.5.0) 2024-06-18
 

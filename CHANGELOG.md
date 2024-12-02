@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Upgrade to `eclipse-temurin:11.0.24_8-jre-focal`. (#141)
 - Upgrade to Gradle 8.10.2. (#142)
+- Upgrade to `testcontainers` 1.20.4. (#143)
 
 ## [[8.5.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.5.0) 2024-06-18
 

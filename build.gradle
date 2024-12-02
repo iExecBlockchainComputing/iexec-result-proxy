@@ -11,7 +11,7 @@ plugins {
 ext {
     springCloudVersion = '2021.0.8'
     jjwtVersion = '0.11.5'
-    testContainersVersion = '1.19.3'
+    testContainersVersion = '1.20.4'
 }
 
 if (!project.hasProperty('gitBranch')) {

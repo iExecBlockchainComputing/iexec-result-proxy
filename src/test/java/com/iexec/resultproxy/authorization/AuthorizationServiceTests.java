@@ -65,11 +65,8 @@ class AuthorizationServiceTests {
 
     private static final String RESULT_DIGEST = "0x3210";
 
-    private static final DockerImageName mongoImage = DockerImageName
-            .parse(System.getProperty("mongo.image"))
-            .asCompatibleSubstituteFor("mongo");
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(mongoImage);
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse(System.getProperty("mongo.image")));
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {

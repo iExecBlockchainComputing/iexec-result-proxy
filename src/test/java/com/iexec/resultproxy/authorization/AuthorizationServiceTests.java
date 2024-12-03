@@ -27,8 +27,9 @@ import com.iexec.commons.poco.utils.SignatureUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -59,6 +60,7 @@ import static org.mockito.Mockito.when;
 
 @DataMongoTest
 @Testcontainers
+@ExtendWith(MockitoExtension.class)
 class AuthorizationServiceTests {
 
     private static final String RESULT_DIGEST = "0x3210";
@@ -84,7 +86,6 @@ class AuthorizationServiceTests {
 
     @BeforeEach
     void beforeEach() throws GeneralSecurityException {
-        MockitoAnnotations.openMocks(this);
         enclaveCreds = Credentials.create(Keys.createEcKeyPair());
         workerCreds = Credentials.create(Keys.createEcKeyPair());
         authorizationRepository.deleteAll();
@@ -135,7 +136,6 @@ class AuthorizationServiceTests {
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenGetTaskFailedWithDetails() {
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
-        when(iexecHubService.isTeeTask(auth.getChainTaskId())).thenReturn(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.empty());
 
         Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
@@ -149,7 +149,6 @@ class AuthorizationServiceTests {
                 .dealid(CHAIN_DEAL_ID)
                 .finalDeadline(Instant.now().minus(5L, ChronoUnit.SECONDS).toEpochMilli())
                 .build();
-        when(iexecHubService.isTeeTask(auth.getChainTaskId())).thenReturn(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
 
         Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
@@ -162,7 +161,6 @@ class AuthorizationServiceTests {
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
         auth.setSignature(new Signature(POOL_WRONG_SIGNATURE));
 
-        when(iexecHubService.isTeeTask(auth.getChainTaskId())).thenReturn(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.empty());
 

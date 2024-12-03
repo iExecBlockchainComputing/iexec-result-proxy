@@ -108,7 +108,7 @@ testing {
 
 tasks.withType(Test).configureEach {
     finalizedBy jacocoTestReport
-    systemProperty "mongo.image", "7.0.15-jammy"
+    systemProperty "mongo.image", "mongo:7.0.15-jammy"
 }
 
 tasks.register('itest', Test) {

@@ -69,7 +69,7 @@ class AuthorizationServiceTests {
             .parse(System.getProperty("mongo.image"))
             .asCompatibleSubstituteFor("mongo");
     @Container
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:" + mongoImage);
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(mongoImage);
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {

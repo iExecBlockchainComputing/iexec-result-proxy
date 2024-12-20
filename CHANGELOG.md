@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [[8.6.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2024
+## [[8.6.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.6.0) 2024-12-20
 
 ### Quality
 

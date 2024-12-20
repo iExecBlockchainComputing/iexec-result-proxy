@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - Upgrade to Gradle 8.10.2. (#142)
 - Upgrade to `testcontainers` 1.20.4. (#143)
 - Upgrade to `mongo:7.0.15-jammy`. (#144)
-- Upgrade to `iexec-commons-poco` 4.2.0 and to `iexec-common` 8.6.0 (#146)
+- Upgrade to `iexec-commons-poco` 4.2.0 and to `iexec-common` 8.6.0. (#146)
 
 ## [[8.5.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.5.0) 2024-06-18
 

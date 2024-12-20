@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [[8.6.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.6.0) 2024-12-20
+
+### Quality
+
+- Keep `itest` task empty in `build.gradle` to avoid a warning during build. (#145)
+
+### Dependency Upgrades
+
+- Upgrade to `eclipse-temurin:11.0.24_8-jre-focal`. (#141)
+- Upgrade to Gradle 8.10.2. (#142)
+- Upgrade to `testcontainers` 1.20.4. (#143)
+- Upgrade to `mongo:7.0.15-jammy`. (#144)
+- Upgrade to `iexec-commons-poco` 4.2.0. (#146)
+- Upgrade to `iexec-common` 8.6.0. (#146)
+
 ## [[8.5.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.5.0) 2024-06-18
 
 ### New Features
@@ -22,7 +37,7 @@ All notable changes to this project will be documented in this file.
 - Upgrade to `eclipse-temurin:11.0.22_7-jre-focal`. (#135)
 - Upgrade to Spring Boot 2.7.18. (#136)
 - Upgrade to `iexec-commons-poco` 4.1.0. (#138)
-- Upgrade to `iexce-common` 8.5.0. (#138)
+- Upgrade to `iexec-common` 8.5.0. (#138)
 
 ## [[8.4.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.4.0) 2024-02-29
 

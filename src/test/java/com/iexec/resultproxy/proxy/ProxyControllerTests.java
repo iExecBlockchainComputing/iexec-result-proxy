@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import com.iexec.resultproxy.authorization.AuthorizationService;
 import com.iexec.resultproxy.challenge.EIP712ChallengeService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ProxyControllerTests {
 
     private static final String CHAIN_TASK_ID = "0x1";
@@ -73,29 +74,24 @@ class ProxyControllerTests {
     @InjectMocks
     private ProxyController controller;
 
-    @BeforeEach
-    void init() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     // region deprecated methods, to remove in v10
     @Test
     void shouldCallAddResult() {
         final ResultModel model = ResultModel.builder().build();
-        controller.addResultDeprecated(TOKEN, model);
+        controller.addResult(TOKEN, model);
         verify(controller).addResult(TOKEN, model);
     }
 
     @Test
     void shouldCallIsResultUploaded() {
-        controller.isResultUploadedDeprecated(CHAIN_TASK_ID, TOKEN);
+        controller.isResultUploaded(CHAIN_TASK_ID, TOKEN);
         verify(controller).isResultUploaded(CHAIN_TASK_ID, TOKEN);
     }
 
     @Test
     void shouldCallGetIpfsHashForTask() {
         when(ipfsNameService.getIpfsHashForTask(CHAIN_TASK_ID)).thenReturn("");
-        controller.getIpfsHashForTaskDeprecated(CHAIN_TASK_ID);
+        controller.getIpfsHashForTask(CHAIN_TASK_ID);
         verify(controller).getIpfsHashForTask(CHAIN_TASK_ID);
     }
     // endregion

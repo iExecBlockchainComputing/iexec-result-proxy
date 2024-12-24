@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2025
 
+### New Features
+
+- Update Java compatibility across modules and replace deprecated features. (#149)
+
+### Dependency Upgrades
+
+- Upgrade to `eclipse-temurin:17.0.13_11-jre-focal`. (#149)
+- Upgrade to Spring Boot `3.0.13`. (#149)
+
 ## [[8.6.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.6.0) 2024-12-20
 
 ### Quality

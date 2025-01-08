@@ -22,9 +22,6 @@ testing {
     suites {
         test {
             useJUnitJupiter()
-            dependencies {
-                implementation 'org.junit.jupiter:junit-jupiter'
-            }
         }
     }
 }

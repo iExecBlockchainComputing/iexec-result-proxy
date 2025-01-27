@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2020-2025 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 package com.iexec.resultproxy.proxy;
 
 import com.iexec.common.result.ResultModel;
-import com.iexec.common.security.SignedChallenge;
 import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
-import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import com.iexec.resultproxy.authorization.AuthorizationService;
-import com.iexec.resultproxy.challenge.ChallengeService;
 import com.iexec.resultproxy.ipfs.task.IpfsNameService;
 import com.iexec.resultproxy.jwt.JwtService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,56 +34,24 @@ import static org.springframework.http.ResponseEntity.ok;
 public class ProxyController {
 
     private final AuthorizationService authorizationService;
-    private final ChallengeService challengeService;
     private final JwtService jwtService;
     private final ProxyService proxyService;
     private final IpfsNameService ipfsNameService;
 
     public ProxyController(AuthorizationService authorizationService,
-                           ChallengeService challengeService,
                            JwtService jwtService,
                            ProxyService proxyService,
                            IpfsNameService ipfsNameService) {
         this.authorizationService = authorizationService;
-        this.challengeService = challengeService;
         this.jwtService = jwtService;
         this.proxyService = proxyService;
         this.ipfsNameService = ipfsNameService;
     }
 
     /**
-     * @deprecated Use new endpoint with valid {@code WorkerpoolAuthorization}
-     */
-    @Deprecated(forRemoval = true)
-    @GetMapping(value = "/results/challenge")
-    public ResponseEntity<EIP712Challenge> getChallenge(@RequestParam(name = "chainId") Integer chainId) {
-        EIP712Challenge eip712Challenge = challengeService.createChallenge(chainId);
-        return ResponseEntity.ok(eip712Challenge);
-    }
-
-    /**
-     * @deprecated Use new endpoint with valid {@code WorkerpoolAuthorization}
-     */
-    @Deprecated(forRemoval = true)
-    @PostMapping(value = "/results/login")
-    public ResponseEntity<String> login(@RequestParam(name = "chainId") Integer chainId,
-                                        @RequestBody String token) {
-        SignedChallenge signedChallenge = challengeService.tokenToSignedChallengeObject(token);
-        if (!challengeService.isSignedChallengeValid(signedChallenge)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String jwtString = jwtService.getOrCreateJwt(signedChallenge.getWalletAddress());
-        if (jwtString == null || jwtString.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-        challengeService.invalidateChallenge(signedChallenge.getChallengeHash());
-        return ResponseEntity.ok(jwtString);
-    }
-
-    /**
      * Logs against Result Proxy with valid {@code WorkerpoolAuthorization}.
+     * <p>
+     * The address of the signer needs to be stored in the {@code workerWallet} field of {@code WorkerpoolAuthorization}
      */
     @PostMapping("/v1/results/token")
     public ResponseEntity<String> getJwt(@RequestHeader("Authorization") String authorization,
@@ -102,16 +67,6 @@ public class ProxyController {
         authorizationService.putIfAbsent(workerpoolAuthorization);
         final String jwtString = jwtService.getOrCreateJwt(workerpoolAuthorization.getWorkerWallet());
         return ResponseEntity.ok(jwtString);
-    }
-
-    /**
-     * @deprecated Use {@code /v1/results} endpoint, will be removed in v10
-     */
-    @Deprecated(forRemoval = true)
-    @PostMapping("/")
-    public ResponseEntity<String> addResultDeprecated(@RequestHeader("Authorization") String token,
-                                                      @RequestBody ResultModel model) {
-        return addResult(token, model);
     }
 
     /**
@@ -153,16 +108,6 @@ public class ProxyController {
     }
 
     /**
-     * @deprecated Use {@code /v1/results/{chainTaskId}} endpoint, will be removed in v10
-     */
-    @Deprecated(forRemoval = true)
-    @RequestMapping(method = RequestMethod.HEAD, path = "/results/{chainTaskId}")
-    public ResponseEntity<String> isResultUploadedDeprecated(@PathVariable(name = "chainTaskId") String chainTaskId,
-                                                             @RequestHeader("Authorization") String token) {
-        return isResultUploaded(chainTaskId, token);
-    }
-
-    /**
      * Checks if a given task has been uploaded on IPFS through the current iExec Result Proxy instance.
      *
      * @param chainTaskId ID of the task
@@ -184,15 +129,6 @@ public class ProxyController {
         boolean isResultFound = proxyService.isResultFound(chainTaskId);
         HttpStatus status = isResultFound ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND;
         return ResponseEntity.status(status).build();
-    }
-
-    /**
-     * @deprecated Use {@code /v1/results/{chainTaskId}/ipfshash} endpoint, will be removed in v10
-     */
-    @Deprecated(forRemoval = true)
-    @GetMapping("/results/{chainTaskId}/ipfshash")
-    public ResponseEntity<String> getIpfsHashForTaskDeprecated(@PathVariable("chainTaskId") String chainTaskId) {
-        return getIpfsHashForTask(chainTaskId);
     }
 
     /**

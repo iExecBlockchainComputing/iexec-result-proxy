@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2022-2025 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.iexec.resultproxy.api;
 
 import com.iexec.common.result.ResultModel;
 import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
-import com.iexec.commons.poco.eip712.entity.EIP712Challenge;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -31,20 +30,6 @@ import feign.RequestLine;
  * @see ResultProxyClientBuilder
  */
 public interface ResultProxyClient {
-
-    /**
-     * @deprecated Will be replaced with new flow and removed in v10
-     */
-    @Deprecated(forRemoval = true)
-    @RequestLine("GET /results/challenge?chainId={chainId}")
-    EIP712Challenge getChallenge(@Param("chainId") int chainId);
-
-    /**
-     * @deprecated Will be replaced with new flow and removed in v10
-     */
-    @Deprecated(forRemoval = true)
-    @RequestLine("POST /results/login?chainId={chainId}")
-    String login(@Param("chainId") int chainId, String token);
 
     @RequestLine("POST /v1/results/token")
     @Headers("Authorization: {authorization}")

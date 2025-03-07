@@ -25,6 +25,7 @@ import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
 import com.iexec.commons.poco.tee.TeeUtils;
+import com.iexec.commons.poco.utils.HashUtils;
 import com.iexec.resultproxy.authorization.AuthorizationService;
 import com.iexec.resultproxy.chain.IexecHubService;
 import com.iexec.resultproxy.ipfs.IpfsResultService;
@@ -160,7 +161,7 @@ public class ProxyService {
 
             final ComputedFile computedFile = readComputedFile(chainTaskId, zipDestinationPath);
             final String resultDigest = ResultUtils.computeWeb2ResultDigest(computedFile, resultFolderPath);
-            final String computedResultHash = ResultUtils.computeResultHash(chainTaskId, resultDigest);
+            final String computedResultHash = HashUtils.concatenateAndHash(chainTaskId, resultDigest);
 
             if (!Objects.equals(computedResultHash, onChainHash)) {
                 log.error("Trying to upload result but on-chain result hash differs from given hash " +

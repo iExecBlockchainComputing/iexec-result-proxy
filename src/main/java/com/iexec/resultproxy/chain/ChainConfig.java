@@ -16,7 +16,13 @@
 
 package com.iexec.resultproxy.chain;
 
+import com.iexec.common.chain.validation.ValidNonZeroEthereumAddress;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Value;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -25,11 +31,26 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "chain")
 //TODO: validate configuration property names and use the same set of names everywhere (blockchain-adapter-api, sms)
 public class ChainConfig {
+    @Positive
+    @NotNull
     int id;
+
     boolean sidechain;
+
+    @URL
+    @NotEmpty
     String privateAddress;
+
+    @ValidNonZeroEthereumAddress
     String hubAddress;
+
+    @Positive
+    @NotNull
     Duration blockTime;
+
+    @Positive
     float gasPriceMultiplier;
+
+    @PositiveOrZero
     long gasPriceCap;
 }

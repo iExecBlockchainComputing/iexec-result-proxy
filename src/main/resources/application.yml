@@ -16,7 +16,7 @@ chain:
   hub-address: ${IEXEC_HUB_ADDRESS:0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f}
   block-time: ${IEXEC_BLOCK_TIME:PT5S}
   gas-price-multiplier: ${IEXEC_GAS_PRICE_MULTIPLIER:1.0} # txs will be sent with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
-  gas-price-cap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap 
+  gas-price-cap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
 
 ipfs:
   host: ${IEXEC_IPFS_HOST:127.0.0.1}

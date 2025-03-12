@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2023 IEXEC BLOCKCHAIN TECH
+ * Copyright 2023-2025 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(properties = {
         "chain.id=134",
         "chain.sidechain=true",
-        "chain.privateAddress=https://bellecour.iex.ec",
-        "chain.hubAddress=0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f",
-        "chain.blockTime=PT5S",
-        "chain.gasPriceMultiplier=1.0",
-        "chain.gasPriceCap=22000000000" })
+        "chain.private-address=https://bellecour.iex.ec",
+        "chain.hub-address=0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f",
+        "chain.block-time=PT5S",
+        "chain.gas-price-multiplier=1.0",
+        "chain.gas-price-cap=22000000000"})
 class Web3jServiceTests {
     @Autowired
     private ChainConfig chainConfig;

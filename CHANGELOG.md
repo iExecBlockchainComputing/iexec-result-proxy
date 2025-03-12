@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2025
 
-### New Features
+### Quality
 
 - Harmonize YML internal variables to proper case. (#154)
 

@@ -23,13 +23,14 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Value;
 import org.hibernate.validator.constraints.URL;
+import org.hibernate.validator.constraints.time.DurationMax;
+import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 
 @Value
 @ConfigurationProperties(prefix = "chain")
-//TODO: validate configuration property names and use the same set of names everywhere (blockchain-adapter-api, sms)
 public class ChainConfig {
     @Positive
     @NotNull
@@ -39,12 +40,13 @@ public class ChainConfig {
 
     @URL
     @NotEmpty
-    String privateAddress;
+    String nodeAddress;
 
     @ValidNonZeroEthereumAddress
     String hubAddress;
 
-    @Positive
+    @DurationMin(millis = 100)
+    @DurationMax(seconds = 20)
     @NotNull
     Duration blockTime;
 

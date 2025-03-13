@@ -43,7 +43,7 @@ class Web3jServiceTests {
 
     @Test
     void checkChainConfig() {
-        ChainConfig expextedConfig = new ChainConfig(
+        final ChainConfig expextedConfig = new ChainConfig(
                 134, true, "https://bellecour.iex.ec",
                 "0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f", Duration.ofSeconds(5),
                 1.0f, 22000000000L

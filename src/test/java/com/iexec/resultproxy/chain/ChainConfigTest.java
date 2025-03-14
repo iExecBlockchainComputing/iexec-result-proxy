@@ -28,7 +28,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ChainConfigUnitTest {
+class ChainConfigTest {
     private static final String IEXEC_NODE_ADDRESS = "https://bellecour.iex.ec";
     private static final String IEXEC_HUB_ADDRESS = "0x1a69b2eb604db8eba185df03ea4f5288dcbbd248";
 

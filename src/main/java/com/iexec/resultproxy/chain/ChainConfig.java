@@ -26,10 +26,12 @@ import org.hibernate.validator.constraints.URL;
 import org.hibernate.validator.constraints.time.DurationMax;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 
 @Value
+@Validated
 @ConfigurationProperties(prefix = "chain")
 public class ChainConfig {
     @Positive

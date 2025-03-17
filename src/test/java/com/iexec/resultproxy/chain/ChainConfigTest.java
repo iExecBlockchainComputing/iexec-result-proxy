@@ -53,8 +53,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("must be greater than 0");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must be greater than 0");
     }
 
     @Test
@@ -69,8 +70,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("must be a valid URL");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must be a valid URL");
     }
 
     @Test
@@ -85,8 +87,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("must not be empty");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must not be empty");
     }
 
     @Test
@@ -101,8 +104,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("Invalid non-zero Ethereum address");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("Invalid non-zero Ethereum address");
     }
 
     @Test
@@ -117,8 +121,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("must be longer than or equal to 100 millis");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must be longer than or equal to 100 millis");
     }
 
     @Test
@@ -133,8 +138,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("must be shorter than or equal to 20 seconds");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must be shorter than or equal to 20 seconds");
     }
 
     @Test
@@ -149,8 +155,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("must not be null");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must not be null");
     }
 
     @Test
@@ -165,8 +172,9 @@ class ChainConfigTest {
                 100L
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("must be greater than 0");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must be greater than 0");
     }
 
     @Test
@@ -181,7 +189,8 @@ class ChainConfigTest {
                 -1L  // invalid cap
         );
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).isEqualTo("must be greater than or equal to 0");
+        assertThat(violations)
+                .extracting(ConstraintViolation::getMessage)
+                .containsExactly("must be greater than or equal to 0");
     }
 }

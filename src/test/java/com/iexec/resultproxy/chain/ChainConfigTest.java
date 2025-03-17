@@ -55,7 +55,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must be greater than 0");
+                .containsExactly("Chain id must be greater than 0");
     }
 
     @Test
@@ -72,7 +72,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must be a valid URL");
+                .containsExactly("Node address must be a valid URL");
     }
 
     @Test
@@ -89,7 +89,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must not be empty");
+                .containsExactly("Node address must not be empty");
     }
 
     @Test
@@ -106,7 +106,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("Invalid non-zero Ethereum address");
+                .containsExactly("Hub address must be a valid non zero Ethereum address");
     }
 
     @Test
@@ -123,7 +123,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must be longer than or equal to 100 millis");
+                .containsExactly("Block time must be greater than 100ms");
     }
 
     @Test
@@ -140,7 +140,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must be shorter than or equal to 20 seconds");
+                .containsExactly("Block time must be less than 20s");
     }
 
     @Test
@@ -157,7 +157,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must not be null");
+                .containsExactly("Block time must not be null");
     }
 
     @Test
@@ -174,7 +174,7 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must be greater than 0");
+                .containsExactly("Gas price multiplier must be greater than 0");
     }
 
     @Test
@@ -191,6 +191,6 @@ class ChainConfigTest {
         final Set<ConstraintViolation<ChainConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
-                .containsExactly("must be greater than or equal to 0");
+                .containsExactly("Gas price cap must be greater or equal to 0");
     }
 }

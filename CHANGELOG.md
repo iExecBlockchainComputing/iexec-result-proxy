@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [[NEXT]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/vNEXT) 2025
 
+### Quality
+
+- Harmonize YML internal variables to proper case. (#154)
+
 ### Breaking API changes
 
 - Remove legacy authorization mechanism, allows to remove challenge services as well. (#150)

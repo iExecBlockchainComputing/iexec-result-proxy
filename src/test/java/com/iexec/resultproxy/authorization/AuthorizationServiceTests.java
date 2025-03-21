@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024-2025 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,19 +101,19 @@ class AuthorizationServiceTests {
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEmpty();
     }
 
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWithNullAuthorizationWithDetails() {
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(null);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(null);
         assertThat(isAuth).isEqualTo(Optional.of(EMPTY_PARAMS_UNAUTHORIZED));
     }
 
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWithEmptyAuthorizationWithDetails() {
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization.builder().build());
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization.builder().build());
         assertThat(isAuth).isEqualTo(Optional.of(EMPTY_PARAMS_UNAUTHORIZED));
     }
 
@@ -129,7 +129,7 @@ class AuthorizationServiceTests {
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(NO_MATCH_ONCHAIN_TYPE));
     }
 
@@ -138,7 +138,7 @@ class AuthorizationServiceTests {
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.empty());
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(GET_CHAIN_TASK_FAILED));
     }
 
@@ -151,7 +151,7 @@ class AuthorizationServiceTests {
                 .build();
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(TASK_FINAL_DEADLINE_REACHED));
     }
 
@@ -159,12 +159,12 @@ class AuthorizationServiceTests {
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenGetDealFailedWithDetails() {
         final ChainTask chainTask = getChainTask(ACTIVE);
         final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
-        final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(true, wrongSignature);
+        final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(wrongSignature);
 
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.empty());
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(GET_CHAIN_DEAL_FAILED));
     }
 
@@ -173,12 +173,12 @@ class AuthorizationServiceTests {
         final ChainDeal chainDeal = getChainDeal();
         final ChainTask chainTask = getChainTask(ACTIVE);
         final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
-        final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(true, wrongSignature);
+        final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(wrongSignature);
 
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
 
-        Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(INVALID_SIGNATURE));
     }
     // endregion
@@ -276,7 +276,7 @@ class AuthorizationServiceTests {
     // endregion
 
     // region utils
-    String getEnclaveSignature(ECKeyPair ecKeyPair) {
+    String getEnclaveSignature(final ECKeyPair ecKeyPair) {
         final String resultHash = HashUtils.concatenateAndHash(CHAIN_TASK_ID, RESULT_DIGEST);
         final String resultSeal = HashUtils.concatenateAndHash(workerCreds.getAddress(), CHAIN_TASK_ID, RESULT_DIGEST);
         final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);
@@ -296,8 +296,8 @@ class AuthorizationServiceTests {
                 .build();
     }
 
-    private WorkerpoolAuthorization getWorkerpoolAuthorizationWithWrongSignature(final boolean isTeeTask, final Signature signature) {
-        final String enclaveChallenge = isTeeTask ? enclaveCreds.getAddress() : BytesUtils.EMPTY_ADDRESS;
+    private WorkerpoolAuthorization getWorkerpoolAuthorizationWithWrongSignature(final Signature signature) {
+        final String enclaveChallenge = enclaveCreds.getAddress();
         return WorkerpoolAuthorization.builder()
                 .chainTaskId(CHAIN_TASK_ID)
                 .enclaveChallenge(enclaveChallenge)

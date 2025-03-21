@@ -41,12 +41,12 @@ public class IpfsService implements SmartLifecycle {
     private IPFS ipfs;
     private final String multiAddress;
 
-    public IpfsService(IpfsConfig ipfsConfig) {
+    public IpfsService(final IpfsConfig ipfsConfig) {
         try {
-            URL ipfsUrl = new URL(ipfsConfig.getUrl());
-            String ipfsHost = ipfsUrl.getHost();
+            final URL ipfsUrl = new URL(ipfsConfig.getUrl());
+            final String ipfsHost = ipfsUrl.getHost();
             int port = ipfsUrl.getPort();
-            String ipfsNodeIp = isIPAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
+            final String ipfsNodeIp = isIPAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
         } catch (MalformedURLException e) {
             log.error("Invalid IPFS URL: {}", ipfsConfig.getUrl(), e);
@@ -54,11 +54,11 @@ public class IpfsService implements SmartLifecycle {
         }
     }
 
-    public Optional<byte[]> get(String ipfsHash) {
+    public Optional<byte[]> get(final String ipfsHash) {
         if (!isIpfsHash(ipfsHash)){
             return Optional.empty();
         }
-        Multihash filePointer = Multihash.fromBase58(ipfsHash);
+        final Multihash filePointer = Multihash.fromBase58(ipfsHash);
         try {
             return Optional.of(ipfs.cat(filePointer));
         } catch (IOException e) {
@@ -67,10 +67,10 @@ public class IpfsService implements SmartLifecycle {
         return Optional.empty();
     }
 
-    public String add(String fileName, byte[] fileContent) {
-        NamedStreamable.ByteArrayWrapper file = new NamedStreamable.ByteArrayWrapper(fileName, fileContent);
+    public String add(final String fileName, final byte[] fileContent) {
+        final NamedStreamable.ByteArrayWrapper file = new NamedStreamable.ByteArrayWrapper(fileName, fileContent);
         try {
-            MerkleNode pushedContent = ipfs.add(file, false).get(0);
+            final MerkleNode pushedContent = ipfs.add(file, false).get(0);
             return pushedContent.hash.toString();
         } catch (IOException e) {
             log.error("Error when trying to push ipfs object [fileName:{}]", fileName);
@@ -78,7 +78,7 @@ public class IpfsService implements SmartLifecycle {
         return "";
     }
 
-    public static boolean isIpfsHash(String hash) {
+    public static boolean isIpfsHash(final String hash) {
         try {
             return Multihash.fromBase58(hash).toBase58() != null;
         } catch (Exception e) {
@@ -86,7 +86,7 @@ public class IpfsService implements SmartLifecycle {
         }
     }
 
-    private String convertHostToIp(String hostname) {
+    private String convertHostToIp(final String hostname) {
         InetAddress address = null;
         try {
             address = InetAddress.getByName(hostname);
@@ -107,7 +107,7 @@ public class IpfsService implements SmartLifecycle {
     }
 
     @Recover
-    public void start(RuntimeException exception) {
+    public void start(final RuntimeException exception) {
         log.error("Exception when initializing IPFS connection", exception);
         log.warn("Shutting down service since IPFS is necessary");
         throw exception;

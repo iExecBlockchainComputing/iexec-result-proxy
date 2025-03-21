@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2024 IEXEC BLOCKCHAIN TECH
+ * Copyright 2024-2025 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import com.iexec.commons.poco.utils.HashUtils;
 import com.iexec.commons.poco.utils.SignatureUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +63,7 @@ public class AuthorizationService {
      * @param workerpoolAuthorization The authorization to check
      * @return the reason if unauthorized, an empty {@code Optional} otherwise
      */
-    public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization workerpoolAuthorization) {
+    public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(final WorkerpoolAuthorization workerpoolAuthorization) {
         if (workerpoolAuthorization == null || BytesUtils.EMPTY_HEX_STRING_32.equals(workerpoolAuthorization.getChainTaskId())) {
             log.error("Not authorized with empty params");
             return Optional.of(EMPTY_PARAMS_UNAUTHORIZED);
@@ -112,11 +111,11 @@ public class AuthorizationService {
         return Optional.empty();
     }
 
-    public boolean isSignedByHimself(String message, String signature, String address) {
+    public boolean isSignedByHimself(final String message, final String signature, final String address) {
         return SignatureUtils.isSignatureValid(BytesUtils.stringToBytes(message), new Signature(signature), address);
     }
 
-    public String getChallengeForWorker(WorkerpoolAuthorization workerpoolAuthorization) {
+    public String getChallengeForWorker(final WorkerpoolAuthorization workerpoolAuthorization) {
         return HashUtils.concatenateAndHash(
                 workerpoolAuthorization.getWorkerWallet(),
                 workerpoolAuthorization.getChainTaskId(),
@@ -124,7 +123,7 @@ public class AuthorizationService {
     }
 
     // region workerpool authorization cache
-    public boolean checkEnclaveSignature(ResultModel model, String walletAddress) {
+    public boolean checkEnclaveSignature(final ResultModel model, final String walletAddress) {
         if (ResultModel.EMPTY_WEB3_SIG.equals(model.getEnclaveSignature())) {
             log.warn("Empty enclave signature {}", walletAddress);
             return false;
@@ -154,7 +153,7 @@ public class AuthorizationService {
         return isSignedByEnclave;
     }
 
-    public void putIfAbsent(WorkerpoolAuthorization workerpoolAuthorization) {
+    public void putIfAbsent(final WorkerpoolAuthorization workerpoolAuthorization) {
         try {
             authorizationRepository.save(new Authorization(workerpoolAuthorization));
             log.debug("Workerpool authorization entry added [chainTaskId:{}, workerWallet:{}]",

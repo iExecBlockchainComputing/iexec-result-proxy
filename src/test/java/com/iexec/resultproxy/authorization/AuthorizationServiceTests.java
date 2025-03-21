@@ -158,8 +158,8 @@ class AuthorizationServiceTests {
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenGetDealFailedWithDetails() {
         final ChainTask chainTask = getChainTask(ACTIVE);
-        final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
-        auth.setSignature(new Signature(POOL_WRONG_SIGNATURE));
+        final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
+        final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(true, wrongSignature);
 
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.empty());
@@ -172,8 +172,8 @@ class AuthorizationServiceTests {
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenPoolSignatureIsNotValidWithDetails() {
         final ChainDeal chainDeal = getChainDeal();
         final ChainTask chainTask = getChainTask(ACTIVE);
-        final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
-        auth.setSignature(new Signature(POOL_WRONG_SIGNATURE));
+        final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
+        final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(true, wrongSignature);
 
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
         when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
@@ -284,10 +284,20 @@ class AuthorizationServiceTests {
                 Numeric.toHexStringWithPrefix(ecKeyPair.getPrivateKey())).getValue();
     }
 
-    WorkerpoolAuthorization getWorkerpoolAuthorization(boolean isTeeTask) {
+    private WorkerpoolAuthorization getWorkerpoolAuthorization(final boolean isTeeTask) {
         final String enclaveChallenge = isTeeTask ? enclaveCreds.getAddress() : BytesUtils.EMPTY_ADDRESS;
         final String hash = HashUtils.concatenateAndHash(workerCreds.getAddress(), CHAIN_TASK_ID, enclaveChallenge);
         final Signature signature = SignatureUtils.signMessageHashAndGetSignature(hash, POOL_PRIVATE);
+        return WorkerpoolAuthorization.builder()
+                .chainTaskId(CHAIN_TASK_ID)
+                .enclaveChallenge(enclaveChallenge)
+                .workerWallet(workerCreds.getAddress())
+                .signature(signature)
+                .build();
+    }
+
+    private WorkerpoolAuthorization getWorkerpoolAuthorizationWithWrongSignature(final boolean isTeeTask, final Signature signature) {
+        final String enclaveChallenge = isTeeTask ? enclaveCreds.getAddress() : BytesUtils.EMPTY_ADDRESS;
         return WorkerpoolAuthorization.builder()
                 .chainTaskId(CHAIN_TASK_ID)
                 .enclaveChallenge(enclaveChallenge)

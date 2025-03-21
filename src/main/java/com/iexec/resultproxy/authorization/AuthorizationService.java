@@ -65,7 +65,7 @@ public class AuthorizationService {
      * @return the reason if unauthorized, an empty {@code Optional} otherwise
      */
     public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization workerpoolAuthorization) {
-        if (workerpoolAuthorization == null || StringUtils.isEmpty(workerpoolAuthorization.getChainTaskId())) {
+        if (workerpoolAuthorization == null || BytesUtils.EMPTY_HEX_STRING_32.equals(workerpoolAuthorization.getChainTaskId())) {
             log.error("Not authorized with empty params");
             return Optional.of(EMPTY_PARAMS_UNAUTHORIZED);
         }

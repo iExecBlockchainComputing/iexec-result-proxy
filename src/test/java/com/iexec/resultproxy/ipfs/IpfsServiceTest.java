@@ -17,6 +17,7 @@
 package com.iexec.resultproxy.ipfs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
-import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +52,7 @@ class IpfsServiceTest {
 
     @ParameterizedTest
     @MethodSource("testHashData")
-    void shouldBeIpfsHash(String hash, boolean expected) {
+    void shouldBeIpfsHash(final String hash, final boolean expected) {
         assertThat(IpfsService.isIpfsHash(hash)).isEqualTo(expected);
     }
 
@@ -77,6 +78,17 @@ class IpfsServiceTest {
         ipfsService = spy(new IpfsService(ipfsConfig));
         String multiAddress = getMultiAddress(ipfsService);
         assertThat(multiAddress).contains("/tcp/5001");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUrlIsInvalid() {
+        when(ipfsConfig.getUrl()).thenReturn("invalid:url:format");
+        final IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new IpfsService(ipfsConfig)
+        );
+        assertThat(exception.getMessage()).contains("Invalid IPFS URL");
+        assertThat(exception.getCause()).isInstanceOf(MalformedURLException.class);
     }
 
     // Helper method to access private field for testing

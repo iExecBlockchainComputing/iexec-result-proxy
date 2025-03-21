@@ -1,6 +1,22 @@
+/*
+ * Copyright 2020-2025 IEXEC BLOCKCHAIN TECH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iexec.resultproxy.ipfs;
 
-import com.iexec.common.utils.NetworkUtils;
+import com.google.common.net.InetAddresses;
 import io.ipfs.api.IPFS;
 import io.ipfs.api.MerkleNode;
 import io.ipfs.api.NamedStreamable;
@@ -12,6 +28,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Optional;
 
 @Service
@@ -22,9 +42,16 @@ public class IpfsService implements SmartLifecycle {
     private final String multiAddress;
 
     public IpfsService(IpfsConfig ipfsConfig) {
-        String ipfsHost = ipfsConfig.getHost();
-        String ipfsNodeIp = NetworkUtils.isIPAddress(ipfsHost) ? ipfsHost : NetworkUtils.convertHostToIp(ipfsHost);
-        this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + ipfsConfig.getPort();
+        try {
+            URL ipfsUrl = new URL(ipfsConfig.getUrl());
+            String ipfsHost = ipfsUrl.getHost();
+            int port = ipfsUrl.getPort();
+            String ipfsNodeIp = isIPAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
+            this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
+        } catch (MalformedURLException e) {
+            log.error("Invalid IPFS URL: {}", ipfsConfig.getUrl(), e);
+            throw new IllegalArgumentException("Invalid IPFS URL: " + ipfsConfig.getUrl(), e);
+        }
     }
 
     public Optional<byte[]> get(String ipfsHash) {
@@ -57,6 +84,20 @@ public class IpfsService implements SmartLifecycle {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private String convertHostToIp(String hostname) {
+        InetAddress address = null;
+        try {
+            address = InetAddress.getByName(hostname);
+        } catch (UnknownHostException e) {
+            log.error("No IP address could be found [host:{}]", hostname, e);
+        }
+        return address != null ? address.getHostAddress() : "";
+    }
+
+    private boolean isIPAddress(String host) {
+        return InetAddresses.isInetAddress(host);
     }
 
     @Override

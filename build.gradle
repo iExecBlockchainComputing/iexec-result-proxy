@@ -72,6 +72,9 @@ dependencies {
     // ipfs
     implementation 'com.github.ipfs:java-ipfs-http-client:1.4.4'
 
+    // google core libs
+    implementation 'com.google.guava:guava:32.1.3-jre'
+
     // json web token
     implementation "io.jsonwebtoken:jjwt-api:$jjwtVersion"
     runtimeOnly "io.jsonwebtoken:jjwt-impl:$jjwtVersion"

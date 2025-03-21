@@ -19,7 +19,7 @@ chain:
   gas-price-cap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
 
 ipfs:
-  url: https://${IEXEC_IPFS_HOST:127.0.0.1}:${IEXEC_IPFS_PORT:5001}
+  url: ${IEXEC_IPFS_URL:http://127.0.0.1:5001}
 
 jwt:
   key-path: /data/jwt-sign.key

@@ -45,7 +45,7 @@ public class IpfsService implements SmartLifecycle {
         try {
             final URL ipfsUrl = new URL(ipfsConfig.getUrl());
             final String ipfsHost = ipfsUrl.getHost();
-            int port = ipfsUrl.getPort();
+            int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : 5001;
             final String ipfsNodeIp = InetAddresses.isInetAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
         } catch (MalformedURLException e) {

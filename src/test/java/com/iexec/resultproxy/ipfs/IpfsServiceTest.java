@@ -1,42 +1,89 @@
+/*
+ * Copyright 2020-2025 IEXEC BLOCKCHAIN TECH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iexec.resultproxy.ipfs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.stream.Stream;
 
+@ExtendWith(MockitoExtension.class)
 class IpfsServiceTest {
 
-    @BeforeEach
-    void init() {
-        MockitoAnnotations.openMocks(this);
+    @Mock
+    private IpfsConfig ipfsConfig;
+
+    private IpfsService ipfsService;
+
+    static Stream<Arguments> testHashData() {
+        return Stream.of(
+                Arguments.of("QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA", true),
+                Arguments.of("QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbU", false),
+                Arguments.of("abcd", false),
+                Arguments.of("", false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testHashData")
+    void shouldBeIpfsHash(String hash, boolean expected) {
+        assertThat(IpfsService.isIpfsHash(hash)).isEqualTo(expected);
     }
 
     @Test
-    void shouldBeIpfsHash() {
-        String hash = "QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbUA";
-        assertThat(IpfsService.isIpfsHash(hash)).isTrue();
+    void shouldConstructWithIPAddressURL() throws Exception {
+        when(ipfsConfig.getUrl()).thenReturn("http://127.0.0.1:5001");
+        ipfsService = new IpfsService(ipfsConfig);
+        String multiAddress = getMultiAddress(ipfsService);
+        assertThat(multiAddress).isEqualTo("/ip4/127.0.0.1/tcp/5001");
     }
 
     @Test
-    void shouldBeIpfsHashSinceWrongLength() {
-        String hash = "QmfZ88JXmx2FJsAxT4ZsJBVhBUXdPoRbDZhbkSS1WsMbU";
-        assertThat(IpfsService.isIpfsHash(hash)).isFalse();
+    void shouldConstructWithLocalhostURL() throws Exception {
+        when(ipfsConfig.getUrl()).thenReturn("http://localhost:5001");
+        ipfsService = new IpfsService(ipfsConfig);
+        String multiAddress = getMultiAddress(ipfsService);
+        assertThat(multiAddress).matches("/ip4/.+/tcp/5001");
     }
 
     @Test
-    void shouldBeIpfsHashSinceNotIpfsHash() {
-        String hash = "abcd";
-        assertThat(IpfsService.isIpfsHash(hash)).isFalse();
+    void shouldHandleNullHostnameResolution() throws Exception {
+        when(ipfsConfig.getUrl()).thenReturn("http://nonexistent-host.local:5001");
+        ipfsService = spy(new IpfsService(ipfsConfig));
+        String multiAddress = getMultiAddress(ipfsService);
+        assertThat(multiAddress).contains("/tcp/5001");
     }
 
-    @Test
-    void shouldBeIpfsHashSinceNotIpfsEmpty() {
-        String hash = "";
-        assertThat(IpfsService.isIpfsHash(hash)).isFalse();
+    // Helper method to access private field for testing
+    private String getMultiAddress(IpfsService service) throws Exception {
+        Field field = IpfsService.class.getDeclaredField("multiAddress");
+        field.setAccessible(true);
+        return (String) field.get(service);
     }
-
 
 }

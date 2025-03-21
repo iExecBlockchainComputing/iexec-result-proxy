@@ -46,7 +46,7 @@ public class IpfsService implements SmartLifecycle {
             final URL ipfsUrl = new URL(ipfsConfig.getUrl());
             final String ipfsHost = ipfsUrl.getHost();
             int port = ipfsUrl.getPort();
-            final String ipfsNodeIp = isIPAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
+            final String ipfsNodeIp = InetAddresses.isInetAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
         } catch (MalformedURLException e) {
             log.error("Invalid IPFS URL: {}", ipfsConfig.getUrl(), e);
@@ -94,10 +94,6 @@ public class IpfsService implements SmartLifecycle {
             log.error("No IP address could be found [host:{}]", hostname, e);
         }
         return address != null ? address.getHostAddress() : "";
-    }
-
-    private boolean isIPAddress(String host) {
-        return InetAddresses.isInetAddress(host);
     }
 
     @Override

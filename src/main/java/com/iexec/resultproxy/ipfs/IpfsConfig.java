@@ -17,15 +17,15 @@
 package com.iexec.resultproxy.ipfs;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.Value;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Data
+@Value
 @ConfigurationProperties(prefix = "ipfs")
 public class IpfsConfig {
 
     @URL(message = "IPFS URL must be a valid URL")
     @NotEmpty(message = "IPFS URL must not be empty")
-    private final String url;
+    String url;
 }

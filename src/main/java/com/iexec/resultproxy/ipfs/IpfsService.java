@@ -16,7 +16,6 @@
 
 package com.iexec.resultproxy.ipfs;
 
-import com.google.common.net.InetAddresses;
 import io.ipfs.api.IPFS;
 import io.ipfs.api.MerkleNode;
 import io.ipfs.api.NamedStreamable;
@@ -45,8 +44,8 @@ public class IpfsService implements SmartLifecycle {
         try {
             final URL ipfsUrl = new URL(ipfsConfig.getUrl());
             final String ipfsHost = ipfsUrl.getHost();
-            int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : 5001;
-            final String ipfsNodeIp = InetAddresses.isInetAddress(ipfsHost) ? ipfsHost : convertHostToIp(ipfsHost);
+            final int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : ipfsUrl.getDefaultPort();;
+            final String ipfsNodeIp = convertHostToIp(ipfsHost);
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
         } catch (MalformedURLException e) {
             log.error("Invalid IPFS URL: {}", ipfsConfig.getUrl(), e);

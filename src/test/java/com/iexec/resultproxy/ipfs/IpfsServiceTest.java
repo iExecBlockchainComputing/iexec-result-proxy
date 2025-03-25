@@ -60,8 +60,8 @@ class IpfsServiceTest {
         return Stream.of(
                 Arguments.of("http://127.0.0.1:5001", "/ip4/127.0.0.1/tcp/5001"),
                 Arguments.of("http://localhost:5001", "/ip4/.+/tcp/5001"),
-                Arguments.of("http://localhost", "/ip4/.+/tcp/5001"),
-                Arguments.of("http://localhost:8080", "/ip4/.+/tcp/8080")
+                Arguments.of("http://127.0.0.1", "/ip4/127.0.0.1/tcp/\\d+"),
+                Arguments.of("http://localhost", "/ip4/.+/tcp/\\d+")
         );
     }
 

@@ -44,11 +44,11 @@ public class IpfsService implements SmartLifecycle {
         try {
             final URL ipfsUrl = new URL(ipfsConfig.getUrl());
             final String ipfsHost = ipfsUrl.getHost();
-            final int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : ipfsUrl.getDefaultPort();;
+            final int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : ipfsUrl.getDefaultPort();
             final String ipfsNodeIp = convertHostToIp(ipfsHost);
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
-        } catch (MalformedURLException e) {
-            log.error("Invalid IPFS URL: {}", ipfsConfig.getUrl(), e);
+        } catch (IOException e) {
+            log.error("Failed to convert IPFS URL to MultiAddress: {}", ipfsConfig.getUrl(), e);
             throw new IllegalArgumentException("Invalid IPFS URL: " + ipfsConfig.getUrl(), e);
         }
     }
@@ -85,14 +85,14 @@ public class IpfsService implements SmartLifecycle {
         }
     }
 
-    private String convertHostToIp(final String hostname) {
-        InetAddress address = null;
+    private String convertHostToIp(final String hostname) throws MalformedURLException {
         try {
-            address = InetAddress.getByName(hostname);
+            final InetAddress address = InetAddress.getByName(hostname);
+            return address.getHostAddress();
         } catch (UnknownHostException e) {
             log.error("No IP address could be found [host:{}]", hostname, e);
+            throw new MalformedURLException("No IP address could be found [host:" + hostname + "]");
         }
-        return address != null ? address.getHostAddress() : "";
     }
 
     @Override

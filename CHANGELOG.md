@@ -7,11 +7,11 @@ All notable changes to this project will be documented in this file.
 ### Quality
 
 - Harmonize YML internal variables to proper case. (#154)
-- Merge split URL configuration properties (protocol, host, port) to a single URL field to offer URL validation at startup. (#155)
 
 ### Breaking API changes
 
 - Remove legacy authorization mechanism, allows to remove challenge services as well. (#150)
+- Merge split URL configuration properties (protocol, host, port) to a single URL field to offer URL validation at startup. (#155)
 
 ### Dependency Upgrades
 

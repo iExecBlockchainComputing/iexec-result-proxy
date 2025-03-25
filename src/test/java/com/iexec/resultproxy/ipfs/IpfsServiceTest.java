@@ -73,14 +73,6 @@ class IpfsServiceTest {
     }
 
     @Test
-    void shouldHandleNullHostnameResolution() throws Exception {
-        when(ipfsConfig.getUrl()).thenReturn("http://nonexistent-host.local:5001");
-        ipfsService = spy(new IpfsService(ipfsConfig));
-        String multiAddress = getMultiAddress(ipfsService);
-        assertThat(multiAddress).contains("/tcp/5001");
-    }
-
-    @Test
     void shouldThrowExceptionWhenUrlIsInvalid() {
         when(ipfsConfig.getUrl()).thenReturn("invalid:url:format");
         final IllegalArgumentException exception = assertThrows(

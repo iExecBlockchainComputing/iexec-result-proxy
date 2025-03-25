@@ -18,7 +18,6 @@ package com.iexec.resultproxy.ipfs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.stream.Stream;
 
@@ -56,20 +56,33 @@ class IpfsServiceTest {
         assertThat(IpfsService.isIpfsHash(hash)).isEqualTo(expected);
     }
 
-    @Test
-    void shouldConstructWithIPAddressURL() throws Exception {
-        when(ipfsConfig.getUrl()).thenReturn("http://127.0.0.1:5001");
+    static Stream<Arguments> testURLData() {
+        return Stream.of(
+                Arguments.of("http://127.0.0.1:5001", "/ip4/127.0.0.1/tcp/5001"),
+                Arguments.of("http://localhost:5001", "/ip4/.+/tcp/5001"),
+                Arguments.of("http://localhost", "/ip4/.+/tcp/5001"),
+                Arguments.of("http://localhost:8080", "/ip4/.+/tcp/8080")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testURLData")
+    void shouldConstructMultiAddress(final String url, final String expectedMultiAddress) throws Exception {
+        when(ipfsConfig.getUrl()).thenReturn(url);
         ipfsService = new IpfsService(ipfsConfig);
         String multiAddress = getMultiAddress(ipfsService);
-        assertThat(multiAddress).isEqualTo("/ip4/127.0.0.1/tcp/5001");
+        assertThat(multiAddress).matches(expectedMultiAddress);
     }
 
     @Test
-    void shouldConstructWithLocalhostURL() throws Exception {
+    void shouldDirectlyConvertHostToIp() throws Exception {
         when(ipfsConfig.getUrl()).thenReturn("http://localhost:5001");
         ipfsService = new IpfsService(ipfsConfig);
-        String multiAddress = getMultiAddress(ipfsService);
-        assertThat(multiAddress).matches("/ip4/.+/tcp/5001");
+
+        Method convertMethod = IpfsService.class.getDeclaredMethod("convertHostToIp", String.class);
+        convertMethod.setAccessible(true);
+        String localhostIp = (String) convertMethod.invoke(ipfsService, "localhost");
+        assertThat(localhostIp).matches("127\\.0\\.0\\.1|::1");
     }
 
     @Test

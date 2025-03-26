@@ -113,7 +113,8 @@ class AuthorizationServiceTests {
 
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWithEmptyAuthorizationWithDetails() {
-        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization.builder().build());
+        final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(WorkerpoolAuthorization.builder()
+                .chainTaskId(null).build());
         assertThat(isAuth).isEqualTo(Optional.of(EMPTY_PARAMS_UNAUTHORIZED));
     }
 

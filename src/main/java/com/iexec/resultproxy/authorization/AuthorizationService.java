@@ -27,6 +27,7 @@ import com.iexec.commons.poco.utils.HashUtils;
 import com.iexec.commons.poco.utils.SignatureUtils;
 import com.iexec.resultproxy.chain.IexecHubService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,7 @@ public class AuthorizationService {
      * @return the reason if unauthorized, an empty {@code Optional} otherwise
      */
     public Optional<AuthorizationError> isAuthorizedOnExecutionWithDetailedIssue(final WorkerpoolAuthorization workerpoolAuthorization) {
-        if (workerpoolAuthorization == null || BytesUtils.EMPTY_HEX_STRING_32.equals(workerpoolAuthorization.getChainTaskId())) {
+        if (workerpoolAuthorization == null || StringUtils.isEmpty(workerpoolAuthorization.getChainTaskId())) {
             log.error("Not authorized with empty params");
             return Optional.of(EMPTY_PARAMS_UNAUTHORIZED);
         }

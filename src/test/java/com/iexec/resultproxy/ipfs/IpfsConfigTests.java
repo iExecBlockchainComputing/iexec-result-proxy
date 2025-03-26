@@ -48,16 +48,16 @@ class IpfsConfigTests {
             "http://localhost",
             "http://127.0.0.1"
     })
-    void validUrlVariationsShouldPassValidation(String url) {
-        IpfsConfig config = new IpfsConfig(url);
-        Set<ConstraintViolation<IpfsConfig>> violations = validator.validate(config);
+    void validUrlVariationsShouldPassValidation(final String url) {
+        final IpfsConfig config = new IpfsConfig(url);
+        final Set<ConstraintViolation<IpfsConfig>> violations = validator.validate(config);
         assertThat(violations).isEmpty();
     }
 
     @Test
     void emptyShouldFailValidation() {
-        IpfsConfig config = new IpfsConfig("");
-        Set<ConstraintViolation<IpfsConfig>> violations = validator.validate(config);
+        final IpfsConfig config = new IpfsConfig("");
+        final Set<ConstraintViolation<IpfsConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
                 .containsExactly("IPFS URL must not be empty");
@@ -68,9 +68,9 @@ class IpfsConfigTests {
             "not-a-url",
             "://no-protocol.com",
     })
-    void invalidUrlShouldFailValidation(String url) {
-        IpfsConfig config = new IpfsConfig(url);
-        Set<ConstraintViolation<IpfsConfig>> violations = validator.validate(config);
+    void invalidUrlShouldFailValidation(final String url) {
+        final IpfsConfig config = new IpfsConfig(url);
+        final Set<ConstraintViolation<IpfsConfig>> violations = validator.validate(config);
         assertThat(violations)
                 .extracting(ConstraintViolation::getMessage)
                 .containsExactly("IPFS URL must be a valid URL");

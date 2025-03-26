@@ -90,7 +90,6 @@ public class IpfsService implements SmartLifecycle {
             final InetAddress address = InetAddress.getByName(hostname);
             return address.getHostAddress();
         } catch (UnknownHostException e) {
-            log.error("No IP address could be found [host:{}]", hostname, e);
             throw new MalformedURLException("No IP address could be found [host:" + hostname + "]");
         }
     }

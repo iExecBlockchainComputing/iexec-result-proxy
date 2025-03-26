@@ -75,14 +75,38 @@ class IpfsServiceTest {
     }
 
     @Test
-    void shouldDirectlyConvertHostToIp() throws Exception {
+    void shouldThrowExceptionForNonexistentHostname() {
+        when(ipfsConfig.getUrl()).thenReturn("http://nonexistent-host.example:5001");
+
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> new IpfsService(ipfsConfig));
+
+        assertThat(exception.getMessage()).contains("Invalid IPFS URL");
+        assertThat(exception.getCause()).isInstanceOf(MalformedURLException.class);
+        assertThat(exception.getCause().getMessage()).contains("No IP address could be found");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConvertingInvalidHostname() throws Exception {
         when(ipfsConfig.getUrl()).thenReturn("http://localhost:5001");
         ipfsService = new IpfsService(ipfsConfig);
-
         Method convertMethod = IpfsService.class.getDeclaredMethod("convertHostToIp", String.class);
         convertMethod.setAccessible(true);
         String localhostIp = (String) convertMethod.invoke(ipfsService, "localhost");
         assertThat(localhostIp).matches("127\\.0\\.0\\.1|::1");
+        MalformedURLException exception = assertThrows(MalformedURLException.class,
+                () -> {
+                    try {
+                        convertMethod.invoke(ipfsService, "nonexistent-host.example");
+                    } catch (Exception e) {
+                        if (e.getCause() instanceof MalformedURLException) {
+                            throw e.getCause();
+                        }
+                        throw e;
+                    }
+                });
+        assertThat(exception.getMessage()).contains("No IP address could be found");
+        assertThat(exception.getMessage()).contains("nonexistent-host.example");
     }
 
     @Test

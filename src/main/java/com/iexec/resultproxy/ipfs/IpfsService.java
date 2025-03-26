@@ -28,9 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Optional;
 
 @Service
@@ -45,7 +43,7 @@ public class IpfsService implements SmartLifecycle {
             final URL ipfsUrl = new URL(ipfsConfig.getUrl());
             final String ipfsHost = ipfsUrl.getHost();
             final int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : ipfsUrl.getDefaultPort();
-            final String ipfsNodeIp = convertHostToIp(ipfsHost);
+            final String ipfsNodeIp = InetAddress.getByName(ipfsHost).getHostAddress();
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
         } catch (IOException e) {
             log.error("Failed to convert IPFS URL to MultiAddress: {}", ipfsConfig.getUrl(), e);
@@ -82,15 +80,6 @@ public class IpfsService implements SmartLifecycle {
             return Multihash.fromBase58(hash).toBase58() != null;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    private String convertHostToIp(final String hostname) throws MalformedURLException {
-        try {
-            final InetAddress address = InetAddress.getByName(hostname);
-            return address.getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new MalformedURLException("No IP address could be found [host:" + hostname + "]");
         }
     }
 

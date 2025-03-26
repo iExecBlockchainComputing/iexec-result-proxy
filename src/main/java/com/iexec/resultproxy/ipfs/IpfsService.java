@@ -45,7 +45,7 @@ public class IpfsService implements SmartLifecycle {
             final int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : ipfsUrl.getDefaultPort();
             final String ipfsNodeIp = InetAddress.getByName(ipfsHost).getHostAddress();
             this.multiAddress = "/ip4/" + ipfsNodeIp + "/tcp/" + port;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to convert IPFS URL to MultiAddress: {}", ipfsConfig.getUrl(), e);
             throw new IllegalArgumentException("Invalid IPFS URL: " + ipfsConfig.getUrl(), e);
         }

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [[9.0.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v9.0.0) 2025-03-28
+
+### Breaking API changes
+
+- Remove legacy authorization mechanism, allows to remove challenge services as well. (#150)
+- Harmonize YML internal variables to proper case. (#154)
+- Merge split URL configuration properties (protocol, host, port) to a single URL field to offer URL validation at startup. (#155)
+
+### Dependency Upgrades
+
+- Upgrade to `eclipse-temurin:17.0.13_11-jre-focal`. (#149)
+- Upgrade to Spring Doc OpenAPI 2.6.0. (#149)
+- Upgrade to Spring Boot 3.3.8. (#151)
+- Upgrade to `java-ipfs-http-client` 1.4.4. (#152)
+- Upgrade to `iexec-common` 9.0.0. (#156)
+- Upgrade to `iexec-commons-poco` 5.0.0. (#156)
+
 ## [[8.6.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v8.6.0) 2024-12-20
 
 ### Quality

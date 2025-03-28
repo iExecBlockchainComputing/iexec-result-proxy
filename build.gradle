@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'io.freefair.lombok' version '8.10.2'
-    id 'org.springframework.boot' version '2.7.18'
+    id 'org.springframework.boot' version '3.3.8'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'jacoco'
     id 'org.sonarqube' version '5.1.0.4882'
@@ -40,8 +40,12 @@ allprojects {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(17))
         }
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs.add('-parameters')
     }
 }
 
@@ -53,6 +57,7 @@ dependencies {
     // spring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation "org.springframework.retry:spring-retry"
     // required for spring-retry
@@ -62,10 +67,10 @@ dependencies {
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     // Spring Doc
-    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
     // ipfs
-    implementation 'com.github.ipfs:java-ipfs-http-client:1.4.0'
+    implementation 'com.github.ipfs:java-ipfs-http-client:1.4.4'
 
     // json web token
     implementation "io.jsonwebtoken:jjwt-api:$jjwtVersion"

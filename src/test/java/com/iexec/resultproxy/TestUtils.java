@@ -19,12 +19,13 @@ package com.iexec.resultproxy;
 import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.ChainTaskStatus;
-import com.iexec.commons.poco.tee.TeeUtils;
+import com.iexec.commons.poco.order.OrderTag;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtils {
@@ -36,18 +37,24 @@ public class TestUtils {
     public static final String POOL_WRONG_SIGNATURE = "0xf869daaca2407b7eabd27c3c4c5a3f3565172ca7211ac1d8bfacea2beb511a4029446a07cccc0884"
             + "c2193b269dfb341461db8c680a8898bb53862d6e48340c2e1b";
 
-    public static ChainDeal getChainDeal() {
-        return ChainDeal.builder()
+    public static final String RESULT_DIGEST = "0x3210";
+    public static final String RESULT_HASH = "0x97f68778e2fa9d60e58ceb64de2c0e72e309400c3168c69499db2140fad28039";
+    public static final String WALLET_ADDRESS = "0x123abc";
+    public static final String WORKER_ADDRESS = "0xabc123";
+
+    public static Optional<ChainDeal> getChainDeal(final OrderTag tag) {
+        return Optional.of(ChainDeal.builder()
                 .poolOwner(POOL_ADDRESS)
-                .tag(TeeUtils.TEE_SCONE_ONLY_TAG)
-                .build();
+                .tag(tag.getValue())
+                .requester(WALLET_ADDRESS)
+                .build());
     }
 
-    public static ChainTask getChainTask(ChainTaskStatus status) {
-        return ChainTask.builder()
+    public static Optional<ChainTask> getChainTask(final ChainTaskStatus status) {
+        return Optional.of(ChainTask.builder()
                 .dealid(CHAIN_DEAL_ID)
                 .finalDeadline(Instant.now().plus(5L, ChronoUnit.SECONDS).toEpochMilli())
                 .status(status)
-                .build();
+                .build());
     }
 }

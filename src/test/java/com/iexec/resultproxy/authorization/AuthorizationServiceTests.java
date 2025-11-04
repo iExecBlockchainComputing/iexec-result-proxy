@@ -17,9 +17,9 @@
 package com.iexec.resultproxy.authorization;
 
 import com.iexec.common.result.ResultModel;
-import com.iexec.commons.poco.chain.ChainDeal;
 import com.iexec.commons.poco.chain.ChainTask;
 import com.iexec.commons.poco.chain.WorkerpoolAuthorization;
+import com.iexec.commons.poco.order.OrderTag;
 import com.iexec.commons.poco.security.Signature;
 import com.iexec.commons.poco.utils.BytesUtils;
 import com.iexec.commons.poco.utils.HashUtils;
@@ -28,6 +28,8 @@ import com.iexec.resultproxy.chain.IexecHubService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +65,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AuthorizationServiceTests {
 
-    private static final String RESULT_DIGEST = "0x3210";
-
     @Container
     private static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse(System.getProperty("mongo.image")));
 
@@ -93,13 +93,12 @@ class AuthorizationServiceTests {
     }
 
     // region isAuthorizedOnExecutionWithDetailedIssue
-    @Test
-    void shouldBeAuthorizedOnExecutionOfTeeTaskWithDetails() {
-        final ChainDeal chainDeal = getChainDeal();
-        final ChainTask chainTask = getChainTask(ACTIVE);
+    @ParameterizedTest
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
+    void shouldBeAuthorizedOnExecutionOfTeeTaskWithDetails(final OrderTag tag) {
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
-        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
-        when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
+        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(getChainTask(ACTIVE));
+        when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));
 
         final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEmpty();
@@ -118,17 +117,16 @@ class AuthorizationServiceTests {
         assertThat(isAuth).isEqualTo(Optional.of(EMPTY_PARAMS_UNAUTHORIZED));
     }
 
-    @Test
-    void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenTaskTypeNotMatchedOnchainWithDetails() {
-        final ChainDeal chainDeal = getChainDeal();
-        final ChainTask chainTask = getChainTask(ACTIVE);
+    @ParameterizedTest
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
+    void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenTaskTypeNotMatchedOnchainWithDetails(final OrderTag tag) {
         final WorkerpoolAuthorization auth = WorkerpoolAuthorization.builder()
                 .chainTaskId("0x1111111111111111111111111111111111111111111111111111111111111111")
                 .workerWallet("0x87ae2b87b5db23830572988fb1f51242fbc471ce")
                 .enclaveChallenge(BytesUtils.EMPTY_ADDRESS)
                 .build();
-        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
-        when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
+        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(getChainTask(ACTIVE));
+        when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));
 
         final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(NO_MATCH_ONCHAIN_TYPE));
@@ -158,26 +156,24 @@ class AuthorizationServiceTests {
 
     @Test
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenGetDealFailedWithDetails() {
-        final ChainTask chainTask = getChainTask(ACTIVE);
         final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(wrongSignature);
 
-        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
-        when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.empty());
+        when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(getChainTask(ACTIVE));
+        when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(Optional.empty());
 
         final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(GET_CHAIN_DEAL_FAILED));
     }
 
-    @Test
-    void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenPoolSignatureIsNotValidWithDetails() {
-        final ChainDeal chainDeal = getChainDeal();
-        final ChainTask chainTask = getChainTask(ACTIVE);
+    @ParameterizedTest
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
+    void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenPoolSignatureIsNotValidWithDetails(final OrderTag tag) {
         final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(wrongSignature);
 
-        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(Optional.of(chainTask));
-        when(iexecHubService.getChainDeal(chainTask.getDealid())).thenReturn(Optional.of(chainDeal));
+        when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(getChainTask(ACTIVE));
+        when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));
 
         final Optional<AuthorizationError> isAuth = authorizationService.isAuthorizedOnExecutionWithDetailedIssue(auth);
         assertThat(isAuth).isEqualTo(Optional.of(INVALID_SIGNATURE));
@@ -277,7 +273,7 @@ class AuthorizationServiceTests {
     // endregion
 
     // region utils
-    String getEnclaveSignature(final ECKeyPair ecKeyPair) {
+    private String getEnclaveSignature(final ECKeyPair ecKeyPair) {
         final String resultHash = HashUtils.concatenateAndHash(CHAIN_TASK_ID, RESULT_DIGEST);
         final String resultSeal = HashUtils.concatenateAndHash(workerCreds.getAddress(), CHAIN_TASK_ID, RESULT_DIGEST);
         final String messageHash = HashUtils.concatenateAndHash(resultHash, resultSeal);

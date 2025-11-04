@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @deprecated never used
+ */
+@Deprecated(forRemoval = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -92,7 +92,7 @@ public class AuthorizationService {
         }
 
         final boolean isTeeTask = !workerpoolAuthorization.getEnclaveChallenge().equals(BytesUtils.EMPTY_ADDRESS);
-        final boolean isTeeTaskOnchain = TeeUtils.isTeeTag(chainDeal.getTag());
+        final boolean isTeeTaskOnchain = TeeUtils.getTeeFramework(chainDeal.getTag()) != null;
         if (isTeeTask != isTeeTaskOnchain) {
             log.error("Could not match on-chain task type [isTeeTask:{}, isTeeTaskOnchain:{}, chainTaskId:{}, walletAddress:{}]",
                     isTeeTask, isTeeTaskOnchain, chainTaskId, workerpoolAuthorization.getWorkerWallet());

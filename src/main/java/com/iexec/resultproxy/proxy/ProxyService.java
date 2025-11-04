@@ -103,7 +103,7 @@ public class ProxyService {
             return false;
         }
 
-        final boolean isTeeTask = TeeUtils.isTeeTag(chainDeal.getTag());
+        final boolean isTeeTask = TeeUtils.getTeeFramework(chainDeal.getTag()) != null;
 
         // Standard tasks
         if (!isTeeTask) {

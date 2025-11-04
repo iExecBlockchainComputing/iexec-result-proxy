@@ -94,7 +94,7 @@ class AuthorizationServiceTests {
 
     // region isAuthorizedOnExecutionWithDetailedIssue
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void shouldBeAuthorizedOnExecutionOfTeeTaskWithDetails(final OrderTag tag) {
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorization(true);
         when(iexecHubService.getChainTask(auth.getChainTaskId())).thenReturn(getChainTask(ACTIVE));
@@ -118,7 +118,7 @@ class AuthorizationServiceTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenTaskTypeNotMatchedOnchainWithDetails(final OrderTag tag) {
         final WorkerpoolAuthorization auth = WorkerpoolAuthorization.builder()
                 .chainTaskId("0x1111111111111111111111111111111111111111111111111111111111111111")
@@ -167,7 +167,7 @@ class AuthorizationServiceTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void shouldNotBeAuthorizedOnExecutionOfTeeTaskWhenPoolSignatureIsNotValidWithDetails(final OrderTag tag) {
         final Signature wrongSignature = new Signature(POOL_WRONG_SIGNATURE);
         final WorkerpoolAuthorization auth = getWorkerpoolAuthorizationWithWrongSignature(wrongSignature);

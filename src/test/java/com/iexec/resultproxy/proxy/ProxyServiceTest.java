@@ -200,7 +200,7 @@ class ProxyServiceTest {
 
     // region TEE tasks with enclave signature
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void isNotAbleToUploadSinceEnclaveSignatureIsNotValid(final OrderTag tag) {
         when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(getChainTask(ACTIVE));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));
@@ -212,7 +212,7 @@ class ProxyServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void isAbleToUploadTeeTaskResultWithEnclaveSignature(final OrderTag tag) {
         when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(getChainTask(ACTIVE));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));
@@ -226,7 +226,7 @@ class ProxyServiceTest {
 
     // region TEE tasks no enclave signature
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void isNotAbleToUploadSinceTaskNotActive(final OrderTag tag) {
         when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(getChainTask(UNSET));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));
@@ -238,7 +238,7 @@ class ProxyServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = OrderTag.class, names = "STANDARD", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = OrderTag.class, names = {"TEE_GRAMINE", "TEE_SCONE", "TEE_TDX"})
     void isAbleToUploadTeeTaskResultWithoutEnclaveSignature(final OrderTag tag) {
         when(iexecHubService.getChainTask(CHAIN_TASK_ID)).thenReturn(getChainTask(ACTIVE));
         when(iexecHubService.getChainDeal(CHAIN_DEAL_ID)).thenReturn(getChainDeal(tag));

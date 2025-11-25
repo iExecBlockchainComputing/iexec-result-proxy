@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.1.0](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.0.0...v9.1.0) (2025-11-04)
+
+
+### Features
+
+* enable TDX tasks support ([#161](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/161)) ([9862406](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/9862406553594866b1f1e8bae8961e4c5a268b58))
+
 ## [[9.0.0]](https://github.com/iExecBlockchainComputing/iexec-result-proxy/releases/tag/v9.0.0) 2025-03-28
 
 ### Breaking API changes

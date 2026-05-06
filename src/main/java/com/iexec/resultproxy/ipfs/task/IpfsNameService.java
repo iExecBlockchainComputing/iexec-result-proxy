@@ -19,6 +19,8 @@ package com.iexec.resultproxy.ipfs.task;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /*
  * This service hold metadata for iExec result pushed to IPFS
  * It allows converting a taskId to an ipfsHash
@@ -44,9 +46,11 @@ public class IpfsNameService {
     }
 
     public String getIpfsHashForTask(String taskId) {
-        return ipfsNameRepository.findByTaskId(taskId)
-                .map(IpfsName::getIpfsHash)
-                .orElse("");
+        Optional<IpfsName> taskResultIpfsHash = ipfsNameRepository.findByTaskId(taskId);
+        if (taskResultIpfsHash.isPresent()) {
+            return taskResultIpfsHash.get().getIpfsHash();
+        }
+        return "";
     }
 
 }

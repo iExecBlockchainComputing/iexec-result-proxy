@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 IEXEC BLOCKCHAIN TECH
+ * Copyright 2020-2026 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.util.Optional;
 
-@Service
 @Slf4j
+@Service
 public class IpfsService implements SmartLifecycle {
 
     private IPFS ipfs;
@@ -52,7 +52,7 @@ public class IpfsService implements SmartLifecycle {
     }
 
     public Optional<byte[]> get(final String ipfsHash) {
-        if (!isIpfsHash(ipfsHash)){
+        if (!isIpfsHash(ipfsHash)) {
             return Optional.empty();
         }
         final Multihash filePointer = Multihash.fromBase58(ipfsHash);

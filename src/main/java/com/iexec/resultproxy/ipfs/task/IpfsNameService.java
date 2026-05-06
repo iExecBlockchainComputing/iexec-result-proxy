@@ -1,9 +1,23 @@
+/*
+ * Copyright 2020-2026 IEXEC BLOCKCHAIN TECH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.iexec.resultproxy.ipfs.task;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /*
  * This service hold metadata for iExec result pushed to IPFS
@@ -11,12 +25,11 @@ import java.util.Optional;
  *
  * /!\ WARN: Mongo volume should be kept between reboots to keep taskId->ipfsHash mapping alive
  * */
-@Service
 @Slf4j
+@Service
 public class IpfsNameService {
 
-
-    private IpfsNameRepository ipfsNameRepository;
+    private final IpfsNameRepository ipfsNameRepository;
 
     public IpfsNameService(IpfsNameRepository ipfsNameRepository) {
         this.ipfsNameRepository = ipfsNameRepository;
@@ -31,12 +44,9 @@ public class IpfsNameService {
     }
 
     public String getIpfsHashForTask(String taskId) {
-        Optional<IpfsName> taskResultIpfsHash = ipfsNameRepository.findByTaskId(taskId);
-        if (taskResultIpfsHash.isPresent()) {
-            return taskResultIpfsHash.get().getIpfsHash();
-        }
-        return "";
+        return ipfsNameRepository.findByTaskId(taskId)
+                .map(IpfsName::getIpfsHash)
+                .orElse("");
     }
-
 
 }

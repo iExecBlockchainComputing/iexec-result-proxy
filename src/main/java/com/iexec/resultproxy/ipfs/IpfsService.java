@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class IpfsService implements SmartLifecycle {
 
     public IpfsService(final IpfsConfig ipfsConfig) {
         try {
-            final URL ipfsUrl = new URL(ipfsConfig.getUrl());
+            final URL ipfsUrl = new URI(ipfsConfig.getUrl()).toURL();
             final String ipfsHost = ipfsUrl.getHost();
             final int port = ipfsUrl.getPort() != -1 ? ipfsUrl.getPort() : ipfsUrl.getDefaultPort();
             final String ipfsNodeIp = InetAddress.getByName(ipfsHost).getHostAddress();

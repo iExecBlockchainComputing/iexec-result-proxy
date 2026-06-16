@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.2.0](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.1.0...v9.2.0) (2026-06-16)
+
+
+### Features
+
+* upgrade to Java 21 ([#166](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/166)) ([3cf4760](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/3cf476057ea4df4ad83c09792d22df3411e57d33))
+* upgrade to Spring Boot 3.5.8 ([#164](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/164)) ([6177958](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/617795899e2f22c18c09d2e27419decadb4dbe35))
+
 ## [9.1.0](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.0.0...v9.1.0) (2025-11-04)
 
 

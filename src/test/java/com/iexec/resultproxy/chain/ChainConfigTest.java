@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 IEXEC BLOCKCHAIN TECH
+ * Copyright 2025-2026 IEXEC BLOCKCHAIN TECH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChainConfigTest {
-    private static final String IEXEC_NODE_ADDRESS = "https://bellecour.iex.ec";
-    private static final String IEXEC_HUB_ADDRESS = "0x1a69b2eb604db8eba185df03ea4f5288dcbbd248";
+    private static final int CHAIN_ID = 421614;
+    private static final String IEXEC_NODE_ADDRESS = "https://sepolia-rollup.arbitrum.io/rpc";
+    private static final String IEXEC_HUB_ADDRESS = "0xB2157BF2fAb286b2A4170E3491Ac39770111Da3E";
 
     private Validator validator;
 
@@ -61,7 +62,7 @@ class ChainConfigTest {
     @Test
     void nodeAddressMustBeValidURL() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 "invalid-url",  // invalid URL
                 IEXEC_HUB_ADDRESS,
@@ -78,7 +79,7 @@ class ChainConfigTest {
     @Test
     void nodeAddressMustNotBeEmpty() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 "",  // empty nodeAddress
                 IEXEC_HUB_ADDRESS,
@@ -95,7 +96,7 @@ class ChainConfigTest {
     @Test
     void hubAddressMustBeValidEthereumAddress() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 IEXEC_NODE_ADDRESS,
                 "0x0",  // invalid address
@@ -112,7 +113,7 @@ class ChainConfigTest {
     @Test
     void blockTimeMustBeAtLeast100ms() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 IEXEC_NODE_ADDRESS,
                 IEXEC_HUB_ADDRESS,
@@ -129,7 +130,7 @@ class ChainConfigTest {
     @Test
     void blockTimeMustBeAtMost20Seconds() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 IEXEC_NODE_ADDRESS,
                 IEXEC_HUB_ADDRESS,
@@ -146,7 +147,7 @@ class ChainConfigTest {
     @Test
     void blockTimeMustNotBeNull() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 IEXEC_NODE_ADDRESS,
                 IEXEC_HUB_ADDRESS,
@@ -163,7 +164,7 @@ class ChainConfigTest {
     @Test
     void gasPriceMultiplierMustBePositive() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 IEXEC_NODE_ADDRESS,
                 IEXEC_HUB_ADDRESS,
@@ -180,7 +181,7 @@ class ChainConfigTest {
     @Test
     void gasPriceCapMustBePositiveOrZero() {
         final ChainConfig config = new ChainConfig(
-                1,
+                CHAIN_ID,
                 false,
                 IEXEC_NODE_ADDRESS,
                 IEXEC_HUB_ADDRESS,

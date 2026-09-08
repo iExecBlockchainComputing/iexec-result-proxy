@@ -1,20 +1,30 @@
-FROM eclipse-temurin:21.0.11_10-jre-noble
+FROM eclipse-temurin:21.0.12_8-jre-noble AS extractor
 
 ARG jar
 
 RUN test -n "$jar"
 
+WORKDIR /extractor
+
+COPY $jar iexec-result-proxy.jar
+
+RUN java -Djarmode=tools -jar iexec-result-proxy.jar extract --layers
+
+FROM eclipse-temurin:21.0.12_8-jre-noble
+
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
+    && apt-get upgrade --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd --system appuser \
-    && useradd -g appuser -s /sbin/nologin -c "Docker image user" appuser
+RUN groupadd -g 1001 appuser \
+    && useradd -g 1001 --no-create-home --no-log-init -s /sbin/nologin -u 1001 appuser
 
+RUN install -d -o appuser -g appuser /app /data
+
+COPY --from=extractor --chown=appuser:appuser /extractor/iexec-result-proxy/dependencies/ /app
+COPY --from=extractor --chown=appuser:appuser /extractor/iexec-result-proxy/snapshot-dependencies/ /app
+COPY --from=extractor --chown=appuser:appuser /extractor/iexec-result-proxy/application/ /app
+
+USER 1001
 WORKDIR /app
-COPY $jar iexec-result-proxy.jar
-RUN mkdir /data
-RUN chown -R appuser:appuser /app /data
-
-USER appuser
-ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "iexec-result-proxy.jar" ]
+ENTRYPOINT [ "java", "-jar", "iexec-result-proxy.jar" ]

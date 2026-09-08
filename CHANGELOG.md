@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.2.0](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.1.0...v9.2.0) (2026-09-08)
+
+
+### Features
+
+* extract Spring Boot Jar layers to optimize OCI image build ([#170](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/170)) ([aaf053a](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/aaf053af2417ec82492c8b63842021c4b84ca60e))
+* start application on Arbitrum Sepolia by default ([#168](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/168)) ([1262785](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/1262785dbfb7e0183f3a425a25b550baef1f0182))
+* upgrade to Java 21 ([#166](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/166)) ([3cf4760](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/3cf476057ea4df4ad83c09792d22df3411e57d33))
+* upgrade to Spring Boot 3.5.8 ([#164](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/164)) ([6177958](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/617795899e2f22c18c09d2e27419decadb4dbe35))
+
 ## [9.1.0](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.0.0...v9.1.0) (2025-11-04)
 
 

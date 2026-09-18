@@ -11,7 +11,6 @@ plugins {
 ext {
     gitTag = 'git tag --points-at HEAD'.execute().text.trim()
     jjwtVersion = '0.11.5'
-    testContainersVersion = '1.20.4'
 }
 
 allprojects {
@@ -22,13 +21,6 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven {
-            url = "https://docker-regis-adm.iex.ec/repository/maven-public/"
-            credentials {
-                username = nexusUser
-                password = nexusPassword
-            }
-        }
         maven {
             url = 'https://jitpack.io'
         }
@@ -48,8 +40,8 @@ allprojects {
 
 dependencies {
     // iexec
-    implementation "com.iexec.commons:iexec-commons-poco:$iexecCommonsPocoVersion"
-    implementation "com.iexec.common:iexec-common:$iexecCommonVersion"
+    implementation "com.github.iexecblockchaincomputing:iexec-commons-poco:$iexecCommonsPocoVersion"
+    implementation "com.github.iexecblockchaincomputing:iexec-common:$iexecCommonVersion"
 
     // spring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -95,8 +87,8 @@ testing {
             useJUnitJupiter()
             dependencies {
                 implementation 'org.springframework.boot:spring-boot-starter-test'
-                implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
-                implementation "org.testcontainers:mongodb:$testContainersVersion"
+                implementation 'org.testcontainers:junit-jupiter'
+                implementation 'org.testcontainers:mongodb'
             }
         }
     }
@@ -130,10 +122,10 @@ publishing {
     repositories {
         maven {
             credentials {
-                username = nexusUser
-                password = nexusPassword
+                username = mvnRepositoryUsername
+                password = mvnRepositoryPassword
             }
-            url = project.hasProperty('nexusUrl') ? nexusUrl : ''
+            url = project.hasProperty('mvnRepositoryUrl') ? mvnRepositoryUrl : ''
         }
     }
 }

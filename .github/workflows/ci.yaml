@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Granted per job rather than here, because the called workflows need scopes this one
+# does not, and a called workflow can never hold more than its caller.
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  prepare:
+    name: Determine image tag
+    runs-on: ubuntu-latest
+    # Prevent execution on forks, which have no access to the registry secrets
+    if: github.repository_owner == 'iExecBlockchainComputing'
+    permissions:
+      contents: read # actions/checkout
+    outputs:
+      image_tag: ${{ steps.rules.outputs.image_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Apply branch and image tag rules
+        id: rules
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          short_sha=$(echo "$HEAD_SHA" | cut -c1-8)
+
+          case "$BRANCH" in
+            main)              kind=production ;;
+            feat/*|fix/*)      kind=develop ;;
+            release-please--*) kind=release ;;
+            *)
+              echo "❌ Branch does not respect naming rules: $BRANCH"
+              echo "Expected one of: main, feat/*, fix/*, release-please--*"
+              exit 1
+              ;;
+          esac
+
+          # Production branches get dev-<sha> images, feature branches feature-<sha>.
+          # Release-please branches build no image: their code is covered by the
+          # dev-<sha> image CI builds on the merge to main, and release-image.yaml
+          # promotes that image to the vX.Y.Z tag.
+          if [ "$kind" = "production" ]; then
+            echo "image_tag=dev-${short_sha}" | tee -a "$GITHUB_OUTPUT"
+          elif [ "$kind" = "develop" ]; then
+            echo "image_tag=feature-${short_sha}" | tee -a "$GITHUB_OUTPUT"
+          fi
+
+  build-and-test:
+    name: Build, test and analyse
+    needs: prepare
+    permissions:
+      contents: read # actions/checkout
+      actions: write # actions/upload-artifact
+    # java-build-v1.0.0
+    uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/java-build.yml@230e504041b25d1e45dad1651ac29a9b9f827dd5
+    with:
+      java-version: '21'
+      sonar: true
+      dockerhub-login: true
+      upload-jar: true
+      artifact-name: boot-jar
+    secrets:
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN_PULL_ONLY }}
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+
+  build-image:
+    name: Build and push OCI image
+    needs: [prepare, build-and-test]
+    # Empty on release-please branches: their commit is covered by the dev-<sha>
+    # image built on the merge to main, which release-image.yaml promotes to the tag.
+    if: needs.prepare.outputs.image_tag != ''
+    permissions:
+      contents: read # actions/checkout
+      actions: read # actions/download-artifact
+      security-events: write # codeql-action/upload-sarif, Trivy report on pull requests
+      pull-requests: write # peter-evans/create-or-update-comment, Hadolint report on pull requests
+    # docker-build-v3.6.0
+    uses: iExecBlockchainComputing/github-actions-workflows/.github/workflows/docker-build.yml@530a5a5bbb364a523561d5cfd34bb8b90f3512c8
+    with:
+      image-name: docker-regis.iex.ec/iexec-result-proxy
+      image-tag: ${{ needs.prepare.outputs.image_tag }}
+      registry: docker-regis.iex.ec
+      push: true
+      security-scan: false
+      security-report: 'sarif'
+      hadolint: true
+      platform: linux/amd64
+      # The image is built from the jar the tests ran against, not from a rebuild.
+      artifact-name: ${{ needs.build-and-test.outputs.artifact-name }}
+      artifact-path: build/libs
+      build-args: jar=${{ needs.build-and-test.outputs.jar-path }}
+    secrets:
+      dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN_PULL_ONLY }}
+      username: ${{ secrets.NEXUS_USERNAME }}
+      password: ${{ secrets.NEXUS_PASSWORD }}

@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'io.freefair.lombok' version '8.14.4'
-    id 'org.springframework.boot' version '3.5.8'
+    id 'org.springframework.boot' version '3.5.16'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
     id 'org.sonarqube' version '6.3.1.5724'
@@ -9,15 +9,11 @@ plugins {
 }
 
 ext {
-    gitTag = 'git tag --points-at HEAD'.execute().text.trim()
     jjwtVersion = '0.11.5'
 }
 
 allprojects {
-    group = 'com.iexec.result-proxy'
-    if (gitTag.isEmpty()) {
-        version += '-NEXT-SNAPSHOT'
-    }
+    group = 'com.github.iExecBlockchainComputing'
     repositories {
         mavenLocal()
         mavenCentral()
@@ -40,8 +36,8 @@ allprojects {
 
 dependencies {
     // iexec
-    implementation "com.github.iexecblockchaincomputing:iexec-commons-poco:$iexecCommonsPocoVersion"
-    implementation "com.github.iexecblockchaincomputing:iexec-common:$iexecCommonVersion"
+    implementation "com.github.iExecBlockchainComputing:iexec-commons-poco:$iexecCommonsPocoVersion"
+    implementation "com.github.iExecBlockchainComputing:iexec-common:$iexecCommonVersion"
 
     // spring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

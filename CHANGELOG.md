@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.2.1](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.2.0...v9.2.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* jitpack iExec dependencies group syntax and Github Actions migration ([#173](https://github.com/iExecBlockchainComputing/iexec-result-proxy/issues/173)) ([b2afcd3](https://github.com/iExecBlockchainComputing/iexec-result-proxy/commit/b2afcd3a60148efd2a4c256fcef9dc28b1f02367))
+
 ## [9.2.0](https://github.com/iExecBlockchainComputing/iexec-result-proxy/compare/v9.1.0...v9.2.0) (2026-09-18)
 
 
